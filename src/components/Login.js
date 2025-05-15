@@ -46,12 +46,16 @@ const Login = () => {
             <div className="max-w-6xl bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden">
                 {/* Left: Login Form */}
                 <div className="w-1/2 p-10 bg-teal-800">
+                    {/*<div className="flex justify-center mb-6">*/}
+                    {/*    <img*/}
+                    {/*        src="https://via.placeholder.com/150x50?text=Revision+App"*/}
+                    {/*        alt="Revision App Logo"*/}
+                    {/*        className="h-8"*/}
+                    {/*    />*/}
+                    {/*    */}
+                    {/*</div>*/}
                     <div className="flex justify-center mb-6">
-                        <img
-                            src="https://via.placeholder.com/150x50?text=Revision+App"
-                            alt="Revision App Logo"
-                            className="h-8"
-                        />
+                        <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-8" />
                     </div>
                     <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision App</h2>
                     <p className="text-gray-300 text-center mb-6">Access your study tools now!</p>
@@ -113,19 +117,20 @@ const Login = () => {
                     </p>
                 </div>
                 {/* Right: Animated Services */}
-                <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-10 relative overflow-hidden">
-                    <h3 className="text-2xl font-semibold text-white mb-6">Why Revision App?</h3>
-                    <div className="relative h-[calc(100%-2rem)]">
-                        <div className="service-card absolute w-full bottom-0 bg-red-900 bg-opacity-40 backdrop-blur-md rounded-lg p-4 text-white">
-                            <h4 className="font-medium">Interactive Quizzes</h4>
+                <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-center items-center">
+                    <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision App?</h3>
+                    <br />
+                    <div className="relative w-full h-full flex flex-col justify-center items-center">
+                        <div className="service-card w-11/12 bg-red-900 bg-opacity-70 backdrop-blur-md rounded-lg p-4 text-white mb-4 animate-slide-up transition-all duration-500 ease-in-out" style={{ animationDelay: '0s' }}>
+                            <h4 className="font-medium text-lg">Interactive Quizzes</h4>
                             <p className="text-sm">Engage with dynamic quizzes tailored to your subjects.</p>
                         </div>
-                        <div className="service-card absolute w-full bottom-0 bg-red-900 bg-opacity-40 backdrop-blur-md rounded-lg p-4 text-white">
-                            <h4 className="font-medium">Study Plans</h4>
+                        <div className="service-card w-11/12 bg-red-900 bg-opacity-70 backdrop-blur-md rounded-lg p-4 text-white mb-4 animate-slide-up transition-all duration-500 ease-in-out" style={{ animationDelay: '0.5s' }}>
+                            <h4 className="font-medium text-lg">Study Plans</h4>
                             <p className="text-sm">Personalized schedules to keep you on track.</p>
                         </div>
-                        <div className="service-card absolute w-full bottom-0 bg-red-900 bg-opacity-40 backdrop-blur-md rounded-lg p-4 text-white">
-                            <h4 className="font-medium">Progress Tracking</h4>
+                        <div className="service-card w-11/12 bg-red-900 bg-opacity-70 backdrop-blur-md rounded-lg p-4 text-white animate-slide-up transition-all duration-500 ease-in-out" style={{ animationDelay: '1s' }}>
+                            <h4 className="font-medium text-lg">Progress Tracking</h4>
                             <p className="text-sm">Monitor your learning with detailed analytics.</p>
                         </div>
                     </div>

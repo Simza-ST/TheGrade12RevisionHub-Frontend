@@ -16,29 +16,31 @@ body {
 }
 
 @keyframes slideUp {
-  0% { transform: translateY(100%); opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { transform: translateY(-100%); opacity: 0; }
+  0% { transform: translateY(100%); opacity: 0; }    /* Start: bottom, invisible */
+  6.7% { transform: translateY(0); opacity: 1; }     /* Appearance: fade in and move to position */
+  56.2% { transform: translateY(0); opacity: 1; }    /* Stay visible for reading */
+  62.9% { transform: translateY(-100%); opacity: 0; } /* Disappearance: fade out and move up */
+  100% { transform: translateY(-100%); opacity: 0; }  /* Stay invisible for pause */
 }
 
 .service-card {
-  animation: slideUp 6s infinite;
+  animation: slideUp 8.08s infinite; /* Total: 0.54s appear + 4s visible + 0.54s disappear + 3s pause */
+  width: 100%;
 }
 
 .service-card:nth-child(2) {
-  animation-delay: 2s;
+  animation-delay: 0.5s;
 }
 
 .service-card:nth-child(3) {
-  animation-delay: 4s;
+  animation-delay: 1s;
 }
 
 footer {
-  background: #4070f4;
+  background: #1a4543;
   padding: 15px 0;
   text-align: center;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 footer .text span {
@@ -72,7 +74,7 @@ footer .text .site-name {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: #4070f4;
+  background: #f87171;
   color: #fff;
   border-radius: 50%;
   text-decoration: none;
@@ -84,4 +86,23 @@ footer .text .site-name {
 
 pre {
   white-space: pre-wrap;
+}
+
+/* Optional: Ignore .login .content if not used with Tailwind */
+.login .content {
+  display: none; /* Comment out or remove if not needed */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .service-card {
+    width: 90%;
+    padding: 2px;
+  }
+  .service-card h4 {
+    font-size: 14px;
+  }
+  .service-card p {
+    font-size: 12px;
+  }
 }
