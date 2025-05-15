@@ -1,0 +1,196 @@
+.contact {
+    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 0;
+}
+
+.contact .content {
+    margin: 0 auto;
+    padding: 0;
+}
+
+.contact .text {
+    width: 80%;
+    text-align: center;
+    margin: auto;
+}
+
+.contact .topic {
+    color: #fff;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: 'Inter', sans-serif;
+}
+
+.contact p {
+    color: #e5e7eb;
+    font-size: 1em;
+    font-family: 'Inter', sans-serif;
+}
+
+.contact .button button {
+    background: linear-gradient(to right, #0d9488, #dc2626);
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.contact .button button:hover {
+    background: #f87171;
+}
+
+.popup {
+    display: flex;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-content {
+    background: #1a4543;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 40%;
+    text-align: center;
+    position: relative;
+    animation: slideIn 0.3s ease-in-out;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 22px;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-btn:hover {
+    color: #f87171;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border 0.3s;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+
+.form-control:focus {
+    border-color: #f87171;
+    box-shadow: 0 0 5px rgba(248, 113, 113, 0.2);
+}
+
+textarea.form-control {
+    resize: none;
+    height: 100px;
+}
+
+.btn-submit {
+    background: linear-gradient(to right, #0d9488, #dc2626);
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-submit:hover {
+    background: #f87171;
+}
+
+.email-copy p {
+    margin-top: 20px;
+    color: #e5e7eb;
+    font-family: 'Inter', sans-serif;
+}
+
+.email-copy span {
+    color: #f87171;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.email-copy span:hover {
+    color: #fff;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.title span {
+    color: #fff;
+    font-size: 30px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+.title span::before,
+.title span::after {
+    content: '';
+    position: absolute;
+    height: 3px;
+    width: 100%;
+    background: #f87171;
+    left: 0;
+    bottom: 0;
+}
+
+.title span::after {
+    bottom: -5px;
+    width: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

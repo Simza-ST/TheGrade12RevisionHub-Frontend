@@ -1,0 +1,11 @@
+.scroll-button a {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: #fff;
+    background: linear-gradient(to right, #0d9488, #dc2626);
+    padding: 7px 12px;
+    font-size: 18px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+}
