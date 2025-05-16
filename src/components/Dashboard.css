@@ -65,23 +65,6 @@ input:focus-visible {
     outline-offset: 2px;
 }
 
-.sidebar-link {
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
-}
-
-.sidebar-link:hover {
-    border-left-color: var(--primary);
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--primary);
-}
-
-.sidebar-link.active {
-    border-left-color: var(--primary);
-    background: rgba(59, 130, 246, 0.2);
-    color: var(--primary);
-}
-
 .tab-link {
     transition: all 0.3s ease;
     position: relative;

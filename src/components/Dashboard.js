@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css';
 import * as THREE from 'three';
 import Chart from 'chart.js/auto';
-import { MatrixController, MatrixElement } from 'chartjs-chart-matrix'; // Import named exports
+import { MatrixController, MatrixElement } from 'chartjs-chart-matrix';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import confetti from 'canvas-confetti';
@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 const Dashboard = () => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('subjects');
     const [xp, setXp] = useState(500);
@@ -39,9 +38,7 @@ const Dashboard = () => {
 
     const animationFrames = useRef({});
 
-    // Register the matrix chart components on mount
     useEffect(() => {
-        // Register both MatrixController and MatrixElement
         Chart.register(MatrixController, MatrixElement);
         const avatarCleanup = initAvatar3D();
         const coachCleanup = initCoach3D();
@@ -333,108 +330,6 @@ const Dashboard = () => {
 
     return (
         <div className={`text-dark transition-colors duration-300 ${theme}`}>
-            {/* Sidebar Navigation */}
-            <nav className={`fixed inset-y-0 left-0 w-64 bg-dark shadow-lg transform transition-transform duration-300 ease-in-out z-30 ${!sidebarOpen ? '-translate-x-full' : ''}`}>
-                <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <img src="/images/logo.png" alt="NexGenStudy Logo" className="h-8" />
-                        <h1 className="text-lg font-bold text-dark">NexGenStudy</h1>
-                    </div>
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="md:hidden text-dark focus-visible"
-                        aria-label="Toggle Sidebar"
-                    >
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div className="px-4 py-2 text-sm text-dark">XP: {xp}</div>
-                <div className="px-4 py-2">
-                    <button
-                        onClick={startVoice}
-                        className={`w-full p-2 bg-primary text-white rounded-md text-sm hover:bg-primary-dark focus-visible ${voiceActive ? 'bg-secondary' : ''}`}
-                        aria-label={voiceActive ? 'Stop Voice Search' : 'Start Voice Search'}
-                    >
-                        <svg className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                        <span>{voiceActive ? 'Listening...' : 'Voice Search'}</span>
-                    </button>
-                    <div id="coachCaptions" className="text-xs text-dark mt-1" aria-live="polite"></div>
-                </div>
-                <nav className="mt-4" aria-label="Sidebar Navigation">
-                    {['dashboard', 'subjects', 'papers', 'tasks', 'planner', 'analytics'].map((tab) => (
-                        <Link
-                            key={tab}
-                            to={`/${tab}`}
-                            className={`sidebar-link flex items-center px-4 py-3 text-dark hover:bg-dark ${activeTab === tab ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab)}
-                            aria-current={activeTab === tab ? 'page' : undefined}
-                        >
-                            <svg className="h-5 w-5 mr-2 holographic" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d={
-                                        tab === 'dashboard'
-                                            ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
-                                            : tab === 'subjects'
-                                                ? 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253'
-                                                : tab === 'papers'
-                                                    ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                                                    : tab === 'tasks'
-                                                        ? 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01'
-                                                        : tab === 'planner'
-                                                            ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                                                            : 'M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
-                                    }
-                                />
-                            </svg>
-                            <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
-                        </Link>
-                    ))}
-                </nav>
-                <div className="absolute bottom-4 px-4">
-                    <div className="relative">
-                        <button
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="flex items-center space-x-2 text-dark hover:text-primary focus-visible"
-                            aria-expanded={dropdownOpen}
-                            aria-label="User Menu"
-                        >
-                            <canvas ref={avatarRef} className="h-8 w-8 rounded-full" aria-hidden="true" />
-                            <span>User</span>
-                        </button>
-                        {dropdownOpen && (
-                            <div className="absolute bottom-10 left-0 w-48 bg-dark shadow-lg rounded-md">
-                                <Link to="/profile" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Profile</Link>
-                                <Link to="/settings" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Settings</Link>
-                                <Link to="/logout" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Logout</Link>
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        onClick={toggleTheme}
-                        className="mt-2 text-dark hover:text-primary flex items-center text-sm focus-visible"
-                        aria-label={`Switch to ${theme === 'dark' ? 'high-contrast' : 'dark'} theme`}
-                    >
-                        {theme === 'dark' ? (
-                            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        ) : (
-                            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                        )}
-                        Toggle Theme
-                    </button>
-                </div>
-            </nav>
-
             {/* AI Study Coach */}
             <div className="fixed bottom-4 left-4 z-50">
                 <div className="bg-dark p-4 rounded-lg shadow-lg flex items-center space-x-2">
@@ -453,47 +348,86 @@ const Dashboard = () => {
             </div>
 
             {/* Main Content */}
-            <main className="lg:ml-64 transition-all duration-300">
+            <main className="transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="md:hidden text-dark mb-4 focus-visible"
-                        aria-label="Toggle Sidebar"
-                    >
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    <div className="flex space-x-4 mb-6" role="tablist">
-                        {['subjects', 'papers', 'tasks', 'planner', 'analytics'].map((tab) => (
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex space-x-4" role="tablist">
+                            {['subjects', 'papers', 'tasks', 'planner', 'analytics'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    role="tab"
+                                    aria-selected={activeTab === tab}
+                                    className={`tab-link flex items-center py-2 px-3 text-sm font-medium text-dark ${activeTab === tab ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    <svg className="h-4 w-4 mr-1 holographic" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d={
+                                                tab === 'subjects'
+                                                    ? 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253'
+                                                    : tab === 'papers'
+                                                        ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                                                        : tab === 'tasks'
+                                                            ? 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01'
+                                                            : tab === 'planner'
+                                                                ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+                                                                : 'M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+                                            }
+                                        />
+                                    </svg>
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center space-x-3">
                             <button
-                                key={tab}
-                                role="tab"
-                                aria-selected={activeTab === tab}
-                                className={`tab-link flex items-center py-2 px-3 text-sm font-medium text-dark ${activeTab === tab ? 'active' : ''}`}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={startVoice}
+                                className={`p-2 bg-primary text-white rounded-md text-sm hover:bg-primary-dark focus-visible ${voiceActive ? 'bg-secondary' : ''}`}
+                                aria-label={voiceActive ? 'Stop Voice Search' : 'Start Voice Search'}
                             >
-                                <svg className="h-4 w-4 mr-1 holographic" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d={
-                                            tab === 'subjects'
-                                                ? 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253'
-                                                : tab === 'papers'
-                                                    ? 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                                                    : tab === 'tasks'
-                                                        ? 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01'
-                                                        : tab === 'planner'
-                                                            ? 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                                                            : 'M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
-                                        }
-                                    />
+                                <svg className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                <span>{voiceActive ? 'Listening...' : 'Voice Search'}</span>
                             </button>
-                        ))}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="flex items-center space-x-2 text-dark hover:text-primary focus-visible"
+                                    aria-expanded={dropdownOpen}
+                                    aria-label="User Menu"
+                                >
+                                    <canvas ref={avatarRef} className="h-8 w-8 rounded-full" aria-hidden="true" />
+                                    <span>User</span>
+                                </button>
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-dark shadow-lg rounded-md">
+                                        <Link to="/profile" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Profile</Link>
+                                        <Link to="/settings" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Settings</Link>
+                                        <Link to="/logout" className="block px-4 py-2 text-dark hover:bg-neutral-base text-sm" onClick={() => setDropdownOpen(false)}>Logout</Link>
+                                    </div>
+                                )}
+                            </div>
+                            <button
+                                onClick={toggleTheme}
+                                className="text-dark hover:text-primary flex items-center text-sm focus-visible"
+                                aria-label={`Switch to ${theme === 'dark' ? 'high-contrast' : 'dark'} theme`}
+                            >
+                                {theme === 'dark' ? (
+                                    <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                    </svg>
+                                )}
+                                Toggle Theme
+                            </button>
+                        </div>
                     </div>
                     <div role="tabpanel">
                         {activeTab === 'subjects' && (

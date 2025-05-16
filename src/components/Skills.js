@@ -24,7 +24,7 @@ const Skills = () => {
                     </div>
 
                     <div className="right">
-                        <img src="/images/home2.jpg" alt="Study Tips" /> {/* Replace with "https://via.placeholder.com/400" if missing */}
+                        <img src="/images/skillsImage.jpg" alt="Study Tips" /> {/* Replace with "https://via.placeholder.com/400" if missing */}
                     </div>
                 </div>
             </div>

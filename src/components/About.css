@@ -1,5 +1,6 @@
 section {
     background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    padding: 0;
 }
 
 .content {
