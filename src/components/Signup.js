@@ -59,7 +59,7 @@ const Signup = () => {
                 <div className="w-1/2 p-10 bg-teal-800">
                     <div className="content">
                         <div className="flex justify-center mb-6">
-                            <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-8" />
+                            <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                         </div>
                         <h2>Join Revision App</h2>
                         <p className="text-gray-300 text-center mb-6">Start your study journey today!</p>

@@ -24,3 +24,10 @@
   background: #4070f4;
 }
 
+.App {
+  background: linear-gradient(to bottom right, #134e4a, #7f1d1d); /* Match section background */
+  margin: 0;
+  padding: 0;
+  min-height: 100vh; /* Ensure it covers the full viewport height */
+  width: 100%;
+}

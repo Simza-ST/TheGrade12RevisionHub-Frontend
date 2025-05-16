@@ -5,6 +5,9 @@
     background-size: cover;
     position: relative;
     z-index: 1;
+    margin: 0;
+    padding: 0;
+    display: block;
 }
 
 .home-content {

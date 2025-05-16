@@ -13,6 +13,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import ForgotPassword from './components/ForgotPassword';
 import FileUploader from './components/FileUploader';
+import Dashboard from './components/Dashboard'; // Import the Dashboard component
 
 function App() {
     return (
@@ -34,10 +35,11 @@ function App() {
                             </>
                         }
                     />
-                    {<Route path="/login" element={<Login />} />}
-                    {<Route path="/signup" element={<Signup />} />}
-                    {<Route path="/forgot-password" element={<ForgotPassword />} />}
-                    {<Route path="/upload" element={<FileUploader />} />}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/upload" element={<FileUploader />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                 </Routes>
             </div>
         </Router>

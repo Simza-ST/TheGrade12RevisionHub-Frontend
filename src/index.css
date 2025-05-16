@@ -6,6 +6,7 @@ body {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
+  background: linear-gradient(to bottom right, #134e4a, #7f1d1d); /* Match section background */
 }
 
 .form-input {
@@ -24,7 +25,7 @@ body {
 }
 
 .service-card {
-  animation: slideUp 8.08s infinite; /* Total: 0.54s appear + 4s visible + 0.54s disappear + 3s pause */
+  animation: slideUp 8.08s infinite;
   width: 100%;
 }
 
@@ -38,9 +39,11 @@ body {
 
 footer {
   background: #1a4543;
-  padding: 15px 0;
+  padding: 15px 0 0 0;
+  margin: 0;
   text-align: center;
   font-family: 'Inter', sans-serif;
+  width: 100%;
 }
 
 footer .text span {
@@ -90,7 +93,7 @@ pre {
 
 /* Optional: Ignore .login .content if not used with Tailwind */
 .login .content {
-  display: none; /* Comment out or remove if not needed */
+  display: none;
 }
 
 /* Responsive adjustments */

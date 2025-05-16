@@ -1,0 +1,236 @@
+/* Define color variables for consistency */
+:root {
+    --primary: #60a5fa; /* Bright blue for buttons, links, progress */
+    --primary-dark: #3b82f6; /* Darker shade for hover */
+    --secondary: #a78bfa; /* Purple for secondary elements */
+    --secondary-dark: #8b5cf6; /* Darker shade for hover */
+    --success: #22c55e; /* Green for success states */
+    --warning: #eab308; /* Yellow for warnings */
+    --error: #ef4444; /* Red for errors */
+    --neutral-base: #334155; /* Slate for borders, shadows */
+    --neutral-secondary: #2d3748; /* Lighter slate for secondary backgrounds */
+    --gradient: linear-gradient(90deg, #60a5fa, #a78bfa); /* Primary gradient */
+}
+
+body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    font-family: 'Orbitron', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.dark {
+    background: #0f172a;
+}
+
+.dark .bg-dark {
+    background: #1e293b;
+}
+
+.dark .text-dark {
+    color: #f1f5f9;
+}
+
+.high-contrast {
+    background: #000;
+}
+
+.high-contrast .bg-dark {
+    background: #111827;
+}
+
+.high-contrast .text-dark {
+    color: #e5e7eb;
+}
+
+.animate-orb {
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.animate-orb:hover {
+    transform: rotate(10deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.sidebar-link {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.sidebar-link:hover {
+    border-left-color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+}
+
+.sidebar-link.active {
+    border-left-color: var(--primary);
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary);
+}
+
+.tab-link {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-link:hover {
+    color: var(--primary);
+}
+
+.tab-link.active {
+    color: var(--primary);
+}
+
+.tab-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gradient);
+}
+
+.holographic {
+    animation: holographic 3s infinite;
+}
+
+@keyframes holographic {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+.study-room {
+    perspective: 1000px;
+}
+
+.study-room-card {
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+}
+
+.study-room-card:hover {
+    transform: rotateY(10deg) rotateX(10deg);
+}
+
+canvas {
+    display: block;
+}
+
+/* Table styling */
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+/* Modal styling */
+.fixed.inset-0 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-dark.p-6 {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Progress bars */
+.w-full.bg-neutral-base {
+    background: var(--neutral-base);
+}
+
+.bg-gradient {
+    background: var(--gradient);
+}
+
+/* Color classes */
+.bg-primary {
+    background: var(--primary);
+}
+
+.bg-primary-dark {
+    background: var(--primary-dark);
+}
+
+.bg-secondary {
+    background: var(--secondary);
+}
+
+.bg-secondary-dark {
+    background: var(--secondary-dark);
+}
+
+.bg-success {
+    background: var(--success);
+}
+
+.bg-warning {
+    background: var(--warning);
+}
+
+.bg-error {
+    background: var(--error);
+}
+
+.bg-neutral-base {
+    background: var(--neutral-base);
+}
+
+.bg-neutral-secondary {
+    background: var(--neutral-secondary);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.text-primary-dark {
+    color: var(--primary-dark);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.text-error {
+    color: var(--error);
+}
+
+.border-primary {
+    border-color: var(--primary);
+}
+
+.border-neutral-base {
+    border-color: var(--neutral-base);
+}
+
+/* Footer styling */
+footer {
+    border-top: 1px solid var(--neutral-base);
+}
