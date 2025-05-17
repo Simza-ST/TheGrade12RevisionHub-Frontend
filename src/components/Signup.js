@@ -33,15 +33,21 @@ const Signup = () => {
         }
 
         try {
-            const response = await fetch('/api/signup', {
-                method: 'POST',
-                body: formData,
-            });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Signup failed');
-            }
+            fetch('http://localhost:6262/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({"email": email,
+                    "password": password})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log(data.message, data.data); // Navigate to login
+                    } else {
+                        console.error(data.message); // Show error
+                    }
+                });
 
             alert('Signup successful! Welcome to Revision App.');
             form.reset();
@@ -50,6 +56,7 @@ const Signup = () => {
         } catch (error) {
             setError(error.message || 'An error occurred. Please try again.');
         }
+
     };
 
     return (
