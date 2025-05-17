@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './Signup.css'; // Import the new CSS file
+import './Signup.css';
 
 const Signup = () => {
     const [error, setError] = useState('');
+
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         const form = event.target;
         const formData = new FormData(form);
 
+        const firstName = formData.get('firstName');
+        const lastName = formData.get('lastName');
+        const idNumber = formData.get('idNumber');
+        const phoneNumber = formData.get('phoneNumber');
         const email = formData.get('email');
         const password = formData.get('password');
-        const phoneNumber = formData.get('phoneNumber');
+        const role = formData.get('role') || 'STUDENT';
         const profilePicture = formData.get('profilePicture');
 
+        // Client-side validation
         if (!/^\S+@\S+\.\S+$/.test(email)) {
             setError('Please enter a valid email address.');
             return;
@@ -33,30 +40,48 @@ const Signup = () => {
         }
 
         try {
-
-            fetch('http://localhost:6262/signup', {
+            const response = await fetch(`${API_BASE_URL}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({"email": email,
-                    "password": password})
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log(data.message, data.data); // Navigate to login
-                    } else {
-                        console.error(data.message); // Show error
-                    }
-                });
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    idNumber,
+                    email,
+                    password,
+                    phoneNumber,
+                    role,
+                }),
+                credentials: 'include',
+            });
 
-            alert('Signup successful! Welcome to Revision App.');
-            form.reset();
-            setError('');
-            window.location.href = '/dashboard';
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMsg = response.status === 415
+                    ? 'Unsupported Media Type: Backend expects multipart/form-data or JSON.'
+                    : response.status === 400
+                        ? 'Invalid request: Check JSON payload.'
+                        : response.status === 404
+                            ? 'Endpoint not found: Verify URL is /signup/signup.'
+                            : `HTTP error! Status: ${response.status}`;
+                throw new Error(data.message || errorMsg);
+            }
+
+            if (data.success) {
+                console.log('Success:', data.message, data.data);
+                alert('Signup successful! Welcome to Revision App.');
+                form.reset();
+                setError('');
+                window.location.href = '/login';
+            } else {
+                setError(data.message || 'Signup failed');
+                console.error('Backend error:', data.message);
+            }
         } catch (error) {
-            setError(error.message || 'An error occurred. Please try again.');
+            console.error('Fetch error:', error);
+            setError(error.message || 'An error occurred during signup. Please check server logs and try again.');
         }
-
     };
 
     return (

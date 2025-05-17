@@ -9,6 +9,28 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import confetti from 'canvas-confetti';
 import { v4 as uuidv4 } from 'uuid';
 
+const ErrorBoundary = ({ children }) => {
+    const [hasError, setHasError] = useState(false);
+
+    React.useEffect(() => {
+        const errorHandler = (error) => {
+            console.error('ErrorBoundary caught:', error);
+            setHasError(true);
+        };
+        window.addEventListener('error', errorHandler);
+        return () => window.removeEventListener('error', errorHandler);
+    }, []);
+
+    if (hasError) {
+        return (
+            <div className="text-red-400 text-center p-4">
+                Error rendering component. Please ensure WebGL is enabled or try a different browser.
+            </div>
+        );
+    }
+    return children;
+};
+
 const Dashboard = () => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -40,6 +62,165 @@ const Dashboard = () => {
 
     useEffect(() => {
         Chart.register(MatrixController, MatrixElement);
+
+        const checkWebGLSupport = () => {
+            if (!window.WebGLRenderingContext) {
+                console.warn('WebGL not supported');
+                return false;
+            }
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            return !!gl;
+        };
+
+        const initAvatar3D = () => {
+            if (!avatarRef.current || !checkWebGLSupport()) return () => {};
+            try {
+                const canvas = avatarRef.current;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                renderer.setSize(32, 32);
+                const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const material = new THREE.MeshBasicMaterial({ color: 0xf87171 });
+                const sphere = new THREE.Mesh(geometry, material);
+                scene.add(sphere);
+                camera.position.z = 1;
+
+                const animate = () => {
+                    animationFrames.current.avatar = requestAnimationFrame(animate);
+                    sphere.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                return () => {
+                    cancelAnimationFrame(animationFrames.current.avatar);
+                    renderer.dispose();
+                    geometry.dispose();
+                    material.dispose();
+                };
+            } catch (error) {
+                console.error('initAvatar3D error:', error);
+                return () => {};
+            }
+        };
+
+        const initCoach3D = () => {
+            if (!coachRef.current || !checkWebGLSupport()) return () => {};
+            try {
+                const canvas = coachRef.current;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                renderer.setSize(48, 48);
+                const geometry = new THREE.TorusGeometry(0.3, 0.1, 16, 100);
+                const material = new THREE.MeshBasicMaterial({ color: 0x134e4a });
+                const torus = new THREE.Mesh(geometry, material);
+                scene.add(torus);
+                camera.position.z = 1;
+
+                const animate = () => {
+                    animationFrames.current.coach = requestAnimationFrame(animate);
+                    torus.rotation.x += 0.01;
+                    torus.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                return () => {
+                    cancelAnimationFrame(animationFrames.current.coach);
+                    renderer.dispose();
+                    geometry.dispose();
+                    material.dispose();
+                };
+            } catch (error) {
+                console.error('initCoach3D error:', error);
+                return () => {};
+            }
+        };
+
+        const initSubjectOrbs = () => {
+            const subjects = [
+                { name: 'Maths', progress: 90, aiPath: 'Focus on Calculus' },
+                { name: 'Physics', progress: 75, aiPath: 'Review Mechanics' },
+                { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
+            ];
+            const cleanups = subjects.map((subject) => {
+                const canvas = document.getElementById(`orb-${subject.name}`);
+                if (!canvas || !checkWebGLSupport()) return () => {};
+                try {
+                    const scene = new THREE.Scene();
+                    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                    renderer.setSize(96, 96);
+                    const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xf87171, wireframe: true });
+                    const sphere = new THREE.Mesh(geometry, material);
+                    scene.add(sphere);
+                    camera.position.z = 1;
+
+                    const animate = () => {
+                        animationFrames.current[`orb-${subject.name}`] = requestAnimationFrame(animate);
+                        sphere.rotation.y += 0.005;
+                        renderer.render(scene, camera);
+                    };
+                    animate();
+
+                    return () => {
+                        cancelAnimationFrame(animationFrames.current[`orb-${subject.name}`]);
+                        renderer.dispose();
+                        geometry.dispose();
+                        material.dispose();
+                    };
+                } catch (error) {
+                    console.error(`initSubjectOrbs error for ${subject.name}:`, error);
+                    return () => {};
+                }
+            });
+
+            return () => cleanups.forEach((cleanup) => cleanup());
+        };
+
+        const initARGraph = () => {
+            if (!arGraphRef.current || !checkWebGLSupport()) return () => {};
+            try {
+                const canvas = arGraphRef.current;
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                const geometry = new THREE.BufferGeometry();
+                const vertices = [];
+                for (let x = -2; x <= 2; x += 0.1) {
+                    const y = 2 * x * x + 3 * x - 5;
+                    vertices.push(x, y / 10, 0);
+                }
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                const material = new THREE.LineBasicMaterial({ color: 0xf87171 });
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+                camera.position.z = 1;
+
+                const animate = () => {
+                    animationFrames.current.arGraph = requestAnimationFrame(animate);
+                    line.rotation.y += 0.005;
+                    renderer.render(scene, camera);
+                };
+                animate();
+
+                return () => {
+                    cancelAnimationFrame(animationFrames.current.arGraph);
+                    renderer.dispose();
+                    geometry.dispose();
+                    material.dispose();
+                };
+            } catch (error) {
+                console.error('initARGraph error:', error);
+                return () => {};
+            }
+        };
+
         const avatarCleanup = initAvatar3D();
         const coachCleanup = initCoach3D();
         const orbsCleanup = initSubjectOrbs();
@@ -160,134 +341,6 @@ const Dashboard = () => {
         if (navigator.vibrate) navigator.vibrate(duration);
     };
 
-    const initAvatar3D = () => {
-        const canvas = avatarRef.current;
-        if (!canvas) return () => {};
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-        renderer.setSize(32, 32);
-        const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0xf87171 });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
-        camera.position.z = 1;
-
-        const animate = () => {
-            animationFrames.current.avatar = requestAnimationFrame(animate);
-            sphere.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        };
-        animate();
-
-        return () => {
-            cancelAnimationFrame(animationFrames.current.avatar);
-            renderer.dispose();
-            geometry.dispose();
-            material.dispose();
-        };
-    };
-
-    const initCoach3D = () => {
-        const canvas = coachRef.current;
-        if (!canvas) return () => {};
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-        renderer.setSize(48, 48);
-        const geometry = new THREE.TorusGeometry(0.3, 0.1, 16, 100);
-        const material = new THREE.MeshBasicMaterial({ color: 0x134e4a });
-        const torus = new THREE.Mesh(geometry, material);
-        scene.add(torus);
-        camera.position.z = 1;
-
-        const animate = () => {
-            animationFrames.current.coach = requestAnimationFrame(animate);
-            torus.rotation.x += 0.01;
-            torus.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        };
-        animate();
-
-        return () => {
-            cancelAnimationFrame(animationFrames.current.coach);
-            renderer.dispose();
-            geometry.dispose();
-            material.dispose();
-        };
-    };
-
-    const initSubjectOrbs = () => {
-        const subjects = [
-            { name: 'Maths', progress: 90, aiPath: 'Focus on Calculus' },
-            { name: 'Physics', progress: 75, aiPath: 'Review Mechanics' },
-            { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
-        ];
-        const cleanups = subjects.map((subject) => {
-            const canvas = document.getElementById(`orb-${subject.name}`);
-            if (!canvas) return () => {};
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-            renderer.setSize(96, 96);
-            const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-            const material = new THREE.MeshBasicMaterial({ color: 0xf87171, wireframe: true });
-            const sphere = new THREE.Mesh(geometry, material);
-            scene.add(sphere);
-            camera.position.z = 1;
-
-            const animate = () => {
-                animationFrames.current[`orb-${subject.name}`] = requestAnimationFrame(animate);
-                sphere.rotation.y += 0.005;
-                renderer.render(scene, camera);
-            };
-            animate();
-
-            return () => {
-                cancelAnimationFrame(animationFrames.current[`orb-${subject.name}`]);
-                renderer.dispose();
-                geometry.dispose();
-                material.dispose();
-            };
-        });
-
-        return () => cleanups.forEach((cleanup) => cleanup());
-    };
-
-    const initARGraph = () => {
-        const canvas = arGraphRef.current;
-        if (!canvas) return () => {};
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-        for (let x = -2; x <= 2; x += 0.1) {
-            const y = 2 * x * x + 3 * x - 5;
-            vertices.push(x, y / 10, 0);
-        }
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const material = new THREE.LineBasicMaterial({ color: 0xf87171 });
-        const line = new THREE.Line(geometry, material);
-        scene.add(line);
-        camera.position.z = 1;
-
-        const animate = () => {
-            animationFrames.current.arGraph = requestAnimationFrame(animate);
-            line.rotation.y += 0.005;
-            renderer.render(scene, camera);
-        };
-        animate();
-
-        return () => {
-            cancelAnimationFrame(animationFrames.current.arGraph);
-            renderer.dispose();
-            geometry.dispose();
-            material.dispose();
-        };
-    };
-
     const handleDragStart = (task) => setDraggedTask(task);
     const handleDrop = (status) => {
         if (draggedTask) {
@@ -333,7 +386,9 @@ const Dashboard = () => {
             {/* AI Study Coach */}
             <div className="fixed bottom-4 left-4 z-50">
                 <div className="bg-dark p-4 rounded-lg shadow-lg flex items-center space-x-2">
-                    <canvas ref={coachRef} className="h-12 w-12" aria-hidden="true" />
+                    <ErrorBoundary>
+                        <canvas ref={coachRef} className="h-12 w-12" aria-hidden="true" />
+                    </ErrorBoundary>
                     <p className="text-sm text-dark">Try a 25-minute Pomodoro session!</p>
                     <button
                         onClick={() => speakTip('Try a 25-minute Pomodoro session!')}
@@ -345,6 +400,7 @@ const Dashboard = () => {
                         </svg>
                     </button>
                 </div>
+                <p id="coachCaptions" className="text-sm text-dark mt-2"></p>
             </div>
 
             {/* Main Content */}
@@ -400,7 +456,9 @@ const Dashboard = () => {
                                     aria-expanded={dropdownOpen}
                                     aria-label="User Menu"
                                 >
-                                    <canvas ref={avatarRef} className="h-8 w-8 rounded-full" aria-hidden="true" />
+                                    <ErrorBoundary>
+                                        <canvas ref={avatarRef} className="h-8 w-8 rounded-full" aria-hidden="true" />
+                                    </ErrorBoundary>
                                     <span>User</span>
                                 </button>
                                 {dropdownOpen && (
@@ -440,7 +498,9 @@ const Dashboard = () => {
                                         { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
                                     ].map((subject) => (
                                         <div key={subject.name} className="bg-dark p-4 rounded-lg border border-neutral-base animate-orb">
-                                            <canvas id={`orb-${subject.name}`} className="w-24 h-24 mx-auto" aria-hidden="true" />
+                                            <ErrorBoundary>
+                                                <canvas id={`orb-${subject.name}`} className="w-24 h-24 mx-auto" aria-hidden="true" />
+                                            </ErrorBoundary>
                                             <h3 className="text-md font-medium text-dark text-center mt-2">{subject.name}</h3>
                                             <div className="mt-2 text-center">
                                                 <div className="relative w-16 h-16 mx-auto">
@@ -744,7 +804,9 @@ const Dashboard = () => {
                         </div>
                         <div className="bg-neutral-base p-4 rounded-md">
                             <p className="text-sm font-medium text-dark">Question: Solve 2x² + 3x - 5 = 0</p>
-                            <canvas ref={arGraphRef} className="w-full h-48 mt-2" aria-hidden="true" />
+                            <ErrorBoundary>
+                                <canvas ref={arGraphRef} className="w-full h-48 mt-2" aria-hidden="true" />
+                            </ErrorBoundary>
                             <input
                                 type="text"
                                 value={answer}

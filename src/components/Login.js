@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 const Login = () => {
     const [error, setError] = useState('');
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         const form = event.target;
@@ -12,6 +14,7 @@ const Login = () => {
         const email = formData.get('email');
         const password = formData.get('password');
 
+        // Client-side validation
         if (!/^\S+@\S+\.\S+$/.test(email)) {
             setError('Please enter a valid email address.');
             return;
@@ -22,22 +25,37 @@ const Login = () => {
         }
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
-                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+                credentials: 'include',
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Login failed');
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
             }
 
+            console.log('Success:', data.message);
             alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
-            window.location.href = '/dashboard';
+            try {
+                window.location.href = '/dashboard';
+            } catch (navError) {
+                console.error('Navigation error:', navError);
+                setError('Failed to redirect to dashboard. Please try again.');
+            }
         } catch (error) {
-            setError(error.message || 'An error occurred. Please try again.');
+            console.error('Fetch error:', error);
+            setError(error.message || 'An error occurred during login. Please try again.');
         }
     };
 
@@ -46,67 +64,11 @@ const Login = () => {
             <div className="max-w-6xl bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden">
                 {/* Left: Login Form */}
                 <div className="w-1/2 p-10 bg-teal-800">
-                    {/*<div className="flex justify-center mb-6">*/}
-                    {/*    <img*/}
-                    {/*        src="https://via.placeholder.com/150x50?text=Revision+App"*/}
-                    {/*        alt="Revision App Logo"*/}
-                    {/*        className="h-8"*/}
-                    {/*    />*/}
-                    {/*    */}
-                    {/*</div>*/}
                     <div className="flex justify-center mb-6">
                         <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                     </div>
                     <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision App</h2>
                     <p className="text-gray-300 text-center mb-6">Access your study tools now!</p>
-                    {/*<form id="loginForm" className="space-y-5" onSubmit={handleSubmit}>*/}
-                    {/*    <div className="relative">*/}
-                    {/*        <input*/}
-                    {/*            type="email"*/}
-                    {/*            id="email"*/}
-                    {/*            name="email"*/}
-                    {/*            required*/}
-                    {/*            className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"*/}
-                    {/*            placeholder="Email Address"*/}
-                    {/*        />*/}
-                    {/*        <label*/}
-                    {/*            htmlFor="email"*/}
-                    {/*            className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"*/}
-                    {/*        >*/}
-                    {/*            Email Address*/}
-                    {/*        </label>*/}
-                    {/*    </div>*/}
-                    {/*    <div className="relative">*/}
-                    {/*        <input*/}
-                    {/*            type="password"*/}
-                    {/*            id="password"*/}
-                    {/*            name="password"*/}
-                    {/*            required*/}
-                    {/*            className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"*/}
-                    {/*            placeholder="Password"*/}
-                    {/*        />*/}
-                    {/*        <label*/}
-                    {/*            htmlFor="password"*/}
-                    {/*            className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"*/}
-                    {/*        >*/}
-                    {/*            Password*/}
-                    {/*        </label>*/}
-                    {/*    </div>*/}
-                    {/*    <div className="text-right">*/}
-                    {/*        <Link to="/forgot-password" className="text-sm text-teal-400 hover:underline">*/}
-                    {/*            Forgot Password?*/}
-                    {/*        </Link>*/}
-                    {/*    </div>*/}
-                    {/*    <button*/}
-                    {/*        type="submit"*/}
-                    {/*        className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"*/}
-                    {/*    >*/}
-                    {/*        Log In*/}
-                    {/*    </button>*/}
-                    {/*    <Link to="/Dashboard" className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 block text-center">*/}
-                    {/*        Log In*/}
-                    {/*    </Link>*/}
-                    {/*</form>*/}
                     <form id="loginForm" className="space-y-5" onSubmit={handleSubmit}>
                         <div className="relative">
                             <input
@@ -145,9 +107,12 @@ const Login = () => {
                                 Forgot Password?
                             </Link>
                         </div>
-                        <Link to="/Dashboard" className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 block text-center">
+                        <button
+                            type="submit"
+                            className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"
+                        >
                             Log In
-                        </Link>
+                        </button>
                     </form>
                     {error && (
                         <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center">
