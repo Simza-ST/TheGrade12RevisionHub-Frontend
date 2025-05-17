@@ -1,71 +1,58 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './ForgotPassword.css'; // Import the new CSS file
+import './ForgotPassword.css';
 
 const ForgotPassword = () => {
     const [error, setError] = useState('');
-    const [isOtpStage, setIsOtpStage] = useState(false);
-    const [userEmail, setUserEmail] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (isLoading) return;
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
         const form = event.target;
         const formData = new FormData(form);
+        const email = formData.get('email');
 
-        if (isOtpStage) {
-            const otp = formData.get('otp').trim();
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            setError('Please enter a valid email address.');
+            setIsLoading(false);
+            return;
+        }
 
-            if (!/^\d{6}$/.test(otp)) {
-                setError('Please enter a valid 6-digit OTP.');
-                return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/password/send-otp/${encodeURIComponent(email)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Send OTP error:', errorData);
+                throw new Error(errorData.message || `Failed to send OTP (status: ${response.status})`);
             }
 
+            setSuccess('OTP sent! Please check your email.');
+            form.reset();
             try {
-                const response = await fetch('/api/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, otp }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'OTP verification failed');
-                }
-
-                alert('OTP verified! Proceed to reset your password.');
-                form.reset();
-                setError('');
-                window.location.href = '/reset-password';
-            } catch (error) {
-                setError(error.message || 'An error occurred. Please try again.');
+                setTimeout(() => {
+                    window.location.href = '/reset-password';
+                }, 2000);
+            } catch (navError) {
+                console.error('Navigation error:', navError);
+                setError('Failed to redirect to dashboard. Please try again.');
             }
-        } else {
-            const email = formData.get('email');
-
-            if (!/^\S+@\S+\.\S+$/.test(email)) {
-                setError('Please enter a valid email address.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/request-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to send OTP');
-                }
-
-                setUserEmail(email);
-                setIsOtpStage(true);
-                setError('');
-                form.reset();
-            } catch (error) {
-                setError(error.message || 'An error occurred. Please try again.');
-            }
+        } catch (error) {
+            console.error('Send OTP exception:', error);
+            setError(error.message || 'An error occurred while sending OTP.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -78,12 +65,12 @@ const ForgotPassword = () => {
                         <div className="flex justify-center mb-6">
                             <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                         </div>
-                        <h2>Reset Your Password</h2>
+                        <h2 className="text-3xl font-bold text-white text-center mb-2">Reset Your Password</h2>
                         <p className="text-gray-300 text-center mb-6" id="formSubtitle">
-                            {isOtpStage ? 'Enter the OTP sent to your email.' : 'Enter your email to receive an OTP.'}
+                            Enter your email to receive an OTP.
                         </p>
                         <form id="forgotPasswordForm" className="space-y-5" onSubmit={handleSubmit}>
-                            <div id="emailSection" className={isOtpStage ? 'hidden' : ''}>
+                            <div id="emailSection">
                                 <div className="relative">
                                     <input
                                         type="email"
@@ -92,6 +79,7 @@ const ForgotPassword = () => {
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Email Address"
+                                        disabled={isLoading}
                                     />
                                     <label
                                         htmlFor="email"
@@ -103,40 +91,21 @@ const ForgotPassword = () => {
                                 <button
                                     type="submit"
                                     id="requestOtpButton"
-                                    className="btn-submit w-full py-3 px-4 mt-2"
+                                    className="btn-submit w-full py-3 px-4 mt-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50"
+                                    disabled={isLoading}
                                 >
-                                    Send OTP
-                                </button>
-                            </div>
-                            <div id="otpSection" className={isOtpStage ? '' : 'hidden'}>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="otp"
-                                        name="otp"
-                                        required
-                                        className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
-                                        placeholder="Enter OTP"
-                                    />
-                                    <label
-                                        htmlFor="otp"
-                                        className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
-                                    >
-                                        Enter OTP
-                                    </label>
-                                </div>
-                                <button
-                                    type="submit"
-                                    id="verifyOtpButton"
-                                    className="btn-submit w-full py-3 px-4"
-                                >
-                                    Verify OTP
+                                    {isLoading ? 'Sending OTP...' : 'Send OTP'}
                                 </button>
                             </div>
                         </form>
                         {error && (
                             <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center">
                                 {error}
+                            </p>
+                        )}
+                        {success && (
+                            <p id="successMessage" className="text-teal-400 text-sm mt-4 text-center">
+                                {success}
                             </p>
                         )}
                         <p className="text-gray-300 text-sm mt-4 text-center">
@@ -153,7 +122,7 @@ const ForgotPassword = () => {
                         </p>
                     </div>
                 </div>
-                {/* Right: Animated Services (unchanged from previous update) */}
+                {/* Right: Animated Services */}
                 <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-center items-center">
                     <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision App?</h3>
                     <br />

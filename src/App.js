@@ -12,6 +12,7 @@ import ScrollButton from './components/ScrollButton';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import FileUploader from './components/FileUploader';
 import Dashboard from './components/Dashboard';
 
@@ -56,6 +57,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                 </Route>
             </Routes>
