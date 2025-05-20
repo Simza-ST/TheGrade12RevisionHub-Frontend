@@ -50,6 +50,13 @@ const Dashboard = () => {
     const [feedback, setFeedback] = useState('');
     const [quizProgress, setQuizProgress] = useState(10);
     const [achievementOpen, setAchievementOpen] = useState(false);
+    const [availableSubjects, setAvailableSubjects] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState('');
+    const [subjects, setSubjects] = useState([
+        { name: 'Maths', progress: 90, aiPath: 'Focus on Calculus' },
+        { name: 'Physics', progress: 75, aiPath: 'Review Mechanics' },
+        { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
+    ]);
 
     const avatarRef = useRef(null);
     const coachRef = useRef(null);
@@ -141,11 +148,6 @@ const Dashboard = () => {
         };
 
         const initSubjectOrbs = () => {
-            const subjects = [
-                { name: 'Maths', progress: 90, aiPath: 'Focus on Calculus' },
-                { name: 'Physics', progress: 75, aiPath: 'Review Mechanics' },
-                { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
-            ];
             const cleanups = subjects.map((subject) => {
                 const canvas = document.getElementById(`orb-${subject.name}`);
                 if (!canvas || !checkWebGLSupport()) return () => {};
@@ -232,7 +234,7 @@ const Dashboard = () => {
             orbsCleanup();
             arGraphCleanup();
         };
-    }, []);
+    }, [subjects]);
 
     useEffect(() => {
         let studyFocusChart = null;
@@ -286,6 +288,37 @@ const Dashboard = () => {
             if (studyFocusChart) studyFocusChart.destroy();
             if (motivationHeatmap) motivationHeatmap.destroy();
         };
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'subjects') {
+            fetch('http://localhost:6262/user/subjects')
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch subjects');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success && Array.isArray(data.data)) {
+                        setAvailableSubjects(data.data);
+                        if (data.data.length > 0) {
+                            setSelectedSubject(data.data[0]);
+                        } else {
+                            setSelectedSubject('');
+                        }
+                    } else {
+                        console.error('Invalid response format or no subjects found:', data);
+                        setAvailableSubjects([]);
+                        setSelectedSubject('');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error fetching subjects:', error);
+                    setAvailableSubjects([]);
+                    setSelectedSubject('');
+                });
+        }
     }, [activeTab]);
 
     const toggleTheme = () => {
@@ -367,6 +400,15 @@ const Dashboard = () => {
             document.getElementById('task-form').reset();
         } else {
             alert('Please fill in all fields.');
+        }
+    };
+
+    const addSubject = () => {
+        if (selectedSubject && !subjects.some((s) => s.name === selectedSubject)) {
+            setSubjects([...subjects, { name: selectedSubject, progress: 0, aiPath: `Start with ${selectedSubject} Basics` }]);
+            setSelectedSubject(availableSubjects[0] || '');
+        } else {
+            alert('Subject already added or not selected.');
         }
     };
 
@@ -491,12 +533,27 @@ const Dashboard = () => {
                         {activeTab === 'subjects' && (
                             <div>
                                 <h2 className="text-lg font-semibold text-dark mb-4 holographic">Subject Matrix</h2>
+                                <div className="flex space-x-2 mb-4">
+                                    <select
+                                        value={selectedSubject}
+                                        onChange={(e) => setSelectedSubject(e.target.value)}
+                                        className="p-2 border rounded-md text-sm bg-dark text-dark focus-visible"
+                                        aria-label="Select Subject to Add"
+                                    >
+                                        {availableSubjects.map((subject) => (
+                                            <option key={subject} value={subject}>{subject}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={addSubject}
+                                        className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark text-sm focus-visible"
+                                        aria-label="Add Selected Subject"
+                                    >
+                                        Add Subject
+                                    </button>
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {[
-                                        { name: 'Maths', progress: 90, aiPath: 'Focus on Calculus' },
-                                        { name: 'Physics', progress: 75, aiPath: 'Review Mechanics' },
-                                        { name: 'Chemistry', progress: 85, aiPath: 'Practice Bonding' },
-                                    ].map((subject) => (
+                                    {subjects.map((subject) => (
                                         <div key={subject.name} className="bg-dark p-4 rounded-lg border border-neutral-base animate-orb">
                                             <ErrorBoundary>
                                                 <canvas id={`orb-${subject.name}`} className="w-24 h-24 mx-auto" aria-hidden="true" />
