@@ -403,6 +403,37 @@ const Dashboard = () => {
         }
     };
 
+    const addSubject = async () => {
+        if (selectedSubject && !subjects.some((s) => s.name === selectedSubject)) {
+            try {
+                const response = await fetch('http://localhost:6262/user/add-subject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                    },
+                    body: JSON.stringify({ subjectName: selectedSubject }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    setSubjects([...subjects, { name: selectedSubject, progress: 0, aiPath: `Start with ${selectedSubject} Basics` }]);
+                    setSelectedSubject(availableSubjects[0] || '');
+                    alert(result.message); // e.g., "New subject added successfully."
+                } else {
+                    alert(result.message || 'Failed to add subject.');
+                }
+            } catch (error) {
+                console.error('Error adding subject:', error);
+                alert('An error occurred while adding the subject.');
+            }
+        } else {
+            alert('Subject already added or not selected.');
+        }
+    };
+
+    /*
     const addSubject = () => {
         if (selectedSubject && !subjects.some((s) => s.name === selectedSubject)) {
             setSubjects([...subjects, { name: selectedSubject, progress: 0, aiPath: `Start with ${selectedSubject} Basics` }]);
@@ -411,6 +442,8 @@ const Dashboard = () => {
             alert('Subject already added or not selected.');
         }
     };
+
+     */
 
     const checkAnswer = () => {
         const isCorrect = answer.trim() === 'x=1,-2.5';
