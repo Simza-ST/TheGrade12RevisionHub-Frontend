@@ -22,7 +22,8 @@ import Schedule from './components/Schedule'; // New component
 import Performance from './components/Performance'; // New component
 import Notifications from './components/Notifications'; // New component
 import Chatroom from './components/Chatroom'; // New component
-import Settings from './components/Settings'; // New component
+import Settings from './components/Settings';
+import Resources from "./components/Resources"; // New component
 
 // Layout with Navbar for public pages
 const PublicLayout = () => (
@@ -46,6 +47,7 @@ function App() {
         '/subjects',
         '/quizzes',
         '/questionpapers',
+        '/resources',
         '/schedule',
         '/performance',
         '/notifications',
@@ -83,6 +85,7 @@ function App() {
                     <Route path="/subjects" element={<Subjects />} />
                     <Route path="/quizzes" element={<Quizzes />} />
                     <Route path="/questionpapers" element={<QuestionPapers />} />
+                    <Route path="/resources" element={<Resources />} />
                     <Route path="/schedule" element={<Schedule />} />
                     <Route path="/performance" element={<Performance />} />
                     <Route path="/notifications" element={<Notifications />} />

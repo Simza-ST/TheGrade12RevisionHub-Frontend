@@ -1,57 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from "./Sidebar"; // Adjust path as needed
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar'; // Adjust path as needed
 
 const Settings = () => {
+    const navigate = useNavigate();
     const [userSettings, setUserSettings] = useState({
         emailNotifications: true,
         theme: 'light',
         language: 'English',
     });
+    const [user] = useState({
+        name: 'Bianca Doe',
+        title: 'CS Honor Student',
+        profilePicture: null,
+    });
 
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const token = localStorage.getItem('jwt');
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                };
-                const response = await fetch('/api/settings', { headers });
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserSettings(data);
-                }
-            } catch (error) {
-                console.error('Error fetching settings:', error);
-            }
+        // Mock data for UI development
+        const mockSettings = {
+            emailNotifications: true,
+            theme: 'light',
+            language: 'English',
         };
-        fetchSettings();
+
+        setTimeout(() => {
+            try {
+                setUserSettings(mockSettings);
+            } catch (error) {
+                console.error('Error setting mock settings:', error);
+            }
+        }, 1000); // Simulate API delay
     }, []);
 
-    const handleSaveSettings = async () => {
-        try {
-            const token = localStorage.getItem('jwt');
-            const headers = {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            };
-            const response = await fetch('/api/settings', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(userSettings),
-            });
-            if (response.ok) {
-                alert('Settings saved successfully!');
-            }
-        } catch (error) {
-            console.error('Error saving settings:', error);
-        }
+    const handleSaveSettings = () => {
+        alert('Settings saved successfully!'); // Mock save action
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwt');
+        navigate('/login');
     };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
-            <Sidebar />
-            <div className="ml-64 p-8 w-full">
+            <Sidebar user={user} onLogout={handleLogout} />
+            <div className="p-8 w-full transition-all duration-300 ml-64 sm:ml-64 lg:ml-64 xl:ml-64">
                 <h1 className="text-3xl font-bold mb-6">Settings</h1>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4">User Settings</h2>

@@ -1,33 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from "./Sidebar"; // Adjust path as needed
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar'; // Adjust path as needed
 
 const Notifications = () => {
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
+    const [user] = useState({
+        name: 'Bianca Doe',
+        title: 'CS Honor Student',
+        profilePicture: null,
+    });
 
     useEffect(() => {
-        const fetchNotifications = async () => {
+        // Mock data for UI development
+        const mockNotifications = [
+            { id: 1, message: 'New quiz available in Mathematics', date: '2025-05-20' },
+            { id: 2, message: 'Assignment due in Physics', date: '2025-05-21' },
+        ];
+
+        setTimeout(() => {
             try {
-                const token = localStorage.getItem('jwt');
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                };
-                const response = await fetch('/api/notifications', { headers });
-                if (response.ok) {
-                    const data = await response.json();
-                    setNotifications(data);
-                }
+                setNotifications(mockNotifications);
             } catch (error) {
-                console.error('Error fetching notifications:', error);
+                console.error('Error setting mock notifications:', error);
             }
-        };
-        fetchNotifications();
+        }, 1000); // Simulate API delay
     }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwt');
+        navigate('/login');
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
-            <Sidebar />
-            <div className="ml-64 p-8 w-full">
+            <Sidebar user={user} onLogout={handleLogout} />
+            <div className="p-8 w-full transition-all duration-300 ml-64 sm:ml-64 lg:ml-64 xl:ml-64">
                 <h1 className="text-3xl font-bold mb-6">Notifications</h1>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4">Your Notifications</h2>
