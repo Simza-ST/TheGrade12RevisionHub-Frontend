@@ -15,6 +15,14 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import FileUploader from './components/FileUploader';
 import Dashboard from './components/Dashboard';
+import Subjects from './components/Subjects'; // New component
+import Quizzes from './components/Quizzes'; // New component
+import QuestionPapers from './components/QuestionPapers'; // New component
+import Schedule from './components/Schedule'; // New component
+import Performance from './components/Performance'; // New component
+import Notifications from './components/Notifications'; // New component
+import Chatroom from './components/Chatroom'; // New component
+import Settings from './components/Settings'; // New component
 
 // Layout with Navbar for public pages
 const PublicLayout = () => (
@@ -29,12 +37,25 @@ const AuthLayout = () => <Outlet />;
 
 function App() {
     const location = useLocation();
-    const noNavbarRoutes = ['/login', '/signup', '/forgot-password', '/dashboard'];
+    const noNavbarRoutes = [
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/reset-password',
+        '/dashboard',
+        '/subjects',
+        '/quizzes',
+        '/questionpapers',
+        '/schedule',
+        '/performance',
+        '/notifications',
+        '/chatroom',
+        '/settings',
+    ];
     const hasNavbar = !noNavbarRoutes.includes(location.pathname);
 
     return (
         <div className={`App ${hasNavbar ? 'has-navbar' : ''}`}>
-
             <Routes>
                 <Route element={<PublicLayout />}>
                     <Route
@@ -59,6 +80,14 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/subjects" element={<Subjects />} />
+                    <Route path="/quizzes" element={<Quizzes />} />
+                    <Route path="/questionpapers" element={<QuestionPapers />} />
+                    <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/performance" element={<Performance />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/chatroom" element={<Chatroom />} />
+                    <Route path="/settings" element={<Settings />} />
                 </Route>
             </Routes>
         </div>
