@@ -81,7 +81,10 @@ const Login = () => {
                             />
                             <label
                                 htmlFor="email"
-                                className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                className="form-label absolute left-4 top-2 text-gray-300 transition-all
+                                   peer-focus:-translate-y-7 peer-focus:text-sm peer-focus:text-gray-400
+                                   peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                   peer-[&:not(:placeholder-shown)]:-translate-y-7 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-gray-400"
                             >
                                 Email Address
                             </label>
@@ -97,7 +100,10 @@ const Login = () => {
                             />
                             <label
                                 htmlFor="password"
-                                className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                className="form-label absolute left-4 top-2 text-gray-300 transition-all
+                                   peer-focus:-translate-y-7 peer-focus:text-sm peer-focus:text-gray-400
+                                   peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                   peer-[&:not(:placeholder-shown)]:-translate-y-7 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-gray-400"
                             >
                                 Password
                             </label>
