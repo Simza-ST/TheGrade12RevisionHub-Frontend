@@ -106,9 +106,18 @@ const Signup = () => {
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="First Name"
                                     />
-                                    <label
+                                    {/*<label
                                         htmlFor="firstName"
                                         className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    >
+                                        First Name
+                                    </label>*/}
+                                    <label
+                                        htmlFor="firstName"
+                                        className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                     >
                                         First Name
                                     </label>
@@ -124,7 +133,10 @@ const Signup = () => {
                                     />
                                     <label
                                         htmlFor="lastName"
-                                        className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                        className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                     >
                                         Last Name
                                     </label>
@@ -141,7 +153,10 @@ const Signup = () => {
                                 />
                                 <label
                                     htmlFor="idNumber"
-                                    className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
                                     ID Number
                                 </label>
@@ -157,7 +172,10 @@ const Signup = () => {
                                 />
                                 <label
                                     htmlFor="phoneNumber"
-                                    className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
                                     Phone Number
                                 </label>
@@ -173,7 +191,10 @@ const Signup = () => {
                                 />
                                 <label
                                     htmlFor="email"
-                                    className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    className="form-label absolute left-4 top-2 text-gray-300 transition-all
+                                       peer-focus:-translate-y-7 peer-focus:text-sm peer-focus:text-gray-400
+                                       peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                       peer-[&:not(:placeholder-shown)]:-translate-y-7 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-gray-400"
                                 >
                                     Email Address
                                 </label>
@@ -189,12 +210,15 @@ const Signup = () => {
                                 />
                                 <label
                                     htmlFor="password"
-                                    className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-8 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
                                     Password
                                 </label>
                             </div>
-                            <div>
+                            {/*/*<div>
                                 <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-300 mb-2">
                                     Profile Picture
                                 </label>
@@ -205,8 +229,8 @@ const Signup = () => {
                                     accept="image/*"
                                     className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-red-800 file:text-red-200 hover:file:bg-red-700"
                                 />
-                            </div>
-                            <div className="relative">
+                            </div>**/}
+                            {/*<div className="relative">
                                 <select
                                     id="role"
                                     name="role"
@@ -224,7 +248,7 @@ const Signup = () => {
                                 >
                                     Role
                                 </label>
-                            </div>
+                            </div>*/}
                             <button type="submit" className="btn-submit w-full">
                                 Sign Up
                             </button>
