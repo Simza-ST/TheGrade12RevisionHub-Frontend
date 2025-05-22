@@ -3,8 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from './Sidebar';
 
-const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Resources = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
+    const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user] = useState({
         name: 'Bianca Doe',
@@ -13,12 +14,36 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     });
 
     useEffect(() => {
-        // Simulate fetching notifications (already provided via props)
+        const mockResources = [
+            {
+                id: 1,
+                title: 'Khan Academy Calculus',
+                url: 'https://khanacademy.org',
+                description: 'Interactive calculus lessons',
+                subject: 'Mathematics',
+            },
+            {
+                id: 2,
+                title: 'Crash Course Chemistry',
+                url: 'https://youtube.com',
+                description: 'Video series on chemistry concepts',
+                subject: 'Chemistry',
+            },
+            {
+                id: 3,
+                title: 'History.com',
+                url: 'https://history.com',
+                description: 'Articles on historical events',
+                subject: 'History',
+            },
+        ];
+
         setTimeout(() => {
             try {
+                setResources(mockResources);
                 setLoading(false);
             } catch (error) {
-                console.error('Error setting notifications:', error);
+                console.error('Error setting mock resources:', error);
             }
         }, 1000);
     }, []);
@@ -26,12 +51,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
-    };
-
-    const handleMarkAsRead = (id) => {
-        setNotifications(notifications.map((n) =>
-            n.id === id ? { ...n, read: true } : n
-        ));
     };
 
     if (loading) {
@@ -61,8 +80,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             >
                 <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold">Notifications</h1>
-                        <p className="text-sm mt-1">Stay updated, {user.name}!</p>
+                        <h1 className="text-3xl font-bold">Resources</h1>
+                        <p className="text-sm mt-1">Find study materials, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
@@ -87,35 +106,26 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Your Notifications</h2>
-                    <ul className="space-y-2">
-                        {notifications.length > 0 ? (
-                            notifications.map((notification) => (
-                                <li
-                                    key={notification.id}
-                                    className={`p-2 rounded flex justify-between items-center ${
-                                        notification.read
-                                            ? 'bg-gray-100 dark:bg-gray-700'
-                                            : 'bg-indigo-50 dark:bg-indigo-900'
-                                    }`}
-                                >
-                                    <span className="text-gray-700 dark:text-gray-200">{notification.message}</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">{notification.date}</span>
-                                        {!notification.read && (
-                                            <button
-                                                onClick={() => handleMarkAsRead(notification.id)}
-                                                className="text-indigo-600 hover:underline text-sm"
-                                                aria-label={`Mark notification ${notification.message} as read`}
-                                            >
-                                                Mark as Read
-                                            </button>
-                                        )}
-                                    </div>
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Study Resources</h2>
+                    <ul className="space-y-4">
+                        {resources.length > 0 ? (
+                            resources.map((resource) => (
+                                <li key={resource.id} className="p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                    <a
+                                        href={resource.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-indigo-600 hover:underline font-medium"
+                                    >
+                                        {resource.title}
+                                    </a>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                                        {resource.description} (Subject: {resource.subject})
+                                    </p>
                                 </li>
                             ))
                         ) : (
-                            <p className="text-gray-600 dark:text-gray-300">No notifications available.</p>
+                            <p className="text-gray-600 dark:text-gray-300">No resources available.</p>
                         )}
                     </ul>
                 </div>
@@ -124,7 +134,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     );
 };
 
-Notifications.propTypes = {
+Resources.propTypes = {
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
@@ -140,4 +150,4 @@ Notifications.propTypes = {
     setNotifications: PropTypes.func.isRequired,
 };
 
-export default Notifications;
+export default Resources;
