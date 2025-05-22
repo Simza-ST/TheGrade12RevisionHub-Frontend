@@ -6,6 +6,8 @@ const Login = () => {
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
+
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         const form = event.target;
@@ -37,13 +39,15 @@ const Login = () => {
                 credentials: 'include',
             });
 
-            const data = await response.json();
+            const {token,message} = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+                throw new Error(message || `HTTP error! Status: ${response.status}`);
             }
 
-            console.log('Success:', data.message);
+            localStorage.setItem("jwt", token);
+
+            console.log('Success:', message);
             alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
