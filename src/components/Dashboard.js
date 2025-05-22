@@ -16,11 +16,11 @@ import Sidebar from './Sidebar';
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const StatsCard = ({ title, value, icon, color = 'text-indigo-600' }) => (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center space-x-4 hover:shadow-lg transition-shadow">
+const StatsCard = ({ title, value, icon, color = 'text-teal-400' }) => (
+    <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow">
         <div className={`text-3xl ${color}`}>{icon}</div>
         <div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">{title}</h3>
+            <h3 className="text-lg font-semibold text-white">{title}</h3>
             <p className={`text-2xl ${color}`}>{value}</p>
         </div>
     </div>
@@ -47,28 +47,30 @@ const CourseMastery = ({ courses }) => {
         }
         result.sort((a, b) => {
             const order = sortOrder === 'asc' ? 1 : -1;
-            return (a[sortBy] - b[sortBy]) * order;
+            return sortBy === 'progress'
+                ? (a.progress - b.progress) * order
+                : a.name.localeCompare(b.name) * order;
         });
         return result;
     }, [courses, sortBy, sortOrder, searchTerm]);
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Course Mastery</h2>
-            <div className="flex justify-between mb-4">
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Course Mastery</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                 <input
                     type="text"
                     placeholder="Search courses..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="px-3 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                    className="px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white w-full sm:w-1/2"
                     aria-label="Search courses"
                 />
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="px-3 py-1 border rounded-lg dark:bg-gray-700 dark:text-white"
+                        className="px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
                         aria-label="Sort by"
                     >
                         <option value="progress">Progress</option>
@@ -76,7 +78,7 @@ const CourseMastery = ({ courses }) => {
                     </select>
                     <button
                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                        className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        className="px-4 py-3 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700 whitespace-nowrap"
                         aria-label={`Sort order: ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
                     >
                         {sortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
@@ -86,15 +88,15 @@ const CourseMastery = ({ courses }) => {
             <div className="space-y-4">
                 {sortedCourses.map((course) => (
                     <div key={course.name} className="flex items-center space-x-4">
-                        <div className="w-1/3 text-gray-700 dark:text-gray-200">{course.name}</div>
+                        <div className="w-1/3 text-white">{course.name}</div>
                         <div className="w-2/3">
-                            <div className="bg-gray-200 dark:bg-gray-600 rounded-full h-4">
+                            <div className="bg-gray-600 rounded-full h-4">
                                 <div
-                                    className="bg-indigo-600 h-4 rounded-full transition-all duration-500"
+                                    className="bg-teal-600 h-4 rounded-full transition-all duration-500"
                                     style={{ width: `${course.progress}%` }}
                                 ></div>
                             </div>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">{course.progress}%</span>
+                            <span className="text-sm text-gray-300">{course.progress}%</span>
                         </div>
                     </div>
                 ))}
@@ -118,12 +120,12 @@ const Schedule = ({ schedule }) => {
     const [viewMode, setViewMode] = useState('list');
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Schedule</h2>
+                <h2 className="text-xl font-semibold text-white">Schedule</h2>
                 <button
                     onClick={() => setViewMode(viewMode === 'list' ? 'calendar' : 'list')}
-                    className="px-3 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    className="px-4 py-3 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
                     aria-label={`Switch to ${viewMode === 'list' ? 'calendar' : 'list'} view`}
                 >
                     {viewMode === 'list' ? 'Calendar View' : 'List View'}
@@ -137,8 +139,8 @@ const Schedule = ({ schedule }) => {
                                 key={day}
                                 className={`px-3 py-1 rounded ${
                                     selectedDay === day
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500'
+                                        ? 'bg-gradient-to-r from-teal-600 to-red-600 text-white'
+                                        : 'bg-gray-600 hover:bg-gray-500'
                                 }`}
                                 onClick={() => setSelectedDay(day)}
                                 aria-label={`Select ${day}`}
@@ -153,20 +155,20 @@ const Schedule = ({ schedule }) => {
                             .map((item) => (
                                 <div
                                     key={item.course}
-                                    className="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                    className="flex items-center justify-between p-2 bg-teal-700 rounded hover:bg-teal-600 transition"
                                     title={`Location: ${item.location}`}
                                 >
-                                    <span className="font-medium text-gray-700 dark:text-gray-200">{item.course}</span>
-                                    <span className="text-gray-600 dark:text-gray-300">{item.time}</span>
+                                    <span className="font-medium text-white">{item.course}</span>
+                                    <span className="text-gray-300">{item.time}</span>
                                 </div>
                             ))}
                         {schedule.filter((item) => item.day === selectedDay).length === 0 && (
-                            <p className="text-gray-600 dark:text-gray-300">No schedule for this day.</p>
+                            <p className="text-gray-300">No schedule for this day.</p>
                         )}
                     </div>
                 </>
             ) : (
-                <div className="text-gray-600 dark:text-gray-300">Calendar view coming soon!</div>
+                <div className="text-gray-300">Calendar view coming soon!</div>
             )}
         </div>
     );
@@ -184,27 +186,27 @@ Schedule.propTypes = {
 };
 
 const RecentActivity = ({ activities }) => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Recent Activity</h2>
+    <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+        <h2 className="text-xl font-semibold mb-4 text-white">Recent Activity</h2>
         <ul className="space-y-2 max-h-80 overflow-y-auto">
             {activities.length > 0 ? (
                 activities.map((activity) => (
                     <li
                         key={activity.id}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer"
+                        className="p-2 bg-teal-700 rounded hover:bg-teal-600 transition cursor-pointer"
                         onClick={() => console.log(`View details for: ${activity.description}`)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) => e.key === 'Enter' && console.log(`View details for: ${activity.description}`)}
                     >
-                        <span className="font-medium text-gray-700 dark:text-gray-200">{activity.description}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                        <span className="font-medium text-white">{activity.description}</span>
+                        <span className="text-sm text-gray-300 ml-2">
                             {new Date(activity.date).toLocaleString()}
                         </span>
                     </li>
                 ))
             ) : (
-                <p className="text-gray-600 dark:text-gray-300">No recent activity.</p>
+                <p className="text-gray-300">No recent activity.</p>
             )}
         </ul>
     </div>
@@ -228,29 +230,29 @@ const UpcomingDeadlines = ({ deadlines }) => {
     );
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Upcoming Deadlines</h2>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Upcoming Deadlines</h2>
             <input
                 type="text"
                 placeholder="Search deadlines..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-1 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
                 aria-label="Search deadlines"
             />
-            <ul className="space-y-2 max-h-80 overflow-y-auto">
+            <ul className="space-y-2 max-h-80 overflow-y-auto mt-4">
                 {filteredDeadlines.length > 0 ? (
                     filteredDeadlines.map((deadline) => (
                         <li
                             key={deadline.id}
-                            className="p-2 bg-gray-100 dark:bg-gray-700 rounded flex justify-between hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            className="p-2 bg-teal-700 rounded flex justify-between hover:bg-teal-600 transition"
                         >
-                            <span className="font-medium text-gray-700 dark:text-gray-200">{deadline.title}</span>
-                            <span className="text-sm text-red-500">{deadline.dueDate}</span>
+                            <span className="font-medium text-white">{deadline.title}</span>
+                            <span className="text-sm text-red-400">{deadline.dueDate}</span>
                         </li>
                     ))
                 ) : (
-                    <p className="text-gray-600 dark:text-gray-300">No upcoming deadlines.</p>
+                    <p className="text-gray-300">No upcoming deadlines.</p>
                 )}
             </ul>
         </div>
@@ -268,8 +270,8 @@ UpcomingDeadlines.propTypes = {
 };
 
 const QuickLinks = () => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Quick Links</h2>
+    <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+        <h2 className="text-xl font-semibold mb-4 text-white">Quick Links</h2>
         <div className="grid grid-cols-2 gap-4">
             {[
                 { to: '/subjects', label: 'View Subjects' },
@@ -282,7 +284,7 @@ const QuickLinks = () => (
                 <Link
                     key={link.to}
                     to={link.to}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-center transition"
+                    className="bg-gradient-to-r from-teal-600 to-red-600 text-white px-4 py-2 rounded-lg hover:from-teal-700 hover:to-red-700 text-center transition"
                 >
                     {link.label}
                 </Link>
@@ -309,20 +311,20 @@ const GoalTracker = ({ goals, setGoals }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Goal Tracker</h2>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Goal Tracker</h2>
             <div className="flex mb-4">
                 <input
                     type="text"
                     placeholder="Add a new goal..."
                     value={newGoal}
                     onChange={(e) => setNewGoal(e.target.value)}
-                    className="flex-1 p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                    className="flex-1 p-3 border border-gray-600 rounded-l-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
                     aria-label="Add a new goal"
                 />
                 <button
                     onClick={handleAddGoal}
-                    className="bg-indigo-600 text-white px-4 rounded-r-lg hover:bg-indigo-700"
+                    className="bg-gradient-to-r from-teal-600 to-red-600 text-white px-4 rounded-r-lg hover:from-teal-700 hover:to-red-700"
                     aria-label="Add goal"
                 >
                     Add
@@ -331,15 +333,15 @@ const GoalTracker = ({ goals, setGoals }) => {
             <div className="space-y-4">
                 {goals.map((goal) => (
                     <div key={goal.id} className="flex items-center space-x-4">
-                        <div className="w-2/3 text-gray-700 dark:text-gray-200">{goal.description}</div>
+                        <div className="w-2/3 text-white">{goal.description}</div>
                         <div className="w-1/3">
-                            <div className="bg-gray-200 dark:bg-gray-600 rounded-full h-4">
+                            <div className="bg-gray-600 rounded-full h-4">
                                 <div
-                                    className="bg-green-600 h-4 rounded-full"
+                                    className="bg-teal-600 h-4 rounded-full"
                                     style={{ width: `${goal.progress}%` }}
                                 ></div>
                             </div>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">{goal.progress}%</span>
+                            <span className="text-sm text-gray-300">{goal.progress}%</span>
                         </div>
                     </div>
                 ))}
@@ -367,36 +369,36 @@ const RecommendedResources = ({ resources }) => {
     );
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Recommended Resources</h2>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Recommended Resources</h2>
             <input
                 type="text"
                 placeholder="Search resources..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-1 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
                 aria-label="Search resources"
             />
-            <ul className="space-y-2 max-h-80 overflow-y-auto">
+            <ul className="space-y-2 max-h-80 overflow-y-auto mt-4">
                 {filteredResources.length > 0 ? (
                     filteredResources.map((resource) => (
                         <li
                             key={resource.id}
-                            className="p-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            className="p-2 bg-teal-700 rounded hover:bg-teal-600 transition"
                         >
                             <a
                                 href={resource.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-indigo-600 hover:underline font-medium"
+                                className="text-teal-400 hover:underline font-medium"
                             >
                                 {resource.title}
                             </a>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">{resource.description}</p>
+                            <p className="text-sm text-gray-300">{resource.description}</p>
                         </li>
                     ))
                 ) : (
-                    <p className="text-gray-600 dark:text-gray-300">No resources available.</p>
+                    <p className="text-gray-300">No resources available.</p>
                 )}
             </ul>
         </div>
@@ -421,8 +423,8 @@ const PerformanceChart = ({ courses }) => {
             {
                 label: 'Progress (%)',
                 data: courses.map((course) => course.progress),
-                backgroundColor: 'rgba(99, 102, 241, 0.6)',
-                borderColor: 'rgba(99, 102, 241, 1)',
+                backgroundColor: 'rgba(45, 212, 191, 0.6)', // teal-600 with opacity
+                borderColor: 'rgba(45, 212, 191, 1)',
                 borderWidth: 1,
             },
         ],
@@ -431,17 +433,18 @@ const PerformanceChart = ({ courses }) => {
     const options = {
         responsive: true,
         plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Course Performance' },
+            legend: { position: 'top', labels: { color: 'white' } },
+            title: { display: true, text: 'Course Performance', color: 'white' },
         },
         scales: {
-            y: { beginAtZero: true, max: 100 },
+            x: { ticks: { color: 'white' } },
+            y: { beginAtZero: true, max: 100, ticks: { color: 'white' } },
         },
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Performance Overview</h2>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Performance Overview</h2>
             <Bar data={data} options={options} />
         </div>
     );
@@ -457,26 +460,26 @@ PerformanceChart.propTypes = {
 };
 
 const NotificationsWidget = ({ notifications }) => (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Notifications</h2>
+    <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+        <h2 className="text-xl font-semibold mb-4 text-white">Notifications</h2>
         <ul className="space-y-2 max-h-80 overflow-y-auto">
             {notifications.length > 0 ? (
                 notifications.slice(0, 5).map((notification) => (
                     <li
                         key={notification.id}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                        className="p-2 bg-teal-700 rounded hover:bg-teal-600 transition"
                     >
-                        <span className="text-gray-700 dark:text-gray-200">{notification.message}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">{notification.date}</span>
+                        <span className="text-white">{notification.message}</span>
+                        <span className="text-sm text-gray-300 ml-2">{notification.date}</span>
                     </li>
                 ))
             ) : (
-                <p className="text-gray-600 dark:text-gray-300">No notifications.</p>
+                <p className="text-gray-300">No notifications.</p>
             )}
         </ul>
         <Link
             to="/notifications"
-            className="block text-center mt-4 text-indigo-600 hover:underline"
+            className="block text-center mt-4 text-teal-400 hover:underline"
         >
             View All Notifications
         </Link>
@@ -512,13 +515,13 @@ const StudyTimer = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Study Timer</h2>
-            <div className="text-4xl font-mono text-indigo-600 mb-4">{formatTime()}</div>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Study Timer</h2>
+            <div className="text-4xl font-mono text-teal-400 mb-4">{formatTime()}</div>
             <div className="flex gap-2">
                 <button
                     onClick={() => setIsActive(!isActive)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                    className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
                     aria-label={isActive ? 'Pause timer' : 'Start timer'}
                 >
                     {isActive ? 'Pause' : 'Start'}
@@ -528,7 +531,7 @@ const StudyTimer = () => {
                         setTime(25 * 60);
                         setIsActive(false);
                     }}
-                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500"
                     aria-label="Reset timer"
                 >
                     Reset
@@ -539,7 +542,7 @@ const StudyTimer = () => {
 };
 
 const MotivationalQuote = ({ quote }) => (
-    <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white p-6 rounded-lg shadow-md text-center">
+    <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl text-center">
         <p className="text-lg font-semibold">"{quote.text}"</p>
         <p className="text-sm mt-2">— {quote.author}</p>
     </div>
@@ -557,20 +560,20 @@ const ProgressOverview = ({ courses }) => {
         courses.reduce((sum, course) => sum + course.progress, 0) / courses.length || 0;
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Progress Overview</h2>
+        <div className="bg-teal-800 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">Progress Overview</h2>
             <div className="flex items-center space-x-4">
                 <div className="w-1/2">
-                    <div className="bg-gray-200 dark:bg-gray-600 rounded-full h-6">
+                    <div className="bg-gray-600 rounded-full h-6">
                         <div
-                            className="bg-indigo-600 h-6 rounded-full"
+                            className="bg-teal-600 h-6 rounded-full"
                             style={{ width: `${averageProgress}%` }}
                         ></div>
                     </div>
                 </div>
                 <div className="w-1/2 text-center">
-                    <p className="text-2xl font-semibold text-indigo-600">{averageProgress.toFixed(1)}%</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Overall Progress</p>
+                    <p className="text-2xl font-semibold text-teal-400">{averageProgress.toFixed(1)}%</p>
+                    <p className="text-sm text-gray-300">Overall Progress</p>
                 </div>
             </div>
         </div>
@@ -674,8 +677,8 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"></div>
             </div>
         );
     }
@@ -683,7 +686,7 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
@@ -694,18 +697,17 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
                 className={`
                     flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
                     ${isCollapsed ? 'ml-16' : 'ml-64'}
-                    ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}
                 `}
             >
-                <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
+                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold">Dashboard</h1>
-                        <p className="text-sm mt-1">Welcome, {user.name}!</p>
+                        <p className="text-sm mt-1 text-gray-300">Welcome, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
                             to="/notifications"
-                            className="relative px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label={`View notifications (${notificationCount} unread)`}
                         >
                             🔔
@@ -717,7 +719,7 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
                         </Link>
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label="Toggle dark mode"
                         >
                             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
@@ -730,7 +732,7 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
                         <StatsCard title="Performance" value={stats.performance} icon="📊" />
                         <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
                         <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
-                        <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" color="text-green-600" />
+                        <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" color="text-teal-400" />
                     </div>
                     <div className="md:col-span-4">
                         <ProgressOverview courses={courses} />

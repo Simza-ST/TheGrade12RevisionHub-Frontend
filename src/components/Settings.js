@@ -17,7 +17,6 @@ const Settings = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate fetching settings
         setTimeout(() => {
             try {
                 setLoading(false);
@@ -38,8 +37,8 @@ const Settings = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"></div>
             </div>
         );
     }
@@ -47,29 +46,29 @@ const Settings = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
+                darkMode={darkMode}
             />
             <div
                 className={`
                     flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
                     ${isCollapsed ? 'ml-16' : 'ml-64'}
-                    ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}
                 `}
             >
-                <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
+                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold">Settings</h1>
-                        <p className="text-sm mt-1">Customize your experience, {user.name}!</p>
+                        <p className="text-sm mt-1 text-gray-300">Customize your experience, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
                             to="/notifications"
-                            className="relative px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label={`View notifications (${notificationCount} unread)`}
                         >
                             🔔
@@ -81,52 +80,52 @@ const Settings = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                         </Link>
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label="Toggle dark mode"
                         >
                             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                         </button>
                     </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">User Settings</h2>
+                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
+                    <h2 className="text-xl font-semibold mb-4 text-white">User Settings</h2>
                     <div className="space-y-4">
                         <div>
-                            <label className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
+                            <label className="flex items-center space-x-2 text-white">
                                 <input
                                     type="checkbox"
                                     checked={darkMode}
                                     onChange={() => setDarkMode(!darkMode)}
-                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                                    className="h-4 w-4 text-teal-600 focus:ring-teal-400"
                                 />
                                 <span>Enable Dark Mode</span>
                             </label>
                         </div>
                         <div>
-                            <label className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
+                            <label className="flex items-center space-x-2 text-white">
                                 <input
                                     type="checkbox"
                                     checked={settings.emailNotifications}
                                     onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
-                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                                    className="h-4 w-4 text-teal-600 focus:ring-teal-400"
                                 />
                                 <span>Enable Email Notifications</span>
                             </label>
                         </div>
                         <div>
-                            <label className="flex items-center space-x-2 text-gray-700 dark:text-gray-200">
+                            <label className="flex items-center space-x-2 text-white">
                                 <input
                                     type="checkbox"
                                     checked={settings.pushNotifications}
                                     onChange={(e) => handleSettingChange('pushNotifications', e.target.checked)}
-                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                                    className="h-4 w-4 text-teal-600 focus:ring-teal-400"
                                 />
                                 <span>Enable Push Notifications</span>
                             </label>
                         </div>
                         <button
                             onClick={() => alert('Settings saved!')}
-                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                            className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
                         >
                             Save Settings
                         </button>
