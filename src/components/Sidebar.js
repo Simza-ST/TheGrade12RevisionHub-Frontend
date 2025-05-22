@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import './sidebar.css';
 
 // UserProfile component for sidebar
 const UserProfile = ({ user, onLogout }) => {
@@ -79,7 +80,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
                     </svg>
                 </button>
             </div>
-            <ul className="space-y-2 flex-1 px-2">
+            <ul className="space-y-2 flex-1 px-2 overflow-auto hide-scrollbar">
                 {navItems.map((item) => (
                     <li key={item.name}>
                         <Link
