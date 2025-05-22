@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar'; // Adjust path as needed
+import { useNavigate, Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import Sidebar from './Sidebar';
 
-const Chatroom = () => {
+const Chatroom = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [loading, setLoading] = useState(true);
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
@@ -13,30 +15,34 @@ const Chatroom = () => {
     });
 
     useEffect(() => {
-        // Mock data for UI development
         const mockMessages = [
-            { id: 1, message: 'Hey, anyone studied for the Math quiz?', sender: 'John', date: '2025-05-20T10:00:00Z' },
-            { id: 2, message: 'Yes, I have some notes to share!', sender: 'Jane', date: '2025-05-20T10:05:00Z' },
+            { id: 1, user: 'John Doe', text: 'Anyone studying for the Math quiz?', timestamp: '2025-05-20 10:00' },
+            { id: 2, user: 'Jane Smith', text: 'Yes, I’m reviewing calculus now!', timestamp: '2025-05-20 10:05' },
         ];
 
         setTimeout(() => {
             try {
                 setMessages(mockMessages);
+                setLoading(false);
             } catch (error) {
                 console.error('Error setting mock messages:', error);
             }
-        }, 1000); // Simulate API delay
+        }, 1000);
     }, []);
 
     const handleSendMessage = () => {
-        const newMsg = {
-            id: messages.length + 1,
-            message: newMessage,
-            sender: user.name,
-            date: new Date().toISOString(),
-        };
-        setMessages([...messages, newMsg]);
-        setNewMessage('');
+        if (newMessage.trim()) {
+            setMessages([
+                ...messages,
+                {
+                    id: messages.length + 1,
+                    user: user.name,
+                    text: newMessage,
+                    timestamp: new Date().toLocaleString(),
+                },
+            ]);
+            setNewMessage('');
+        }
     };
 
     const handleLogout = () => {
@@ -44,39 +50,86 @@ const Chatroom = () => {
         navigate('/login');
     };
 
+    if (loading) {
+        return (
+            <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    const notificationCount = notifications.filter((n) => !n.read).length;
+
     return (
-        <div className="flex min-h-screen bg-gray-100">
-            <Sidebar user={user} onLogout={handleLogout} />
-            <div className="p-8 w-full transition-all duration-300 ml-64 sm:ml-64 lg:ml-64 xl:ml-64">
-                <h1 className="text-3xl font-bold mb-6">Chatroom</h1>
-                <div className="bg-white p-6 rounded-lg shadow-md h-[calc(100vh-12rem)] flex flex-col">
-                    <h2 className="text-xl font-semibold mb-4">Messages</h2>
-                    <div className="flex-1 overflow-y-auto space-y-2">
+        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+            <Sidebar
+                user={user}
+                onLogout={handleLogout}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
+            />
+            <div
+                className={`
+                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+                    ${isCollapsed ? 'ml-16' : 'ml-64'}
+                    ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}
+                `}
+            >
+                <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">Chatroom</h1>
+                        <p className="text-sm mt-1">Connect with peers, {user.name}!</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link
+                            to="/notifications"
+                            className="relative px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            aria-label={`View notifications (${notificationCount} unread)`}
+                        >
+                            🔔
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {notificationCount}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            onClick={() => setDarkMode(!darkMode)}
+                            className="px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            aria-label="Toggle dark mode"
+                        >
+                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        </button>
+                    </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Study Group Chat</h2>
+                    <div className="max-h-96 overflow-y-auto mb-4">
                         {messages.length > 0 ? (
-                            messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className="p-2 bg-gray-100 rounded flex justify-between"
-                                >
-                                    <span>{msg.message}</span>
-                                    <span className="text-sm text-gray-500">{msg.sender}</span>
+                            messages.map((message) => (
+                                <div key={message.id} className="p-2 border-b border-gray-200 dark:border-gray-700">
+                                    <span className="font-medium text-gray-700 dark:text-gray-200">{message.user}: </span>
+                                    <span className="text-gray-600 dark:text-gray-300">{message.text}</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400 block">{message.timestamp}</span>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-600">No messages yet.</p>
+                            <p className="text-gray-600 dark:text-gray-300">No messages yet.</p>
                         )}
                     </div>
-                    <div className="mt-4 flex">
+                    <div className="flex gap-2">
                         <input
                             type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
-                            className="flex-1 p-2 rounded-l border border-gray-300"
                             placeholder="Type a message..."
+                            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                            aria-label="Type a message"
                         />
                         <button
                             onClick={handleSendMessage}
-                            className="bg-indigo-600 text-white px-4 rounded-r"
+                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                            aria-label="Send message"
                         >
                             Send
                         </button>
@@ -85,6 +138,22 @@ const Chatroom = () => {
             </div>
         </div>
     );
+};
+
+Chatroom.propTypes = {
+    isCollapsed: PropTypes.bool.isRequired,
+    setIsCollapsed: PropTypes.func.isRequired,
+    darkMode: PropTypes.bool.isRequired,
+    setDarkMode: PropTypes.func.isRequired,
+    notifications: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+            read: PropTypes.bool.isRequired,
+        })
+    ).isRequired,
+    setNotifications: PropTypes.func.isRequired,
 };
 
 export default Chatroom;

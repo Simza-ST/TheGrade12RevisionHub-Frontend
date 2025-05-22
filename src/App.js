@@ -1,108 +1,164 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Outlet, useLocation } from 'react-router-dom';
-import './App.css';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import About from './components/About';
-import Skills from './components/Skills';
-import Services from './components/Services';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import ScrollButton from './components/ScrollButton';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
-import Signup from './components/Signup';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import FileUploader from './components/FileUploader';
 import Dashboard from './components/Dashboard';
-import Subjects from './components/Subjects'; // New component
-import Quizzes from './components/Quizzes'; // New component
-import QuestionPapers from './components/QuestionPapers'; // New component
-import Schedule from './components/Schedule'; // New component
-import Performance from './components/Performance'; // New component
-import Notifications from './components/Notifications'; // New component
-import Chatroom from './components/Chatroom'; // New component
+import Subjects from './components/Subjects';
+import Quizzes from './components/Quizzes';
+import QuestionPapers from './components/QuestionPapers';
+import Resources from './components/Resources';
+import Schedule from './components/Schedule';
+import Performance from './components/Performance';
+import Notifications from './components/Notifications';
+import Chatroom from './components/Chatroom';
 import Settings from './components/Settings';
-import Resources from "./components/Resources"; // New component
 
-// Layout with Navbar for public pages
-const PublicLayout = () => (
-    <>
-        <Navbar />
-        <Outlet />
-    </>
-);
+const App = () => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+    const [notifications, setNotifications] = useState([
+        { id: 1, message: 'New quiz available in Mathematics', date: '2025-05-20', read: false },
+        { id: 2, message: 'Assignment due in Physics', date: '2025-05-21', read: false },
+        { id: 3, message: 'Study group meeting scheduled', date: '2025-05-19', read: true },
+    ]);
 
-// Layout without Navbar for auth/dashboard pages
-const AuthLayout = () => <Outlet />;
-
-function App() {
-    const location = useLocation();
-    const noNavbarRoutes = [
-        '/login',
-        '/signup',
-        '/forgot-password',
-        '/reset-password',
-        '/dashboard',
-        '/subjects',
-        '/quizzes',
-        '/questionpapers',
-        '/resources',
-        '/schedule',
-        '/performance',
-        '/notifications',
-        '/chatroom',
-        '/settings',
-    ];
-    const hasNavbar = !noNavbarRoutes.includes(location.pathname);
-
-    return (
-        <div className={`App ${hasNavbar ? 'has-navbar' : ''}`}>
-            <Routes>
-                <Route element={<PublicLayout />}>
-                    <Route
-                        path="/"
-                        element={
-                            <>
-                                <Home />
-                                <About />
-                                <Skills />
-                                <Services />
-                                <Contact />
-                                <Footer />
-                                <ScrollButton />
-                            </>
-                        }
-                    />
-                    <Route path="/upload" element={<FileUploader />} />
-                </Route>
-                <Route element={<AuthLayout />}>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/subjects" element={<Subjects />} />
-                    <Route path="/quizzes" element={<Quizzes />} />
-                    <Route path="/questionpapers" element={<QuestionPapers />} />
-                    <Route path="/resources" element={<Resources />} />
-                    <Route path="/schedule" element={<Schedule />} />
-                    <Route path="/performance" element={<Performance />} />
-                    <Route path="/notifications" element={<Notifications />} />
-                    <Route path="/chatroom" element={<Chatroom />} />
-                    <Route path="/settings" element={<Settings />} />
-                </Route>
-            </Routes>
-        </div>
-    );
-}
-
-function AppWrapper() {
     return (
         <Router>
-            <App />
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <Dashboard
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/subjects"
+                    element={
+                        <Subjects
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/quizzes"
+                    element={
+                        <Quizzes
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/questionpapers"
+                    element={
+                        <QuestionPapers
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/resources"
+                    element={
+                        <Resources
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/schedule"
+                    element={
+                        <Schedule
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/performance"
+                    element={
+                        <Performance
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/notifications"
+                    element={
+                        <Notifications
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/chatroom"
+                    element={
+                        <Chatroom
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/settings"
+                    element={
+                        <Settings
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route path="/" element={<Login />} />
+            </Routes>
         </Router>
     );
-}
+};
 
-export default AppWrapper;
+export default App;

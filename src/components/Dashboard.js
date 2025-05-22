@@ -11,112 +11,7 @@ import {
     Legend,
 } from 'chart.js';
 import PropTypes from 'prop-types';
-
-// UserProfile component for sidebar
-const UserProfile = ({ user, onLogout }) => {
-    if (!user) {
-        return null; // Don't render if user is undefined
-    }
-
-    return (
-        <div className="flex items-center space-x-4 p-4 bg-indigo-900 rounded-lg">
-            <img
-                src={user.profilePicture || '/default-avatar.png'}
-                alt="Profile"
-                className="w-10 h-10 rounded-full"
-            />
-            <div className="flex-1">
-                <h2 className="text-sm font-semibold text-white">{user.name || 'Unknown User'}</h2>
-                <p className="text-xs text-gray-300">{user.title || 'No Title'}</p>
-            </div>
-        </div>
-    );
-};
-
-UserProfile.propTypes = {
-    user: PropTypes.shape({
-        name: PropTypes.string,
-        title: PropTypes.string,
-        profilePicture: PropTypes.string,
-    }),
-    onLogout: PropTypes.func.isRequired,
-};
-
-// Sidebar component with collapsible design and navigation tabs
-const Sidebar = ({ user, onLogout, isSidebarVisible, setIsSidebarVisible }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
-    const navItems = [
-        { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-        { name: 'Subjects', path: '/subjects', icon: '📚' },
-        { name: 'Quizzes', path: '/quizzes', icon: '❓' },
-        { name: 'Question Papers', path: '/questionpapers', icon: '📝' },
-        { name: 'Resources', path: '/resources', icon: '🔗' },
-        { name: 'Schedule', path: '/schedule', icon: '📅' },
-        { name: 'Performance', path: '/performance', icon: '📊' },
-        { name: 'Notifications', path: '/notifications', icon: '🔔' },
-        { name: 'Chatroom', path: '/chatroom', icon: '💬' },
-        { name: 'Settings', path: '/settings', icon: '⚙️' },
-        { name: 'Logout', path: '/', icon: '🚪', onClick: onLogout },
-    ];
-
-    return (
-        <nav
-            className={`h-screen bg-indigo-800 text-white flex flex-col p-4 fixed top-0 left-0 transition-all duration-300 ${
-                isSidebarVisible ? 'translate-x-0' : '-translate-x-full'
-            } md:translate-x-0 ${isCollapsed ? 'w-16' : 'w-64'} z-50`}
-        >
-            <div className="flex items-center justify-between mb-8">
-                {!isCollapsed && (
-                    <div className="text-2xl font-bold">RevisionHub</div>
-                )}
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="p-2 rounded hover:bg-indigo-600"
-                    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                >
-                    {isCollapsed ? '➡️' : '⬅️'}
-                </button>
-            </div>
-            <ul className="space-y-2 flex-1">
-                {navItems.map((item) => (
-                    <li key={item.name} className="flex items-center">
-                        <Link
-                            to={item.path}
-                            onClick={item.onClick || (() => setIsSidebarVisible(false))} // Close sidebar on mobile
-                            className={`flex items-center w-full py-2 px-4 rounded hover:bg-indigo-600 ${
-                                isCollapsed ? 'justify-center' : ''
-                            }`}
-                            title={isCollapsed ? item.name : ''}
-                            aria-label={`Navigate to ${item.name}`}
-                        >
-                            <span className="text-lg">{item.icon}</span>
-                            {!isCollapsed && (
-                                <span className="ml-3">{item.name}</span>
-                            )}
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-            {!isCollapsed && (
-                <div className="mt-auto">
-                    <UserProfile user={user} onLogout={onLogout} />
-                </div>
-            )}
-        </nav>
-    );
-};
-
-Sidebar.propTypes = {
-    user: PropTypes.shape({
-        name: PropTypes.string,
-        title: PropTypes.string,
-        profilePicture: PropTypes.string,
-    }),
-    onLogout: PropTypes.func.isRequired,
-    isSidebarVisible: PropTypes.bool.isRequired,
-    setIsSidebarVisible: PropTypes.func.isRequired,
-};
+import Sidebar from './Sidebar';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -304,8 +199,8 @@ const RecentActivity = ({ activities }) => (
                     >
                         <span className="font-medium text-gray-700 dark:text-gray-200">{activity.description}</span>
                         <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-              {new Date(activity.date).toLocaleString()}
-            </span>
+                            {new Date(activity.date).toLocaleString()}
+                        </span>
                     </li>
                 ))
             ) : (
@@ -691,11 +586,9 @@ ProgressOverview.propTypes = {
     ).isRequired,
 };
 
-const Dashboard = () => {
+const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
-    const [isSidebarVisible, setIsSidebarVisible] = useState(false);
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
@@ -713,11 +606,9 @@ const Dashboard = () => {
     const [deadlines, setDeadlines] = useState([]);
     const [goals, setGoals] = useState([]);
     const [resources, setResources] = useState([]);
-    const [notifications, setNotifications] = useState([]);
     const [quote, setQuote] = useState({ text: '', author: '' });
 
     useEffect(() => {
-        // Simulate API fetch
         setTimeout(() => {
             setCourses([
                 { name: 'Advance Calculus', progress: 86 },
@@ -768,11 +659,6 @@ const Dashboard = () => {
                     description: 'Articles on historical events',
                 },
             ]);
-            setNotifications([
-                { id: 1, message: 'New quiz available in Mathematics', date: '2025-05-20' },
-                { id: 2, message: 'Assignment due in Physics', date: '2025-05-21' },
-                { id: 3, message: 'Study group meeting scheduled', date: '2025-05-19' },
-            ]);
             setQuote({
                 text: 'Education is the most powerful weapon you can use to change the world.',
                 author: 'Nelson Mandela',
@@ -794,64 +680,51 @@ const Dashboard = () => {
         );
     }
 
+    const notificationCount = notifications.filter((n) => !n.read).length;
+
     return (
-        <div className={`flex min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>
+        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
-                isSidebarVisible={isSidebarVisible}
-                setIsSidebarVisible={setIsSidebarVisible}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
             />
             <div
-                className={`p-8 w-full transition-all duration-300 ${
-                    isSidebarVisible ? 'md:ml-64 md:ml-16' : 'ml-0 md:ml-16'
-                } ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`}
+                className={`
+                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+                    ${isCollapsed ? 'ml-16' : 'ml-64'}
+                    ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}
+                `}
             >
-                {/* Welcome Banner */}
                 <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                            className="md:hidden px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-gray-100"
-                            aria-label={isSidebarVisible ? 'Hide sidebar' : 'Show sidebar'}
-                        >
-                            ☰
-                        </button>
-                        <div>
-                            <h1 className="text-3xl font-bold">Welcome, {user.name}!</h1>
-                            <p className="text-sm mt-1">Ready to conquer your studies today?</p>
-                        </div>
+                    <div>
+                        <h1 className="text-3xl font-bold">Dashboard</h1>
+                        <p className="text-sm mt-1">Welcome, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
                             to="/notifications"
-                            className="relative px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-gray-100"
-                            aria-label={`View notifications (${notifications.length} new)`}
+                            className="relative px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                            aria-label={`View notifications (${notificationCount} unread)`}
                         >
                             🔔
-                            {notifications.length > 0 && (
+                            {notificationCount > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {notifications.length}
-                </span>
+                                    {notificationCount}
+                                </span>
                             )}
                         </Link>
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-gray-100"
+                            className="px-4 py-2 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
                             aria-label="Toggle dark mode"
                         >
                             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                         </button>
-                        <Link
-                            to="/subjects"
-                            className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-gray-100"
-                        >
-                            Start Studying
-                        </Link>
                     </div>
                 </div>
 
-                {/* Stats and Progress Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
                         <StatsCard title="Performance" value={stats.performance} icon="📊" />
@@ -864,39 +737,50 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Main Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <CourseMastery courses={courses} />
                     <Schedule schedule={schedule} />
                     <PerformanceChart courses={courses} />
                 </div>
 
-                {/* Secondary Content */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <RecentActivity activities={activities} />
                     <UpcomingDeadlines deadlines={deadlines} />
                 </div>
 
-                {/* Additional Widgets */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <GoalTracker goals={goals} setGoals={setGoals} />
                     <RecommendedResources resources={resources} />
                     <NotificationsWidget notifications={notifications} />
                 </div>
 
-                {/* Study Tools and Motivation */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <StudyTimer />
                     <MotivationalQuote quote={quote} />
                 </div>
 
-                {/* Quick Links */}
                 <div className="mt-6">
                     <QuickLinks />
                 </div>
             </div>
         </div>
     );
+};
+
+Dashboard.propTypes = {
+    isCollapsed: PropTypes.bool.isRequired,
+    setIsCollapsed: PropTypes.func.isRequired,
+    darkMode: PropTypes.bool.isRequired,
+    setDarkMode: PropTypes.func.isRequired,
+    notifications: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+            read: PropTypes.bool.isRequired,
+        })
+    ).isRequired,
+    setNotifications: PropTypes.func.isRequired,
 };
 
 export default Dashboard;
