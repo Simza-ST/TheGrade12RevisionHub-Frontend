@@ -1,66 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import Sidebar from './Sidebar';
 
-
-/*const Notifications = () => {
-    const [notifications, setNotifications] = useState([]);
-    const [filterType, setFilterType] = useState('all'); // Filter state
-    const [loading, setLoading] = useState(false); // Loading state
-    const [error, setError] = useState(null); // Error state*/
 const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [filterType, setFilterType] = useState('all');
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
         profilePicture: null,
     });
 
-    // Fetch notifications
+    // Fetch notifications from API
     useEffect(() => {
         const fetchNotifications = async () => {
+            console.log('Loading started');
             setLoading(true);
-            setError(null); // Reset error state
+            setError(null);
             try {
                 const token = localStorage.getItem('jwt');
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                };
-                const response = await fetch('/api/notifications', { headers });
-                if (response.ok) {
-                    const data = await response.json();
-                    setNotifications(data);
+                if (!token) {
+                    setError('No authentication token found. Please log in.');
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
                 } else {
-                    setError('Failed to fetch notifications');
+                    const headers = {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    };
+                    const response = await fetch('/api/notifications', { headers });
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Fetched Notifications:', data);
+                        const normalizedData = data.map((notification) => ({
+                            ...notification,
+                            type: notification.type || 'info',
+                        }));
+                        setNotifications(normalizedData);
+                    } else {
+                        setError(`Failed to fetch notifications: ${response.status} ${response.statusText}`);
+                    }
                 }
             } catch (error) {
-                setError('Error fetching notifications');
+                setError(`Error fetching notifications: ${error.message}`);
                 console.error('Error fetching notifications:', error);
             } finally {
                 setLoading(false);
+                console.log('Loading ended');
             }
         };
         fetchNotifications();
-    }, []);
+    }, [setNotifications]);
 
-    // Calculate notification counts
-    const totalNotifications = notifications.length;
-    const unreadNotifications = notifications.filter(n => !n.read).length;
-    const readNotifications = notifications.filter(n => n.read).length;
+    useEffect(() => {
+        console.log('Current Notifications State:', notifications);
+    }, [notifications]);
 
-    // Filter notifications by type
-    const filteredNotifications = filterType === 'all'
-        ? notifications
-        : notifications.filter(n => n.type === filterType);
+    const handleLogout = () => {
+        localStorage.removeItem('jwt');
+        navigate('/login');
+    };
 
-    // Mark a single notification as read
     const markAsRead = async (id) => {
         try {
             const token = localStorage.getItem('jwt');
+            if (!token) {
+                setError('No authentication token found');
+                return;
+            }
             const headers = {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -71,7 +81,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 body: JSON.stringify({ read: true }),
             });
             if (response.ok) {
-                setNotifications(notifications.map(n =>
+                setNotifications(notifications.map((n) =>
                     n.id === id ? { ...n, read: true } : n
                 ));
             } else {
@@ -83,10 +93,13 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         }
     };
 
-    // Mark all notifications as read
     const markAllAsRead = async () => {
         try {
             const token = localStorage.getItem('jwt');
+            if (!token) {
+                setError('No authentication token found');
+                return;
+            }
             const headers = {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -97,7 +110,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 body: JSON.stringify({ read: true }),
             });
             if (response.ok) {
-                setNotifications(notifications.map(n => ({ ...n, read: true })));
+                setNotifications(notifications.map((n) => ({ ...n, read: true })));
             } else {
                 setError('Failed to mark all notifications as read');
             }
@@ -107,10 +120,13 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         }
     };
 
-    // Delete a single notification
     const deleteNotification = async (id) => {
         try {
             const token = localStorage.getItem('jwt');
+            if (!token) {
+                setError('No authentication token found');
+                return;
+            }
             const headers = {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -120,7 +136,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 headers,
             });
             if (response.ok) {
-                setNotifications(notifications.filter(n => n.id !== id));
+                setNotifications(notifications.filter((n) => n.id !== id));
             } else {
                 setError('Failed to delete notification');
             }
@@ -130,11 +146,14 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         }
     };
 
-    // Delete all notifications
     const deleteAllNotifications = async () => {
         if (window.confirm('Are you sure you want to delete all notifications?')) {
             try {
                 const token = localStorage.getItem('jwt');
+                if (!token) {
+                    setError('No authentication token found');
+                    return;
+                }
                 const headers = {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -155,17 +174,87 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         }
     };
 
+    const totalNotifications = notifications.length;
+    const unreadNotifications = notifications.filter((n) => !n.read).length;
+    const readNotifications = notifications.filter((n) => n.read).length;
+    const filteredNotifications = filterType === 'all'
+        ? notifications
+        : notifications.filter((n) => n.type === filterType);
+
+    if (loading) {
+        return (
+            <>
+                <style>
+                    {`
+                        .custom-spin {
+                            animation: custom-spin 1s linear infinite;
+                            border-radius: 50%;
+                            height: 3rem;
+                            width: 3rem;
+                            border-top: 2px solid #2dd4bf;
+                            border-bottom: 2px solid #2dd4bf;
+                        }
+                        @keyframes custom-spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    `}
+                </style>
+                <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
+                    <div className="custom-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"></div>
+                </div>
+            </>
+        );
+    }
+
     return (
-        <div className="flex min-h-screen bg-gray-100">
-            <Sidebar />
-            <div className="ml-64 p-8 w-full">
-                <h1 className="text-3xl font-bold mb-6">Notifications</h1>
-                <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+            <Sidebar
+                user={user}
+                onLogout={handleLogout}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
+                darkMode={darkMode}
+            />
+            <div
+                className={`
+                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+                    ${isCollapsed ? 'ml-16' : 'ml-64'}
+                `}
+            >
+                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">Notifications</h1>
+                        <p className="text-sm mt-1 text-gray-300">Stay updated, {user.name}!</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link
+                            to="/notifications"
+                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            aria-label={`View notifications (${unreadNotifications} unread)`}
+                        >
+                            🔔
+                            {unreadNotifications > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {unreadNotifications}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            onClick={() => setDarkMode(!darkMode)}
+                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            aria-label="Toggle dark mode"
+                        >
+                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        </button>
+                    </div>
+                </div>
+                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold">Your Notifications</h2>
+                        <h2 className="text-xl font-semibold text-white">Your Notifications</h2>
                         <div className="flex items-center gap-4">
                             <select
-                                className="border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="border rounded-lg px-2 py-1 text-sm text-white bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 value={filterType}
                                 onChange={(e) => setFilterType(e.target.value)}
                             >
@@ -175,8 +264,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                                 <option value="error">Error</option>
                             </select>
                             <button
-                                onClick={markAllAsRead}//transition-all duration-200
-                                className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg  hover:bg-blue-700 transition transform hover:-translate-y-1 "
+                                onClick={markAllAsRead}
+                                className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition transform hover:-translate-y-1"
                                 style={{ boxShadow: '2px 6px 15px rgba(0, 0, 200, 0.4)' }}
                                 disabled={unreadNotifications === 0}
                             >
@@ -192,8 +281,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             </button>
                         </div>
                     </div>
-
-                    {/* Notification Summary */}
+                    {error && <p className="text-red-400 mb-4">{error}</p>}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         <p className="bg-red-100 text-red-800 font-semibold py-2 px-4 rounded-lg hover:bg-red-200 transition">
                             Total Notifications: {totalNotifications}
@@ -205,62 +293,58 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             Read Notifications: {readNotifications}
                         </p>
                     </div>
-
-                    {/* Notification List */}
-                    {loading ? (
-                        <p className="text-gray-600">Loading notifications...</p>
-                    ) : error ? (
-                        <p className="text-red-600">{error}</p>
-                    ) : filteredNotifications.length > 0 ? (
-                        <ul className="space-y-2">
-                            {filteredNotifications.map((notification) => (
+                    <ul className="space-y-2">
+                        {filteredNotifications.length > 0 ? (
+                            filteredNotifications.map((notification) => (
                                 <li
                                     key={notification.id}
-                                    className={`p-2 rounded-lg flex justify-between items-center ${
-                                        notification.read ? 'bg-gray-100' : 'bg-blue-50'
-                                    } hover:bg-gray-200 transition`}
+                                    className={`p-2 rounded flex justify-between items-center ${
+                                        notification.read ? 'bg-teal-700' : 'bg-teal-600'
+                                    }`}
                                 >
                                     <div className="flex items-center gap-2">
-                    <span
-                        className={`text-sm font-medium ${
-                            notification.type === 'info'
-                                ? 'text-blue-600'
-                                : notification.type === 'warning'
-                                    ? 'text-yellow-600'
-                                    : 'text-red-600'
-                        }`}
-                    >
-                      [{notification.type.toUpperCase()}]
-                    </span>
-                                        <span className={notification.read ? 'text-gray-600' : 'text-blue-800 font-medium'}>
-                      {notification.message}
-                    </span>
+                                        <span
+                                            className={`text-sm font-medium ${
+                                                notification.type === 'info'
+                                                    ? 'text-blue-400'
+                                                    : notification.type === 'warning'
+                                                        ? 'text-yellow-400'
+                                                        : notification.type === 'error'
+                                                            ? 'text-red-400'
+                                                            : 'text-gray-400'
+                                            }`}
+                                        >
+                                            [{notification.type ? notification.type.toUpperCase() : 'UNKNOWN'}]
+                                        </span>
+                                        <span className="text-white">{notification.message}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">
-                      {new Date(notification.date).toLocaleString()}
-                    </span>
+                                        <span className="text-sm text-gray-300">
+                                            {new Date(notification.date).toLocaleString()}
+                                        </span>
                                         {!notification.read && (
                                             <button
                                                 onClick={() => markAsRead(notification.id)}
-                                                className="text-sm text-blue-600 hover:underline"
+                                                className="text-sm text-teal-400 hover:underline"
+                                                aria-label={`Mark notification ${notification.message} as read`}
                                             >
                                                 Mark as Read
                                             </button>
                                         )}
                                         <button
                                             onClick={() => deleteNotification(notification.id)}
-                                            className="text-sm text-red-600 hover:underline"
+                                            className="text-sm text-red-400 hover:underline"
+                                            aria-label={`Delete notification ${notification.message}`}
                                         >
                                             Delete
                                         </button>
                                     </div>
                                 </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="text-gray-600">No notifications available.</p>
-                    )}
+                            ))
+                        ) : (
+                            <p className="text-gray-300">No notifications available.</p>
+                        )}
+                    </ul>
                 </div>
             </div>
         </div>
@@ -278,6 +362,7 @@ Notifications.propTypes = {
             message: PropTypes.string.isRequired,
             date: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
+            type: PropTypes.oneOf(['info', 'warning', 'error', undefined]),
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
