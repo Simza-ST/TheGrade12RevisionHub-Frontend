@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
-const Login = () => {
+const Login = ({ setIsAuthenticated }) => {
     const [error, setError] = useState('');
-
+    const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
-
-
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -36,27 +35,21 @@ const Login = () => {
                     email,
                     password,
                 }),
-                credentials: 'include',
             });
 
-            const {token,message} = await response.json();
+            const { token, message } = await response.json();
 
             if (!response.ok) {
                 throw new Error(message || `HTTP error! Status: ${response.status}`);
             }
 
-            localStorage.setItem("jwt", token);
-
+            localStorage.setItem('jwt', token);
+            setIsAuthenticated(true); // Update authentication state
             console.log('Success:', message);
             alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
-            try {
-                window.location.href = '/dashboard';
-            } catch (navError) {
-                console.error('Navigation error:', navError);
-                setError('Failed to redirect to dashboard. Please try again.');
-            }
+            navigate('/dashboard'); // Navigate to dashboard
         } catch (error) {
             console.error('Fetch error:', error);
             setError(error.message || 'An error occurred during login. Please try again.');
@@ -158,6 +151,10 @@ const Login = () => {
             </div>
         </div>
     );
+};
+
+Login.propTypes = {
+    setIsAuthenticated: PropTypes.func.isRequired,
 };
 
 export default Login;
