@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from './Sidebar';
 
-const API_BASE_URL = 'http://localhost:6262/user';
+const API_BASE_URL = 'http://localhost:6262/user'; // Note: Likely needs to be '/api'
 
 const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
     const [questionPapers, setQuestionPapers] = useState([]);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
+    const [selectedYear, setSelectedYear] = useState(''); // New state for year filter
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pdfUrl, setPdfUrl] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
+    const [currentPaper, setCurrentPaper] = useState(null);
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
@@ -110,6 +113,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     }, [selectedSubject]);
 
     const viewPdf = async (paperId) => {
+        setPdfLoading(true);
         try {
             const token = localStorage.getItem('jwt');
             if (!token) {
@@ -131,13 +135,17 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
             const url = window.URL.createObjectURL(blob);
             setPdfUrl(url);
             setShowModal(true);
+            setCurrentPaper(questionPapers.find(p => p.id === paperId));
         } catch (err) {
             setError(`Error viewing PDF: ${err.message}`);
             console.error('Error viewing PDF:', err);
+        } finally {
+            setPdfLoading(false);
         }
     };
 
     const downloadPdf = async (paperId, fileName) => {
+        setPdfLoading(true);
         try {
             const token = localStorage.getItem('jwt');
             if (!token) {
@@ -167,16 +175,27 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
         } catch (err) {
             setError(`Error downloading PDF: ${err.message}`);
             console.error('Error downloading PDF:', err);
+        } finally {
+            setPdfLoading(false);
         }
     };
 
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         setShowModal(false);
         setPdfUrl(null);
+        setCurrentPaper(null);
         if (pdfUrl) {
             window.URL.revokeObjectURL(pdfUrl);
         }
-    };
+    }, [pdfUrl]);
+
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape' && showModal) closeModal();
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [showModal, closeModal]);
 
     const handleLogout = () => {
         localStorage.removeItem('jwt');
@@ -185,8 +204,24 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
     const handleSubjectChange = (e) => {
         setSelectedSubject(e.target.value);
+        setSelectedYear(''); // Reset year when subject changes
         setError(null);
     };
+
+    const handleYearChange = (e) => {
+        setSelectedYear(e.target.value);
+        setError(null);
+    };
+
+    // Extract unique years for dropdown
+    const years = [...new Set(questionPapers.map(paper => paper.year))].sort();
+
+    // Filter papers by subject and year
+    const filteredPapers = questionPapers.filter(paper => {
+        const matchesSubject = paper.subject === selectedSubject;
+        const matchesYear = selectedYear ? paper.year === selectedYear : true;
+        return matchesSubject && matchesYear;
+    });
 
     if (loading) {
         return (
@@ -198,17 +233,16 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
     if (error) {
         return (
-            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
-                <p className="text-red-400">{error}</p>
-                <button
-                    onClick={() => {
-                        setError(null);
-                        setSelectedSubject('');
-                    }}
-                    className="ml-4 text-teal-400 hover:underline"
-                >
-                    Retry
-                </button>
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center text-center">
+                <div className="bg-teal-900 bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+                    <p className="text-red-400 mb-4">{error}</p>
+                    <button
+                        onClick={() => setError(null)}
+                        className="text-teal-400 hover:underline px-4 py-2"
+                    >
+                        Retry
+                    </button>
+                </div>
             </div>
         );
     }
@@ -224,21 +258,22 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 setIsCollapsed={setIsCollapsed}
                 darkMode={darkMode}
             />
-            <div
+            <main
                 className={`
-                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+                    flex-1 min-w-0 p-4 sm:p-6 transition-all duration-300
                     ${isCollapsed ? 'ml-16' : 'ml-64'}
                 `}
             >
-                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
+                {/* Header */}
+                <header className="bg-gradient-to-r from-teal-600 to-red-600 p-4 rounded-2xl shadow-2xl mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold">Question Papers</h1>
-                        <p className="text-sm mt-1 text-gray-300">Access past papers, {user.name}!</p>
+                        <h1 className="text-2xl font-bold text-white">Question Papers</h1>
+                        <p className="text-sm text-gray-300 mt-1">Access past papers, {user.name}</p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-2">
                         <Link
                             to="/notifications"
-                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            className="relative px-3 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label={`View notifications (${notificationCount} unread)`}
                         >
                             🔔
@@ -250,97 +285,158 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         </Link>
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            className="px-3 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
                             aria-label="Toggle dark mode"
                         >
                             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                         </button>
                     </div>
-                </div>
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6`}>
-                    <h2 className="text-xl font-semibold mb-4 text-white">Your Enrolled Subjects</h2>
-                    <select
-                        value={selectedSubject}
-                        onChange={handleSubjectChange}
-                        className={`w-full p-2 rounded bg-teal-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-                            darkMode ? 'bg-teal-900' : 'bg-teal-700'
-                        }`}
-                        aria-label="Select a subject"
-                    >
-                        <option value="" disabled>
-                            Select a subject
-                        </option>
-                        {enrolledSubjects.length > 0 ? (
-                            enrolledSubjects.map((subject, index) => (
-                                <option key={index} value={subject} className="text-white">
-                                    {subject}
-                                </option>
-                            ))
-                        ) : (
+                </header>
+
+                {/* Filter Bar */}
+                <section className="mb-4">
+                    <div className="bg-teal-900 bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-4 items-center">
+                        <label htmlFor="subject-select" className="text-white font-semibold text-lg">
+                            Filter by Subject
+                        </label>
+                        <select
+                            id="subject-select"
+                            value={selectedSubject}
+                            onChange={handleSubjectChange}
+                            className={`w-full sm:w-auto p-2 rounded bg-teal-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+                                darkMode ? 'bg-teal-900' : 'bg-teal-700'
+                            }`}
+                            aria-label="Select a subject"
+                        >
                             <option value="" disabled>
-                                No enrolled subjects available
+                                Select a subject
                             </option>
-                        )}
-                    </select>
-                </div>
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <h2 className="text-xl font-semibold mb-4 text-white">Available Question Papers</h2>
-                    <ul className="space-y-2">
-                        {questionPapers.length > 0 ? (
-                            questionPapers.map((paper) => (
-                                <li key={paper.id} className="p-2 bg-teal-700 rounded flex justify-between items-center">
-                                    <span className="text-white">
+                            {enrolledSubjects.length > 0 ? (
+                                enrolledSubjects.map((subject, index) => (
+                                    <option key={index} value={subject} className="text-white">
+                                        {subject}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="" disabled>
+                                    No subjects available
+                                </option>
+                            )}
+                        </select>
+                        <label htmlFor="year-select" className="text-white font-semibold text-lg">
+                            Filter by Year
+                        </label>
+                        <select
+                            id="year-select"
+                            value={selectedYear}
+                            onChange={handleYearChange}
+                            className={`w-full sm:w-auto p-2 rounded bg-teal-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+                                darkMode ? 'bg-teal-900' : 'bg-teal-700'
+                            }`}
+                            aria-label="Select a year"
+                        >
+                            <option value="">All Years</option>
+                            {years.map((year, index) => (
+                                <option key={index} value={year} className="text-white">
+                                    {year}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </section>
+
+                {/* Papers List */}
+                <section className="bg-teal-900 bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl">
+                    <h2 className="text-lg font-semibold text-white mb-3">Available Papers</h2>
+                    <div className="space-y-2">
+                        {filteredPapers.length > 0 ? (
+                            filteredPapers.map((paper) => (
+                                <div
+                                    key={paper.id}
+                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 bg-teal-700 rounded gap-3"
+                                >
+                                    <span className="text-white text-sm sm:text-base flex-1">
                                         {paper.title} ({paper.subject}, {paper.year})
                                     </span>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 w-full sm:w-auto">
                                         <button
-                                            className="text-teal-400 hover:underline"
+                                            className="text-teal-400 hover:underline px-2 py-1 disabled:opacity-50"
                                             onClick={() => viewPdf(paper.id)}
+                                            disabled={pdfLoading}
+                                            aria-label={`View ${paper.title}`}
                                         >
-                                            View
+                                            {pdfLoading ? 'Loading...' : 'View'}
                                         </button>
                                         <button
-                                            className="text-teal-400 hover:underline"
+                                            className="text-teal-400 hover:underline px-2 py-1 disabled:opacity-50"
                                             onClick={() => downloadPdf(paper.id, paper.title)}
+                                            disabled={pdfLoading}
+                                            aria-label={`Download ${paper.title}`}
                                         >
-                                            Download
+                                            {pdfLoading ? 'Loading...' : 'Download'}
                                         </button>
                                     </div>
-                                </li>
+                                </div>
                             ))
                         ) : (
-                            <p className="text-gray-300">
+                            <p className="text-gray-300 text-sm">
                                 {selectedSubject
-                                    ? `No question papers available for ${selectedSubject}.`
-                                    : 'Please select a subject to view question papers.'}
+                                    ? `No question papers available for ${selectedSubject}${
+                                        selectedYear ? ` in ${selectedYear}` : ''
+                                    }.`
+                                    : 'Please select a subject to view papers.'}
                             </p>
                         )}
-                    </ul>
-                </div>
+                    </div>
+                </section>
+
+                {/* PDF Modal */}
                 {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className={`bg-teal-${darkMode ? '900' : '800'} p-6 rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh]`}>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-semibold text-white">View PDF</h2>
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="modal-title"
+                    >
+                        <div className="bg-teal-900 bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+                            <div className="flex justify-between items-center mb-3">
+                                <h2 id="modal-title" className="text-lg font-semibold text-white">
+                                    {currentPaper ? currentPaper.title : 'View PDF'}
+                                </h2>
                                 <button
                                     onClick={closeModal}
-                                    className="text-white hover:text-teal-400"
+                                    className="text-white hover:text-teal-400 text-xl"
                                     aria-label="Close modal"
                                 >
                                     ✕
                                 </button>
                             </div>
-                            {pdfUrl && (
-                                <iframe
-                                    src={pdfUrl}
-                                    className="w-full h-[70vh] rounded"
-                                    title="Question Paper PDF"
-                                />
+                            {pdfLoading ? (
+                                <div className="flex justify-center items-center h-[60vh]">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-400"></div>
+                                </div>
+                            ) : (
+                                pdfUrl && (
+                                    <iframe
+                                        src={pdfUrl}
+                                        className="w-full h-[60vh] rounded"
+                                        title="Question Paper PDF"
+                                    />
+                                )
+                            )}
+                            {currentPaper && !pdfLoading && (
+                                <button
+                                    className="mt-3 text-teal-400 hover:underline px-2 py-1"
+                                    onClick={() => downloadPdf(currentPaper.id, currentPaper.title)}
+                                    aria-label={`Download ${currentPaper.title}`}
+                                >
+                                    Download PDF
+                                </button>
                             )}
                         </div>
                     </div>
                 )}
-            </div>
+            </main>
         </div>
     );
 };
