@@ -5,8 +5,11 @@ import Sidebar from './Sidebar';
 
 const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
+    const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [questionPapers, setQuestionPapers] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
@@ -14,31 +17,115 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     });
 
     useEffect(() => {
-        const mockPapers = [
-            { id: 1, title: 'Mathematics Final Exam', subject: 'Mathematics', year: 2024 },
-            { id: 2, title: 'Physical Sciences Midterm', subject: 'Physical Sciences', year: 2023 },
-            { id: 3, title: 'History Essay Questions', subject: 'History', year: 2024 },
-        ];
-
-        setTimeout(() => {
+        const fetchSubjects = async () => {
             try {
-                setQuestionPapers(mockPapers);
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('No JWT token found. Please log in.');
+                }
+
+                console.log('Fetching subjects from:', `${process.env.REACT_APP_API_BASE_URL}/user/enrolled-subjects`);
+                console.log('Using token:', token.substring(0, 10) + '...'); // Log first 10 chars of token for safety
+
+                const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/user/enrolled-subjects`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                console.log('Subjects response status:', response.status);
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Subjects response body:', text.substring(0, 100)); // Log first 100 chars
+                    throw new Error(`Failed to fetch subjects: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Subjects response data:', data);
+
+                if (data.success) {
+                    setEnrolledSubjects(data.data || []);
+                } else {
+                    throw new Error(data.message || 'Failed to fetch subjects');
+                }
+            } catch (err) {
+                console.error('Subjects fetch error:', err.message);
+                setError(`Could not load subjects: ${err.message}`);
+            } finally {
+                // Fetch question papers only if a subject is selected
+                if (selectedSubject) {
+                    try {
+                        const token = localStorage.getItem('jwt');
+                        const response = await fetch(
+                            `${process.env.REACT_APP_API_BASE_URL}/user/question-papers?subjectName=${encodeURIComponent(selectedSubject)}`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            }
+                        );
+
+                        console.log('Papers response status:', response.status);
+
+                        if (!response.ok) {
+                            const text = await response.text();
+                            console.error('Papers response body:', text.substring(0, 100));
+                            throw new Error(`Failed to fetch papers: ${response.status} ${response.statusText}`);
+                        }
+
+                        const data = await response.json();
+                        if (data.success) {
+                            setQuestionPapers(data.data || []);
+                        } else {
+                            throw new Error(data.message || 'Failed to fetch papers');
+                        }
+                    } catch (err) {
+                        console.error('Papers fetch error:', err.message);
+                        setError(`Could not load question papers: ${err.message}`);
+                    }
+                } else {
+                    setQuestionPapers([]);
+                }
                 setLoading(false);
-            } catch (error) {
-                console.error('Error setting mock question papers:', error);
             }
-        }, 1000);
-    }, []);
+        };
+
+        fetchSubjects();
+    }, [selectedSubject]);
 
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
     };
 
+    const handleViewPaper = (fileUrl) => {
+        window.open(fileUrl, '_blank');
+    };
+
+    const handleDownloadPaper = (fileUrl, title) => {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = `${title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (loading) {
         return (
             <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 justify-center items-center">
+                <p className="text-red-500">{error}</p>
             </div>
         );
     }
@@ -89,25 +176,68 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Available Question Papers</h2>
-                    <ul className="space-y-2">
-                        {questionPapers.length > 0 ? (
-                            questionPapers.map((paper) => (
-                                <li key={paper.id} className="p-2 bg-gray-100 dark:bg-gray-700 rounded flex justify-between">
-                                    <span className="text-gray-700 dark:text-gray-200">
-                                        {paper.title} ({paper.subject}, {paper.year})
-                                    </span>
-                                    <button
-                                        className="text-indigo-600 hover:underline"
-                                        onClick={() => alert(`Downloading ${paper.title}`)}
-                                    >
-                                        Download
-                                    </button>
-                                </li>
-                            ))
-                        ) : (
-                            <p className="text-gray-600 dark:text-gray-300">No question papers available.</p>
-                        )}
-                    </ul>
+                    {enrolledSubjects.length > 0 ? (
+                        <div>
+                            <label htmlFor="subject-select" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                Select a Subject
+                            </label>
+                            <select
+                                id="subject-select"
+                                value={selectedSubject}
+                                onChange={(e) => setSelectedSubject(e.target.value)}
+                                className="w-full p-2 border rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+                            >
+                                <option value="">All Subjects</option>
+                                {enrolledSubjects.map((subject) => (
+                                    <option key={subject} value={subject}>
+                                        {subject}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="mt-4 space-y-4">
+                                {enrolledSubjects
+                                    .filter((subject) => !selectedSubject || subject === selectedSubject)
+                                    .map((subject) => (
+                                        <div key={subject} className="border-b pb-4">
+                                            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">{subject}</h3>
+                                            <ul className="space-y-2 mt-2">
+                                                {questionPapers
+                                                    .filter((paper) => paper.subject.name === subject)
+                                                    .map((paper) => (
+                                                        <li
+                                                            key={paper.id}
+                                                            className="p-2 bg-gray-100 dark:bg-gray-700 rounded flex justify-between items-center"
+                                                        >
+                                                            <span className="text-gray-700 dark:text-gray-200">
+                                                                {paper.title} ({paper.year})
+                                                            </span>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    className="text-indigo-600 hover:underline"
+                                                                    onClick={() => handleViewPaper(paper.fileUrl)}
+                                                                >
+                                                                    View
+                                                                </button>
+                                                                <button
+                                                                    className="text-indigo-600 hover:underline"
+                                                                    onClick={() => handleDownloadPaper(paper.fileUrl, paper.title)}
+                                                                >
+                                                                    Download
+                                                                </button>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                {questionPapers.filter((paper) => paper.subject.name === subject).length === 0 && (
+                                                    <p className="text-gray-600 dark:text-gray-300">No question papers available for {subject}.</p>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-gray-600 dark:text-gray-300">No enrolled subjects. Please enroll in a subject to view question papers.</p>
+                    )}
                 </div>
             </div>
         </div>
@@ -127,7 +257,6 @@ QuestionPapers.propTypes = {
             read: PropTypes.bool.isRequired,
         })
     ).isRequired,
-    setNotifications: PropTypes.func.isRequired,
 };
 
 export default QuestionPapers;
