@@ -3,33 +3,90 @@ import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from './Sidebar';
 
-const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
+const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
-    const [questionPapers, setQuestionPapers] = useState([]);
+    const [papers, setPapers] = useState([]);
+    const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [filterSubject, setFilterSubject] = useState('');
+    const [sortBy, setSortBy] = useState('dueDate');
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
         profilePicture: null,
     });
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+
+    // Fetch question papers and subjects
     useEffect(() => {
-        const mockPapers = [
-            { id: 1, title: 'Mathematics Final Exam', subject: 'Mathematics', year: 2024 },
-            { id: 2, title: 'Physical Sciences Midterm', subject: 'Physical Sciences', year: 2023 },
-            { id: 3, title: 'History Essay Questions', subject: 'History', year: 2024 },
-        ];
-
-        setTimeout(() => {
+        const fetchData = async () => {
             try {
-                setQuestionPapers(mockPapers);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error setting mock question papers:', error);
-            }
-        }, 1000);
-    }, []);
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                const headers = {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                };
 
+                // Fetch question papers
+                const papersResponse = await fetch(`${API_BASE_URL}/user/question-papers`, { headers });
+                const papersData = await papersResponse.json();
+                if (!papersResponse.ok || !papersData.success) {
+                    throw new Error(papersData.message || 'Failed to fetch question papers');
+                }
+
+                // Fetch subjects for filtering
+                const subjectsResponse = await fetch(`${API_BASE_URL}/user/subjects`, { headers });
+                const subjectsData = await subjectsResponse.json();
+                if (!subjectsResponse.ok || !subjectsData.success) {
+                    throw new Error(subjectsData.message || 'Failed to fetch subjects');
+                }
+
+                setPapers(papersData.data || []);
+                setSubjects(subjectsData.data || []);
+                setLoading(false);
+            } catch (err) {
+                setError(`Error fetching data: ${err.message}`);
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [API_BASE_URL]);
+
+    // Handle viewing a question paper
+    const handleViewPaper = (paperId, paperTitle, url) => {
+        setNotifications([
+            ...notifications,
+            {
+                id: notifications.length + 1,
+                message: `Viewed question paper: ${paperTitle}`,
+                date: new Date().toISOString().split('T')[0],
+                read: false,
+            },
+        ]);
+        window.open(url, '_blank'); // Open PDF in new tab
+    };
+
+    // Filter and sort papers
+    const filteredPapers = filterSubject
+        ? papers.filter((paper) => paper.subject === filterSubject)
+        : papers;
+
+    const sortedPapers = [...filteredPapers].sort((a, b) => {
+        if (sortBy === 'dueDate') {
+            return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+        if (sortBy === 'title') {
+            return a.title.localeCompare(b.title);
+        }
+        return 0;
+    });
+
+    // Handle logout
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
@@ -63,7 +120,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold">Question Papers</h1>
-                        <p className="text-sm mt-1 text-gray-300">Access past papers, {user.name}!</p>
+                        <p className="text-sm mt-1 text-gray-300">Access your study materials, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
@@ -88,26 +145,76 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     </div>
                 </div>
                 <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <h2 className="text-xl font-semibold mb-4 text-white">Available Question Papers</h2>
-                    <ul className="space-y-2">
-                        {questionPapers.length > 0 ? (
-                            questionPapers.map((paper) => (
-                                <li key={paper.id} className="p-2 bg-teal-700 rounded flex justify-between">
-                                    <span className="text-white">
-                                        {paper.title} ({paper.subject}, {paper.year})
-                                    </span>
-                                    <button
-                                        className="text-teal-400 hover:underline"
-                                        onClick={() => alert(`Downloading ${paper.title}`)}
-                                    >
-                                        Download
-                                    </button>
-                                </li>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-white">Available Question Papers</h2>
+                    </div>
+
+                    {error && (
+                        <div className="p-4 mb-4 rounded-lg bg-red-7
+System: 00 text-white">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="mb-6 flex gap-4">
+                        <div>
+                            <label htmlFor="filterSubject" className="block text-white mb-2 font-medium">
+                                Filter by Subject
+                            </label>
+                            <select
+                                id="filterSubject"
+                                value={filterSubject}
+                                onChange={(e) => setFilterSubject(e.target.value)}
+                                className="p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
+                            >
+                                <option value="">All Subjects</option>
+                                {subjects.map((subject, index) => (
+                                    <option key={index} value={subject}>
+                                        {subject}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="sortBy" className="block text-white mb-2 font-medium">
+                                Sort By
+                            </label>
+                            <select
+                                id="sortBy"
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
+                            >
+                                <option value="dueDate">Due Date</option>
+                                <option value="title">Title</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {sortedPapers.length > 0 ? (
+                            sortedPapers.map((paper) => (
+                                <div
+                                    key={paper.id}
+                                    className="bg-teal-800 bg-opacity-90 p-4 rounded-2xl shadow-2xl hover:shadow-lg transition-shadow"
+                                >
+                                    <h3 className="text-lg font-medium text-white">{paper.title}</h3>
+                                    <p className="text-sm text-gray-300">Subject: {paper.subject}</p>
+                                    <p className="text-sm text-teal-400">Due: {paper.dueDate}</p>
+                                    <div className="mt-4">
+                                        <button
+                                            onClick={() => handleViewPaper(paper.id, paper.title, paper.url)}
+                                            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+                                        >
+                                            View Paper
+                                        </button>
+                                    </div>
+                                </div>
                             ))
                         ) : (
-                            <p className="text-gray-300">No question papers available.</p>
+                            <p className="text-gray-300 col-span-full">No question papers available.</p>
                         )}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
