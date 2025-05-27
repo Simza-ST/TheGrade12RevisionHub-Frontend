@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from './Sidebar';
+import NotificationHeader from './NotificationHeader';
+import NotificationControls from './NotificationControls';
+import NotificationStats from './NotificationStats';
+import NotificationList from './NotificationList';
 
+
+//main component
 const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
