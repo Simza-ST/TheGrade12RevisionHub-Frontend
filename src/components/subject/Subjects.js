@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import Sidebar from '../Sidebar';
+import Header from '../common/Header';
 import SubjectForm from './SubjectForm';
 import SubjectCard from './SubjectCard';
-import MessageBanner from './MessageBanner';
+import MessageBanner from '../MessageBanner';
 
 const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();

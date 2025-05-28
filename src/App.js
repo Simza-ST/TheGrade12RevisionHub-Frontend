@@ -2,15 +2,22 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import Subjects from './components/Subjects';
-import Quizzes from './components/Quizzes';
-import QuestionPapers from './components/QuestionPapers';
+import Subjects from './components/subject/Subjects';
+import Quizzes from './components/quiz/Quizzes';
+import QuestionPapers from './components/question-papers/QuestionPapers';
+import QuestionPapersList from './components/question-papers/QuestionPapersList';
+import QuestionPaperDetails from './components/question-papers/QuestionPaperDetails';
 import Resources from './components/Resources';
 import Schedule from './components/Schedule';
 import Performance from './components/Performance';
 import Notifications from './components/Notifications';
 import Chatroom from './components/Chatroom';
 import Settings from './components/Settings';
+
+// const ProtectedRoute = () => {
+//     const token = localStorage.getItem('jwt');
+//     return token ? <Outlet /> : <Navigate to="/login" replace />;
+// };
 
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -155,6 +162,8 @@ const App = () => {
                         />
                     }
                 />
+                    <Route path="/question-papers/list" element={<QuestionPapersList />} />
+                    <Route path="/question-papers/:id" element={<QuestionPaperDetails />} />
                 <Route path="/" element={<Login />} />
             </Routes>
         </Router>

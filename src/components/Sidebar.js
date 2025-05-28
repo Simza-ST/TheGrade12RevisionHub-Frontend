@@ -37,7 +37,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed }) => {
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
         { name: 'Subjects', path: '/subjects', icon: '📚' },
         { name: 'Quizzes', path: '/quizzes', icon: '❓' },
-        { name: 'Question Papers', path: '/questionpapers', icon: '📝' },
+        { name: 'Question Papers', path: '/question-papers/list', icon: '📝' },
         { name: 'Resources', path: '/resources', icon: '🔗' },
         { name: 'Schedule', path: '/schedule', icon: '📅' },
         { name: 'Performance', path: '/performance', icon: '📊' },
