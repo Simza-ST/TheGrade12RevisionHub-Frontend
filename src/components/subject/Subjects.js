@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../Sidebar';
 import Header from '../common/Header';
@@ -19,8 +19,7 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
         title: 'CS Honor Student',
         profilePicture: null,
     });
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
-    const cardColors = ['bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-pink-200', 'bg-purple-200', 'bg-teal-200'];
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
 
     const fetchData = async (url, setData) => {
         try {
@@ -41,8 +40,13 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
     };
 
     useEffect(() => {
-        fetchData(`${API_BASE_URL}/user/subjects`, setSubjects);
-        fetchData(`${API_BASE_URL}/user/enrolled-subjects`, setEnrolledSubjects);
+        fetchData(`${API_BASE_URL}/subjects`, setSubjects);
+        fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+            console.log('Enrolled subjects data:', data);
+            // Map to strings if API returns objects
+            const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+            setEnrolledSubjects(subjectNames);
+        });
     }, [API_BASE_URL]);
 
     useEffect(() => {
@@ -64,14 +68,17 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                 Authorization: `Bearer ${localStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
-            const response = await fetch(`${API_BASE_URL}/user/add-subject`, {
+            const response = await fetch(`${API_BASE_URL}/add-subject`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ subjectName: selectedSubject }),
             });
             const data = await response.json();
             if (response.ok && data.success) {
-                fetchData(`${API_BASE_URL}/user/enrolled-subjects`, setEnrolledSubjects);
+                fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+                    const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+                    setEnrolledSubjects(subjectNames);
+                });
                 setMessage({ text: data.message, type: 'success' });
                 setSelectedSubject('');
                 setIsAdding(false);
@@ -89,13 +96,16 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                 Authorization: `Bearer ${localStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
-            const response = await fetch(`${API_BASE_URL}/user/remove-subject?subjectName=${encodeURIComponent(subjectName)}`, {
+            const response = await fetch(`${API_BASE_URL}/remove-subject?subjectName=${encodeURIComponent(subjectName)}`, {
                 method: 'DELETE',
                 headers,
             });
             const data = await response.json();
             if (response.ok && data.success) {
-                fetchData(`${API_BASE_URL}/user/enrolled-subjects`, setEnrolledSubjects);
+                fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+                    const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+                    setEnrolledSubjects(subjectNames);
+                });
                 setMessage({ text: data.message, type: 'success' });
             } else {
                 setMessage({ text: data.message || 'Failed to remove subject', type: 'error' });
@@ -121,7 +131,11 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                 setIsCollapsed={setIsCollapsed}
                 darkMode={darkMode}
             />
-            <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+            <main
+                className={`flex-1 p-6 sm:p-8 transition-all duration-300 max-w-5xl mx-auto w-full ${
+                    isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
+                }`}
+            >
                 <Header
                     user={user}
                     notificationCount={notificationCount}
@@ -129,16 +143,16 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                     setDarkMode={setDarkMode}
                     onNotificationsClick={() => navigate('/notifications')}
                 />
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <div className="flex justify-between items-center mb-4">
+                <section className="bg-teal-800/80 p-6 rounded-2xl shadow-2xl">
+                    <header className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-white">Your Subjects</h2>
                         <button
                             onClick={() => setIsAdding(!isAdding)}
-                            className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
+                            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-400 transition-colors"
                         >
                             {isAdding ? 'Cancel' : 'Add new subject'}
                         </button>
-                    </div>
+                    </header>
                     <MessageBanner message={message.text} type={message.type} />
                     {isAdding && (
                         <SubjectForm
@@ -149,25 +163,24 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                             darkMode={darkMode}
                         />
                     )}
-                    <div className="mt-6">
-                        <h2 className="text-xl font-semibold mb-4 text-white">Courses</h2>
+                    <section className="mt-6">
+                        <h3 className="text-xl font-semibold mb-4 text-white">Courses</h3>
                         {enrolledSubjects.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {enrolledSubjects.map((subject, index) => (
                                     <SubjectCard
-                                        key={index}
+                                        key={subject + index}
                                         subject={subject}
                                         onRemove={handleRemoveSubject}
-                                        colorClass={cardColors[index % cardColors.length]}
                                     />
                                 ))}
                             </div>
                         ) : (
                             <p className="text-gray-300">No courses enrolled yet.</p>
                         )}
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </main>
         </div>
     );
 };

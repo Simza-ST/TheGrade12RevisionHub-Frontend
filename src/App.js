@@ -46,19 +46,6 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/subjects"
-                    element={
-                        <Subjects
-                            isCollapsed={isCollapsed}
-                            setIsCollapsed={setIsCollapsed}
-                            darkMode={darkMode}
-                            setDarkMode={setDarkMode}
-                            notifications={notifications}
-                            setNotifications={setNotifications}
-                        />
-                    }
-                />
-                <Route
                     path="/quizzes"
                     element={
                         <Quizzes
@@ -72,15 +59,26 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/questionpapers"
+                    path="/subjects"
                     element={
-                        <QuestionPapers
+                        <Subjects
                             isCollapsed={isCollapsed}
                             setIsCollapsed={setIsCollapsed}
                             darkMode={darkMode}
                             setDarkMode={setDarkMode}
                             notifications={notifications}
-                            setNotifications={setNotifications}
+                        />
+                    }
+                />
+                <Route
+                    path="/question-papers"
+                    element={
+                        <QuestionPapersList
+                            isCollapsed={isCollapsed}
+                            setIsCollapsed={setIsCollapsed}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            notifications={notifications}
                         />
                     }
                 />

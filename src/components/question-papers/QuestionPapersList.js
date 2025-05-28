@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Sidebar from '../Sidebar';
 import Header from '../common/Header';
 import FilterSection from './FilterSection';
@@ -11,6 +12,7 @@ import { useQuestionPapers } from '../../hooks/useQuestionPapers';
 
 const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const {
         questionPapers,
         subjects,
@@ -32,6 +34,20 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
 
     const user = { name: 'Student', title: 'CS Student', profilePicture: null };
 
+    // Handle subject query parameter
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const subject = params.get('subject');
+        console.log('Query subject:', subject, 'Available subjects:', subjects);
+        if (subject && subjects.includes(decodeURIComponent(subject))) {
+            setSelectedSubject(decodeURIComponent(subject));
+        } else if (subject) {
+            console.log(`Subject "${decodeURIComponent(subject)}" not found in subjects:`, subjects);
+            setSelectedSubject(''); // Clear invalid subject
+            navigate('/question-papers', { replace: true }); // Clear query param
+        }
+    }, [location.search, subjects, setSelectedSubject, navigate]);
+
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
@@ -40,6 +56,7 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
     const handleSubjectChange = (e) => {
         setSelectedSubject(e.target.value);
         setSelectedYear('');
+        navigate('/question-papers', { replace: true }); // Clear query params
     };
 
     const handleYearChange = (e) => {
