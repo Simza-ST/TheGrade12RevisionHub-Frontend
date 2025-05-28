@@ -7,25 +7,13 @@ import ErrorDialog from './ErrorDialog';
 import Tooltip from './Tooltip';
 import { API_BASE_URL, getAuthHeaders } from '../../utils/api';
 
-/**
- * QuestionPaperDetails component to display details of a specific question paper with instructional content
- * @param {Object} props - Component props
- * @param {boolean} isCollapsed - Sidebar collapse state
- * @param {Function} setIsCollapsed - Function to toggle sidebar collapse
- * @param {boolean} darkMode - Dark mode state
- * @param {Function} setDarkMode - Function to toggle dark mode
- */
 const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [questionPaper, setQuestionPaper] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const user = {
-        name: 'Student',
-        title: 'CS Student',
-        profilePicture: null,
-    };
+    const user = { name: 'Student', title: 'CS Student', profilePicture: null };
 
     useEffect(() => {
         const fetchPaper = async () => {
@@ -51,7 +39,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                         title: data.data.fileName,
                         subject: data.data.subject?.subjectName || 'Unknown',
                         year: data.data.year || data.data.fileName.match(/\d{4}/)?.[0] || 'Unknown',
-                        description: data.data.description || 'This paper covers key topics to help you prepare effectively for your exam.',
+                        description: data.data.description || 'This paper covers key topics for exam prep.',
                         difficulty: data.data.difficulty || 'Not specified',
                     });
                 } else {
@@ -87,7 +75,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                 return;
             }
             if (!response.ok) {
-                throw new Error(`Failed to download PDF: HTTP ${response.status}`);
+                throw new Error(`Failed to download paper: HTTP ${response.status}`);
             }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -99,7 +87,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            setError(`Error downloading PDF: ${err.message}`);
+            setError(`Error downloading paper: ${err.message}`);
         }
     };
 
@@ -122,21 +110,21 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                         title: data.data.fileName,
                         subject: data.data.subject?.subjectName || 'Unknown',
                         year: data.data.year || data.data.fileName.match(/\d{4}/)?.[0] || 'Unknown',
-                        description: data.data.description || 'This paper covers key topics to help you prepare effectively for your exam.',
+                        description: data.data.description || 'This paper covers key topics for exam prep.',
                         difficulty: data.data.difficulty || 'Not specified',
                     });
                 }
                 setLoading(false);
             })
             .catch((err) => {
-                setError(`Error fetching: ${err.message}`);
+                setError(`Error retrying: ${err.message}`);
                 setLoading(false);
             });
     };
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-700 via-gray-800 to-red-700 items-center justify-center">
                 <LoadingSpinner />
             </div>
         );
@@ -147,7 +135,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
     }
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-700 via-gray-800 to-red-700">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
@@ -156,54 +144,41 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                 darkMode={darkMode}
             />
             <main
-                className={`flex-1 p-4 sm:p-6 transition-all duration-300 ${
-                    isCollapsed ? 'ml-16' : 'ml-64'
+                className={`flex-1 p-4 sm:p-6 transition-all duration-300 max-w-4xl mx-auto w-full ${
+                    isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
                 }`}
             >
-                <header className="bg-gradient-to-r from-teal-600 to-red-600 p-4 rounded-lg shadow-md mb-4">
-                    <h1 className="text-2xl font-bold text-white">{questionPaper.title}</h1>
-                    <p className="text-sm text-gray-300 mt-1">
-                        {questionPaper.subject} - {questionPaper.year}
-                    </p>
+                <header className="bg-teal-800/80 p-4 sm:p-6 rounded-lg shadow-lg mb-6">
+                    <h1 className="text-lg sm:text-xl font-semibold text-white mb-2">{questionPaper.title}</h1>
+                    <p className="text-sm sm:text-base text-gray-200">{questionPaper.subject} - {questionPaper.year}</p>
                 </header>
-                <section className="bg-teal-900 bg-opacity-90 p-6 rounded-lg shadow-md mb-4">
-                    <h2 className="text-xl font-semibold text-white mb-4">Why Use This Paper?</h2>
-                    <p className="text-gray-300 text-sm mb-4">
-                        Practicing with this past paper will help you master key concepts, improve time management, and build confidence for your upcoming exam. Dive in to get a head start!
+                <section className="bg-teal-800/80 p-4 sm:p-6 rounded-lg shadow-lg">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Paper Details</h2>
+                    <p className="text-sm sm:text-base text-gray-200 mb-4">
+                        Practice this paper to master concepts and boost exam confidence!
                     </p>
-                    <div className="bg-teal-800 bg-opacity-80 p-3 rounded text-sm text-gray-200 mb-4">
-                        <strong>NB:</strong> Reviewing past papers like this one can reveal common question types and help you focus your study efforts.
-                    </div>
-                </section>
-                <section className="bg-teal-900 bg-opacity-90 p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold text-white mb-4">Paper Details</h2>
-                    <div className="text-gray-300 space-y-4">
-                        <p>
-                            <strong>Description:</strong> {questionPaper.description}
-                        </p>
-                        <p>
-                            <strong>Subject:</strong> {questionPaper.subject}
-                        </p>
-                        <p>
-                            <strong>Year:</strong> {questionPaper.year}
-                        </p>
-                        <p>
-                            <strong>Difficulty:</strong> {questionPaper.difficulty}
-                        </p>
-                    </div>
-                    <div className="mt-6 flex gap-4">
-                        <Tooltip text="Preview this paper in your browser">
+                    <p className="bg-teal-700/90 p-3 rounded-md text-sm text-gray-200 mb-4">
+                        <strong>NB:</strong> Past papers highlight key question types.
+                    </p>
+                    <ul className="text-gray-200 text-sm sm:text-base mb-6 space-y-2">
+                        <li><strong>Description:</strong> {questionPaper.description}</li>
+                        <li><strong>Subject:</strong> {questionPaper.subject}</li>
+                        <li><strong>Year:</strong> {questionPaper.year}</li>
+                        <li><strong>Difficulty:</strong> {questionPaper.difficulty}</li>
+                    </ul>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Tooltip text="Preview in browser">
                             <button
                                 onClick={viewPaper}
-                                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-200"
+                                className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-400 disabled:bg-gray-400 disabled:hover:bg-gray-400 transition-colors duration-200"
                             >
-                                View Paper
+                                Preview Paper
                             </button>
                         </Tooltip>
-                        <Tooltip text="Download this paper for offline study">
+                        <Tooltip text="Save offline">
                             <button
                                 onClick={downloadPaper}
-                                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-200"
+                                className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-400 disabled:bg-gray-400 disabled:hover:bg-gray-400 transition-colors duration-200"
                             >
                                 Download Paper
                             </button>

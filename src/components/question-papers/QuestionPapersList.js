@@ -9,15 +9,6 @@ import ErrorDialog from './ErrorDialog';
 import LoadingSpinner from './LoadingSpinner';
 import { useQuestionPapers } from '../../hooks/useQuestionPapers';
 
-/**
- * QuestionPapersList component to display and manage a list of question papers
- * @param {Object} props - Component props
- * @param {boolean} isCollapsed - Sidebar collapse state
- * @param {Function} setIsCollapsed - Function to toggle sidebar collapse
- * @param {boolean} darkMode - Dark mode state
- * @param {Function} setDarkMode - Function to toggle dark mode
- * @param {Object[]} notifications - List of notifications
- */
 const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();
     const {
@@ -39,11 +30,7 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
         downloadPdf,
     } = useQuestionPapers();
 
-    const user = {
-        name: 'Student',
-        title: 'CS Student',
-        profilePicture: null,
-    };
+    const user = { name: 'Student', title: 'CS Student', profilePicture: null };
 
     const handleLogout = () => {
         localStorage.removeItem('jwt');
@@ -64,7 +51,7 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 items-center justify-center">
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-700 via-gray-800 to-red-700 items-center justify-center">
                 <LoadingSpinner />
             </div>
         );
@@ -75,7 +62,7 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
     }
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-700 via-gray-800 to-red-700">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
@@ -94,22 +81,20 @@ const QuestionPapersList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode
                     darkMode={darkMode}
                     toggleDarkMode={() => setDarkMode(!darkMode)}
                 />
-                <section className="bg-teal-900 bg-opacity-80 p-4 sm:p-6 rounded-lg shadow-lg mb-6">
-                    <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Get Started with Past Papers</h2>
-                    <p className="text-gray-200 text-sm sm:text-base mb-4">
-                        Select a subject and year to explore past exam papers. Practicing with these papers helps you understand question patterns and boost your confidence for exams!
+                <section className="bg-teal-800/80 p-4 sm:p-6 rounded-lg shadow-lg mb-6">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Explore Past Papers</h2>
+                    <p className="text-gray-200 text-sm sm:text-base mb-3">
+                        Filter by subject and year to find exam papers and boost your prep!
                     </p>
-                    <div className="bg-teal-800 bg-opacity-90 p-3 rounded-md text-sm text-gray-200">
-                        <strong>NB:</strong> Regular practice with past papers can improve your exam performance by up to 20%. Start today!
-                    </div>
-                </section>
-                <section className="bg-teal-900 bg-opacity-80 p-4 sm:p-6 rounded-lg shadow-lg mb-6">
-                    <h2 className="text-lg sm:text-xl font-semibold text-white mb-3">Quick Tips</h2>
-                    <ul className="list-disc list-inside text-gray-200 text-sm sm:text-base space-y-2">
-                        <li>Use the filters to narrow down papers by subject and year.</li>
-                        <li>Click <strong>View</strong> to preview a paper in your browser.</li>
-                        <li>Click <strong>Download</strong> to save a paper for offline study.</li>
-                        <li>Check the paper details page for more information about each paper.</li>
+                    <p className="bg-teal-700/90 p-3 rounded-md text-sm text-gray-200 mb-3">
+                        <strong>NB:</strong> Past papers can improve your score by up to 20%.
+                    </p>
+                    <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Quick Tips</h3>
+                    <ul className="list-disc list-inside text-gray-200 text-sm sm:text-base space-y-1">
+                        <li>Filter by subject/year.</li>
+                        <li>Preview with <strong>View</strong>.</li>
+                        <li>Save offline with <strong>Download</strong>.</li>
+                        <li>Check details for more info.</li>
                     </ul>
                 </section>
                 <FilterSection
