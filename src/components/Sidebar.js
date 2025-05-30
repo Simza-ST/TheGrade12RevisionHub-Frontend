@@ -38,7 +38,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
         { name: 'Subjects', path: '/subjects', icon: '📚' },
         { name: 'Quizzes', path: '/quizzes', icon: '❓' },
-        { name: 'Question Papers', path: '/questionpapers', icon: '📝' },
+        { name: 'Question Papers', path: '/question-papers/list', icon: '📝' },
         { name: 'Resources', path: '/resources', icon: '🔗' },
         { name: 'Performance', path: '/performance', icon: '📊' },
         { name: 'Notifications', path: '/notifications', icon: '🔔' },

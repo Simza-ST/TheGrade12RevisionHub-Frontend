@@ -297,6 +297,7 @@ Subjects.propTypes = {
             read: PropTypes.bool.isRequired,
         })
     ).isRequired,
+    setNotifications: PropTypes.func.isRequired,
 };
 
 export default Subjects;

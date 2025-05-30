@@ -1,0 +1,203 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import Sidebar from '../Sidebar';
+import Header from '../common/Header';
+import SubjectForm from './SubjectForm';
+import SubjectCard from './SubjectCard';
+import MessageBanner from '../MessageBanner';
+
+const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
+    const navigate = useNavigate();
+    const [subjects, setSubjects] = useState([]);
+    const [enrolledSubjects, setEnrolledSubjects] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState('');
+    const [isAdding, setIsAdding] = useState(false);
+    const [message, setMessage] = useState({ text: '', type: '' });
+    const [user] = useState({
+        name: 'Bianca Doe',
+        title: 'CS Honor Student',
+        profilePicture: null,
+    });
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+
+    const fetchData = async (url, setData) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(url, { headers });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                setData(data.data || []);
+            } else {
+                setMessage({ text: data.message || `Failed to fetch data from ${url}`, type: 'error' });
+            }
+        } catch (error) {
+            setMessage({ text: `Error fetching data: ${error.message}`, type: 'error' });
+        }
+    };
+
+    useEffect(() => {
+        fetchData(`${API_BASE_URL}/subjects`, setSubjects);
+        fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+            console.log('Enrolled subjects data:', data);
+            // Map to strings if API returns objects
+            const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+            setEnrolledSubjects(subjectNames);
+        });
+    }, [API_BASE_URL]);
+
+    useEffect(() => {
+        let timeoutId;
+        if (message.text) {
+            timeoutId = setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+        }
+        return () => clearTimeout(timeoutId);
+    }, [message]);
+
+    const handleAddSubject = async (e) => {
+        e.preventDefault();
+        if (!selectedSubject) {
+            setMessage({ text: 'Please select a subject', type: 'error' });
+            return;
+        }
+        try {
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(`${API_BASE_URL}/add-subject`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ subjectName: selectedSubject }),
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+                    const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+                    setEnrolledSubjects(subjectNames);
+                });
+                setMessage({ text: data.message, type: 'success' });
+                setSelectedSubject('');
+                setIsAdding(false);
+            } else {
+                setMessage({ text: data.message || 'Failed to add subject', type: 'error' });
+            }
+        } catch (error) {
+            setMessage({ text: `Error adding subject: ${error.message}`, type: 'error' });
+        }
+    };
+
+    const handleRemoveSubject = async (subjectName) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(`${API_BASE_URL}/remove-subject?subjectName=${encodeURIComponent(subjectName)}`, {
+                method: 'DELETE',
+                headers,
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
+                    const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
+                    setEnrolledSubjects(subjectNames);
+                });
+                setMessage({ text: data.message, type: 'success' });
+            } else {
+                setMessage({ text: data.message || 'Failed to remove subject', type: 'error' });
+            }
+        } catch (error) {
+            setMessage({ text: `Error removing subject: ${error.message}`, type: 'error' });
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwt');
+        navigate('/login');
+    };
+
+    const notificationCount = notifications.filter((n) => !n.read).length;
+
+    return (
+        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+            <Sidebar
+                user={user}
+                onLogout={handleLogout}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
+                darkMode={darkMode}
+            />
+            <main
+                className={`flex-1 p-6 sm:p-8 transition-all duration-300 max-w-5xl mx-auto w-full ${
+                    isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
+                }`}
+            >
+                <Header
+                    user={user}
+                    notificationCount={notificationCount}
+                    darkMode={darkMode}
+                    setDarkMode={setDarkMode}
+                    onNotificationsClick={() => navigate('/notifications')}
+                />
+                <section className="bg-teal-800/80 p-6 rounded-2xl shadow-2xl">
+                    <header className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-white">Your Subjects</h2>
+                        <button
+                            onClick={() => setIsAdding(!isAdding)}
+                            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-400 transition-colors"
+                        >
+                            {isAdding ? 'Cancel' : 'Add new subject'}
+                        </button>
+                    </header>
+                    <MessageBanner message={message.text} type={message.type} />
+                    {isAdding && (
+                        <SubjectForm
+                            subjects={subjects}
+                            selectedSubject={selectedSubject}
+                            onSubjectSelect={(e) => setSelectedSubject(e.target.value)}
+                            onSubmit={handleAddSubject}
+                            darkMode={darkMode}
+                        />
+                    )}
+                    <section className="mt-6">
+                        <h3 className="text-xl font-semibold mb-4 text-white">Courses</h3>
+                        {enrolledSubjects.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {enrolledSubjects.map((subject, index) => (
+                                    <SubjectCard
+                                        key={subject + index}
+                                        subject={subject}
+                                        onRemove={handleRemoveSubject}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-300">No courses enrolled yet.</p>
+                        )}
+                    </section>
+                </section>
+            </main>
+        </div>
+    );
+};
+
+Subjects.propTypes = {
+    isCollapsed: PropTypes.bool.isRequired,
+    setIsCollapsed: PropTypes.func.isRequired,
+    darkMode: PropTypes.bool.isRequired,
+    setDarkMode: PropTypes.func.isRequired,
+    notifications: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+            read: PropTypes.bool.isRequired,
+        })
+    ).isRequired,
+};
+
+export default Subjects;
