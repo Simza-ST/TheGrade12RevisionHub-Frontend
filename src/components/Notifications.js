@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { jwtDecode } from 'jwt-decode'; // Changed to named import
 import Sidebar from './Sidebar';
 import LoadingSpinner from './LoadingSpinner';
 import NotificationHeader from './NotificationHeader';
@@ -19,38 +18,13 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const [filterType, setFilterType] = useState('all');
     const [user, setUser] = useState(null);
 
-    // Get userId from JWT token
-    const getUserIdFromToken = () => {
-        const token = localStorage.getItem('token');
-        if (!token) return null;
-        try {
-            const decoded = jwtDecode(token); // Uses named export
-            return decoded.sub || decoded.userId; // Adjust based on your token's payload
-        } catch (e) {
-            console.error('Invalid token:', e);
-            return null;
-        }
-    };
-
-    const userId = getUserIdFromToken();
-
-    // Redirect to login if no userId
-    useEffect(() => {
-        if (!userId) {
-            setError('Please log in to view notifications.');
-            navigate('/login');
-        }
-    }, [userId, navigate]);
-
     // Fetch user details
     useEffect(() => {
         const fetchUserDetails = async () => {
-            if (!userId) return;
-
             setLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:8080/api/users/me', {
+                const token = localStorage.getItem('jwt');
+                const response = await fetch('http://localhost:6262/api/users/me', {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -61,68 +35,67 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     setUser({
                         id: data.id,
                         name: `${data.firstName} ${data.lastName}`,
-                        title: data.role, // Changed from role to align with User entity
+                        title: data.role,
                         profilePicture: data.profilePicture || null,
                     });
                 } else {
-                    setError('Failed to fetch user details.');
+                    setError(`Failed to fetch user details: ${response.status} ${response.statusText}`);
+                    console.error('User details response:', await response.text());
                     navigate('/login');
                 }
             } catch (error) {
-                setError('Error fetching user details.');
+                setError(`Error fetching user details: ${error.message}`);
                 console.error('Error fetching user details:', error);
                 navigate('/login');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchUserDetails();
-    }, [userId, navigate]);
+    }, [navigate]);
 
     // WebSocket setup
     useEffect(() => {
-        if (!userId) return;
-
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS('http://localhost:6262/ws');
         const stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
-        });
-
-        stompClient.onConnect = () => {
-            console.log('Connected to WebSocket for userId:', userId);
-            stompClient.subscribe(`/topic/notifications/${userId}`, (message) => {
-                const data = JSON.parse(message.body);
-                if (data.message && data.type === 'INFO') {
-                    // Handle deletion events
-                    if (data.message === 'All notifications cleared') {
-                        setNotifications([]);
-                    } else if (data.message === 'Notification deleted') {
-                        setNotifications((prev) => prev.filter((n) => n.id !== data.id)); // Assumes id in message
-                    }
-                } else {
-                    // Handle new or updated notifications
-                    setNotifications((prev) => {
-                        const exists = prev.find((n) => n.id === data.id);
-                        if (exists) {
-                            return prev.map((n) => (n.id === data.id ? { ...n, ...data } : n));
+            connectHeaders: {
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+            },
+            onConnect: () => {
+                console.log('Connected to WebSocket');
+                stompClient.subscribe(`/topic/notifications`, (message) => {
+                    const data = JSON.parse(message.body);
+                    if (data.message && data.type === 'INFO') {
+                        if (data.message === 'All notifications cleared') {
+                            setNotifications([]);
+                        } else if (data.message === 'Notification deleted') {
+                            setNotifications((prev) => prev.filter((n) => n.id !== data.id));
                         }
-                        return [
-                            ...prev,
-                            { ...data, type: data.type?.toLowerCase() || 'info', read: data.isRead || false },
-                        ];
-                    });
-                }
-            });
-        };
-
-        stompClient.onStompError = (frame) => {
-            console.error('WebSocket error:', frame);
-            setError('WebSocket connection failed');
-        };
+                    } else {
+                        setNotifications((prev) => {
+                            const exists = prev.find((n) => n.id === data.id);
+                            if (exists) {
+                                return prev.map((n) =>
+                                    n.id === data.id ? { ...n, ...data, read: data.isRead !== undefined ? data.isRead : n.read } : n
+                                );
+                            }
+                            return [
+                                ...prev,
+                                { ...data, type: data.type?.toLowerCase() || 'info', read: data.isRead || false },
+                            ];
+                        });
+                    }
+                });
+            },
+            onStompError: (frame) => {
+                console.error('WebSocket error:', frame);
+                setError('WebSocket connection failed');
+            },
+        });
 
         stompClient.activate();
 
@@ -130,18 +103,17 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             stompClient.deactivate();
             console.log('Disconnected from WebSocket');
         };
-    }, [userId, setNotifications]);
+    }, [setNotifications]);
 
     // Fetch initial notifications
     useEffect(() => {
         const fetchNotifications = async () => {
-            if (!userId) return;
-
+            if (!user) return;
             setLoading(true);
             setError(null);
             try {
-                const token = localStorage.getItem('jwt_token');
-                const response = await fetch(`http://localhost:8080/api/notifications/${userId}`, {
+                const token = localStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -158,6 +130,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     setNotifications(normalizedData);
                 } else {
                     setError(`Failed to fetch notifications: ${response.status} ${response.statusText}`);
+                    console.error('Notifications response:', await response.text());
                 }
             } catch (error) {
                 setError(`Error fetching notifications: ${error.message}`);
@@ -167,17 +140,17 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             }
         };
         fetchNotifications();
-    }, [userId, setNotifications]);
+    }, [user, setNotifications]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('jwt');
         navigate('/login');
     };
 
     const markAsRead = async (id) => {
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -185,9 +158,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 },
             });
             if (response.ok) {
-                setNotifications(notifications.map((n) =>
-                    n.id === id ? { ...n, read: true } : n
-                ));
+                setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
             } else {
                 setError('Failed to mark notification as read');
             }
@@ -199,8 +170,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const markAllAsRead = async () => {
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`http://localhost:8080/api/notifications/read/all/${userId}`, {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/notifications/read/all/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -220,8 +191,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const deleteNotification = async (id) => {
         try {
-            const token = localStorage.getItem('jwt_token');
-            const response = await fetch(`http://localhost:8080/api/notifications/${id}`, {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/notifications/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -242,8 +213,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const deleteAllNotifications = async () => {
         if (window.confirm('Are you sure you want to delete all notifications?')) {
             try {
-                const token = localStorage.getItem('jwt_token');
-                const response = await fetch(`http://localhost:8080/api/notifications/all/${userId}`, {
+                const token = localStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/notifications/all/${user.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

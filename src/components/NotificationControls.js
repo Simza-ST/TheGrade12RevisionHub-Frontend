@@ -14,6 +14,10 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                 <option value="info">Info</option>
                 <option value="warning">Warning</option>
                 <option value="error">Error</option>
+                <option value="birthday">birthday</option>
+                <option value="Read">Read</option>
+                <option value="unRead">unRead</option>
+                <option value="quiz">quiz</option>
             </select>
             <button
                 onClick={markAllAsRead}
