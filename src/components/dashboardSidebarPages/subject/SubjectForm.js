@@ -1,19 +1,17 @@
-import Sidebar from "../Sidebar";
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const SubjectForm = ({ subjects, selectedSubject, onSubjectSelect, onSubmit, darkMode }) => (
     <form onSubmit={onSubmit} className="mb-6">
         <div className="mb-4">
-            <label htmlFor="subject-select" className="block text-white mb-2 font-medium">
+            <label htmlFor="subject-select" className="block text-[var(--text-primary)] mb-2 font-medium">
                 Select a Subject
             </label>
             <select
                 id="subject-select"
                 value={selectedSubject}
                 onChange={onSubjectSelect}
-                className="p-3 border border-gray-600 rounded-lg w-full focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
+                className="p-3 border border-[var(--border)] rounded-lg w-full focus:ring-2 focus:ring-[var(--accent-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors duration-200"
             >
                 <option value="" disabled>
                     Choose a subject
@@ -33,7 +31,7 @@ const SubjectForm = ({ subjects, selectedSubject, onSubjectSelect, onSubmit, dar
         </div>
         <button
             type="submit"
-            className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
+            className="px-4 py-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)] transition-colors duration-200"
         >
             Add Subject
         </button>

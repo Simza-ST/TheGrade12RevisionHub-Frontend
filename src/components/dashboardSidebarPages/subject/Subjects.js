@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../Sidebar';
-import Header from '../common/Header';
 import SubjectForm from './SubjectForm';
 import SubjectCard from './SubjectCard';
-import MessageBanner from '../MessageBanner';
+import MessageBanner from '../../MessageBanner';
 
 const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -20,6 +19,10 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
         profilePicture: null,
     });
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
 
     const fetchData = async (url, setData) => {
         try {
@@ -43,7 +46,6 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
         fetchData(`${API_BASE_URL}/subjects`, setSubjects);
         fetchData(`${API_BASE_URL}/enrolled-subjects`, (data) => {
             console.log('Enrolled subjects data:', data);
-            // Map to strings if API returns objects
             const subjectNames = Array.isArray(data) ? data.map((s) => s.subjectName || s) : [];
             setEnrolledSubjects(subjectNames);
         });
@@ -123,7 +125,7 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+        <div className="flex min-h-screen bg-[var(--bg-primary)]">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
@@ -136,19 +138,39 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                     isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
                 }`}
             >
-                <Header
-                    user={user}
-                    notificationCount={notificationCount}
-                    darkMode={darkMode}
-                    setDarkMode={setDarkMode}
-                    onNotificationsClick={() => navigate('/notifications')}
-                />
-                <section className="bg-teal-800/80 p-6 rounded-2xl shadow-2xl">
+                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[var(--text-primary)]">Your Subjects</h1>
+                        <p className="text-sm mt-1 text-[var(--text-secondary)]">Manage your courses, {user.name}!</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link
+                            to="/notifications"
+                            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                            aria-label={`View notifications (${notificationCount} unread)`}
+                        >
+                            🔔
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {notificationCount}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            onClick={() => setDarkMode(!darkMode)}
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                            aria-label="Toggle dark mode"
+                        >
+                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        </button>
+                    </div>
+                </div>
+                <section className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)]">
                     <header className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-white">Your Subjects</h2>
+                        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Subjects</h2>
                         <button
                             onClick={() => setIsAdding(!isAdding)}
-                            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-400 transition-colors"
+                            className="px-4 py-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)] transition-colors duration-200"
                         >
                             {isAdding ? 'Cancel' : 'Add new subject'}
                         </button>
@@ -164,7 +186,7 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                         />
                     )}
                     <section className="mt-6">
-                        <h3 className="text-xl font-semibold mb-4 text-white">Courses</h3>
+                        <h3 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Courses</h3>
                         {enrolledSubjects.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {enrolledSubjects.map((subject, index) => (
@@ -176,7 +198,7 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-300">No courses enrolled yet.</p>
+                            <p className="text-[var(--text-secondary)]">No courses enrolled yet.</p>
                         )}
                     </section>
                 </section>

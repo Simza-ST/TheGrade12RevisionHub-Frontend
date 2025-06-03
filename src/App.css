@@ -1,3 +1,32 @@
+/* Define root variables for light and dark modes */
+:root {
+  --bg-primary: #F7FAFC; /* Light mode background */
+  --bg-secondary: #FFFFFF; /* Light mode card background */
+  --text-primary: #1A202C; /* Light mode text */
+  --text-secondary: #4A5568; /* Light mode secondary text */
+  --accent-primary: #2DD4BF; /* Light mode teal */
+  --accent-secondary: #F56565; /* Light mode coral */
+  --border: #E2E8F0; /* Light mode border */
+  --hover-primary: #26A69A; /* Light mode hover */
+  --hover-secondary: #E53E3E; /* Light mode secondary hover */
+  --scrollbar-track: #E2E8F0;
+  --scrollbar-thumb: #2DD4BF;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1A202C; /* Dark mode background */
+  --bg-secondary: #2D3748; /* Dark mode card background */
+  --text-primary: #E2E8F0; /* Dark mode text */
+  --text-secondary: #A0AEC0; /* Dark mode secondary text */
+  --accent-primary: #4FD1C5; /* Dark mode teal */
+  --accent-secondary: #E53E3E; /* Dark mode red */
+  --border: #4A5568; /* Dark mode border */
+  --hover-primary: #5EEAD4; /* Dark mode hover */
+  --hover-secondary: #F56565; /* Dark mode secondary hover */
+  --scrollbar-track: #2D3748;
+  --scrollbar-thumb: #4FD1C5;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -11,27 +40,27 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #134e4a;
+  background: var(--accent-primary);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #134e4a;
+  background: var(--hover-primary);
 }
 
 .App {
-  background: linear-gradient(to bottom right, #134e4a, #7f1d1d); /* Match section background */
+  background: var(--bg-primary);
   margin: 0;
   padding: 0;
-  min-height: 100vh; /* Ensure it covers the full viewport height */
+  min-height: 100vh;
   width: 100%;
 }
 
 .App.has-navbar {
-  padding-top: 2px; /* Adjust based on your Navbar height */
+  padding-top: 2px;
 }

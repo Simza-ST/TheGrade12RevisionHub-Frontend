@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import About from './components/About';
-import Skills from './components/Skills';
-import Services from './components/Services';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
+import Navbar from './components/welcomePages/Navbar';
+import Home from './components/welcomePages/Home';
+import About from './components/welcomePages/About';
+import Skills from './components/welcomePages/Skills';
+import Services from './components/welcomePages/Services';
+import Contact from './components/welcomePages/Contact';
+import Footer from './components/welcomePages/Footer';
 import ScrollButton from './components/ScrollButton';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import ForgotPassword from './components/ForgotPassword';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './components/Dashboard';
-import Subjects from './components/Subjects';
-import Quizzes from './components/Quizzes';
-import QuestionPapers from './components/QuestionPapers';
-import Resources from './components/Resources';
-import Schedule from './components/Schedule';
-import Performance from './components/Performance';
-import Notifications from './components/Notifications';
-import Chatroom from './components/Chatroom';
-import Settings from './components/Settings';
+import Resources from './components/dashboardSidebarPages/Resources';
+import Schedule from './components/onDashboardPages/Schedule';
+import Performance from './components/dashboardSidebarPages/Performance';
+import Notifications from './components/dashboardSidebarPages/Notifications';
+import Chatroom from './components/dashboardSidebarPages/Chatroom';
+import Settings from './components/dashboardSidebarPages/Settings';
+//import QuestionPapers from "./components/dashboardSidebarPages/question-papers/QuestionPapers";
+import QuestionPapersList from "./components/dashboardSidebarPages/question-papers/QuestionPapersList";
+import QuestionPaperDetails from "./components/dashboardSidebarPages/question-papers/QuestionPaperDetails";
+import Quizzes from './components/dashboardSidebarPages/quiz/Quizzes';
+import Subjects from "./components/dashboardSidebarPages/subject/Subjects";
+
 
 // Basic PublicLayout component to wrap public routes
 const PublicLayout = () => (
@@ -129,10 +132,10 @@ const App = () => {
                         }
                     />
                     <Route
-                        path="/questionpapers"
+                        path="/question-papers"
                         element={
                             isAuthenticated ? (
-                                <QuestionPapers
+                                <QuestionPapersList
                                     isCollapsed={isCollapsed}
                                     setIsCollapsed={setIsCollapsed}
                                     darkMode={darkMode}
@@ -145,6 +148,24 @@ const App = () => {
                             )
                         }
                     />
+                    <Route
+                        path="/question-papers"
+                        element={
+                            isAuthenticated ? (
+                                <QuestionPaperDetails
+                                    isCollapsed={isCollapsed}
+                                    setIsCollapsed={setIsCollapsed}
+                                    darkMode={darkMode}
+                                    setDarkMode={setDarkMode}
+                                    notifications={notifications}
+                                    setNotifications={setNotifications}
+                                />
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
+
                     <Route
                         path="/resources"
                         element={
@@ -247,6 +268,9 @@ const App = () => {
                             )
                         }
                     />
+                    <Route path="/question-papers/list" element={<QuestionPapersList  darkMode={darkMode} setDarkMode={setDarkMode}/>} />
+                    <Route path="/question-papers/:id" element={<QuestionPaperDetails />} />
+                    <Route path="/" element={<Login />} />
                 </Routes>
             </Router>
         </div>

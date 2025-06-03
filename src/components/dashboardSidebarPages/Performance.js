@@ -26,6 +26,7 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
     });
 
     useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
         const mockCourses = [
             { name: 'Advance Calculus', progress: 86, grade: 'A' },
             { name: 'Physical Sciences', progress: 80, grade: 'B+' },
@@ -42,7 +43,7 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
                 console.error('Error setting mock courses:', error);
             }
         }, 1000);
-    }, []);
+    }, [darkMode]);
 
     const handleLogout = () => {
         localStorage.removeItem('jwt');
@@ -55,8 +56,8 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
             {
                 label: 'Progress (%)',
                 data: courses.map((course) => course.progress),
-                backgroundColor: 'rgba(45, 212, 191, 0.6)',
-                borderColor: 'rgba(45, 212, 191, 1)',
+                backgroundColor: 'var(--accent-primary)',
+                borderColor: 'var(--accent-primary)',
                 borderWidth: 1,
             },
         ],
@@ -65,19 +66,19 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
     const chartOptions = {
         responsive: true,
         plugins: {
-            legend: { position: 'top', labels: { color: 'white' } },
-            title: { display: true, text: 'Course Performance', color: 'white' },
+            legend: { position: 'top', labels: { color: 'var(--text-primary)' } },
+            title: { display: true, text: 'Course Performance', color: 'var(--text-primary)' },
         },
         scales: {
-            x: { ticks: { color: 'white' } },
-            y: { beginAtZero: true, max: 100, ticks: { color: 'white' } },
+            x: { ticks: { color: 'var(--text-primary)' } },
+            y: { beginAtZero: true, max: 100, ticks: { color: 'var(--text-primary)' } },
         },
     };
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"></div>
+            <div className="flex min-h-screen justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
             </div>
         );
     }
@@ -85,7 +86,7 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
+        <div className="flex min-h-screen">
             <Sidebar
                 user={user}
                 onLogout={handleLogout}
@@ -95,55 +96,55 @@ const Performance = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notif
             />
             <div
                 className={`
-                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-                    ${isCollapsed ? 'ml-16' : 'ml-64'}
-                `}
+          flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+          ${isCollapsed ? 'ml-16' : 'ml-64'}
+        `}
             >
-                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
+                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold">Performance</h1>
-                        <p className="text-sm mt-1 text-gray-300">Track your progress, {user.name}!</p>
+                        <h1 className="text-3xl font-bold text-[var(--text-primary)]">Performance</h1>
+                        <p className="text-sm mt-1 text-[var(--text-secondary)]">Track your progress, {user.name}!</p>
                     </div>
                     <div className="flex gap-4">
                         <Link
                             to="/notifications"
-                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                             aria-label={`View notifications (${notificationCount} unread)`}
                         >
                             🔔
                             {notificationCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    {notificationCount}
-                                </span>
+                                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-[var(--text-primary)] text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {notificationCount}
+                </span>
                             )}
                         </Link>
                         <button
                             onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                             aria-label="Toggle dark mode"
                         >
                             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                         </button>
                     </div>
                 </div>
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6`}>
-                    <h2 className="text-xl font-semibold mb-4 text-white">Performance Chart</h2>
+                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6">
+                    <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Performance Chart</h2>
                     <Bar data={chartData} options={chartOptions} />
                 </div>
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <h2 className="text-xl font-semibold mb-4 text-white">Course Details</h2>
+                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+                    <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Course Details</h2>
                     <ul className="space-y-2">
                         {courses.length > 0 ? (
                             courses.map((course) => (
-                                <li key={course.name} className="p-2 bg-teal-700 rounded flex justify-between">
-                                    <span className="text-white">
-                                        {course.name} (Progress: {course.progress}%)
-                                    </span>
-                                    <span className="text-teal-400">Grade: {course.grade}</span>
+                                <li key={course.name} className="p-2 bg-[var(--bg-secondary)] rounded flex justify-between">
+                  <span className="text-[var(--text-primary)]">
+                    {course.name} (Progress: {course.progress}%)
+                  </span>
+                                    <span className="text-[var(--accent-primary)]">Grade: {course.grade}</span>
                                 </li>
                             ))
                         ) : (
-                            <p className="text-gray-300">No performance data available.</p>
+                            <p className="text-[var(--text-secondary)]">No performance data available.</p>
                         )}
                     </ul>
                 </div>

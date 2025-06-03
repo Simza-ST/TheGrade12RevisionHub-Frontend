@@ -5,13 +5,13 @@ const SubjectCard = ({ subject, onRemove }) => {
     console.log('SubjectCard subject:', subject);
     return (
         <article
-            className="bg-teal-800/80 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 rounded-2xl shadow-[var(--shadow)] hover:shadow-lg transition-shadow duration-300"
         >
             <header className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-medium text-white">{subject}</h3>
+                <h3 className="text-lg font-medium text-[var(--text-primary)]">{subject}</h3>
                 <button
                     onClick={() => onRemove(subject)}
-                    className="p-1 bg-red-600 text-white rounded-full hover:bg-red-500 transition-colors"
+                    className="p-1 bg-[var(--accent-secondary)] text-white rounded-full hover:bg-[var(--hover-secondary)] transition-colors duration-200"
                     title="Remove subject"
                     aria-label={`Remove ${subject}`}
                 >
@@ -31,7 +31,7 @@ const SubjectCard = ({ subject, onRemove }) => {
             </header>
             <Link
                 to={`/question-papers?subject=${encodeURIComponent(subject)}`}
-                className="px-3 py-1 bg-teal-500 text-white rounded-md hover:bg-teal-400 text-sm transition-colors"
+                className="px-3 py-1 bg-[var(--accent-primary)] text-white rounded-md hover:bg-[var(--hover-primary)] text-sm transition-colors duration-200"
                 aria-label={`View past papers for ${subject}`}
             >
                 Past Papers

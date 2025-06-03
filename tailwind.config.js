@@ -1,8 +1,6 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: [
-        './src/**/*.{js,jsx,ts,tsx}',
-    ],
+    darkMode: 'class',
+    content: ['./src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         extend: {
             colors: {
@@ -18,6 +16,10 @@ module.exports = {
                 'footer-bg': '#1a4543',
                 'gradient-start': '#134e4a',
                 'gradient-end': '#7f1d1d',
+                'bg-secondary': '#f9fafb',
+                'bg-secondary-dark': '#374151',
+                'hover-primary': '#e5e7eb',
+                'hover-primary-dark': '#4b5563',
             },
             fontFamily: {
                 'inter': ['Inter', 'sans-serif'],
@@ -28,16 +30,4 @@ module.exports = {
         },
     },
     plugins: [],
-}
-
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-    darkMode: 'class', // Enable dark mode with class strategy
-    content: [
-        './src/**/*.{js,jsx,ts,tsx}',
-    ],
-    theme: {
-        extend: {},
-    },
-    plugins: [],
-}
+};

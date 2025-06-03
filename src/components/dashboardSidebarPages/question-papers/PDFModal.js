@@ -2,16 +2,6 @@ import PropTypes from 'prop-types';
 import { useEffect, useCallback } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
-/**
- * PDFModal component to display a PDF in a modal
- * @param {Object} props - Component props
- * @param {boolean} showModal - Whether the modal is visible
- * @param {Function} onClose - Handler to close the modal
- * @param {string} pdfUrl - URL of the PDF to display
- * @param {Object} currentPaper - Current paper object
- * @param {boolean} pdfLoading - PDF loading state
- * @param {Function} onDownloadPdf - Handler for downloading PDF
- */
 const PDFModal = ({ showModal, onClose, pdfUrl, currentPaper, pdfLoading, onDownloadPdf }) => {
     const closeModal = useCallback(() => {
         onClose();
@@ -37,14 +27,14 @@ const PDFModal = ({ showModal, onClose, pdfUrl, currentPaper, pdfLoading, onDown
             aria-modal="true"
             aria-labelledby="modal-title"
         >
-            <div className="bg-teal-900 bg-opacity-90 p-4 rounded-lg shadow-lg w-full max-w-3xl max-h-[85vh] flex flex-col">
+            <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
                 <div className="flex justify-between items-center mb-3">
-                    <h2 id="modal-title" className="text-lg font-semibold text-white">
+                    <h2 id="modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
                         {currentPaper ? currentPaper.title : 'View PDF'}
                     </h2>
                     <button
                         onClick={closeModal}
-                        className="text-white hover:text-teal-300 text-xl"
+                        className="text-[var(--text-primary)] hover:text-[var(--accent-primary)] text-xl"
                         aria-label="Close modal"
                     >
                         ✕
@@ -64,7 +54,7 @@ const PDFModal = ({ showModal, onClose, pdfUrl, currentPaper, pdfLoading, onDown
                 {currentPaper && !pdfLoading && (
                     <button
                         onClick={() => onDownloadPdf(currentPaper.id, currentPaper.title)}
-                        className="mt-3 text-teal-300 hover:underline px-2 py-1"
+                        className="mt-3 text-[var(--accent-primary)] hover:underline px-2 py-1"
                         aria-label={`Download ${currentPaper.title}`}
                     >
                         Download PDF
