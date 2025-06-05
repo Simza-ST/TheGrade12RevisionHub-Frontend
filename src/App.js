@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/welcomePages/Navbar';
 import Home from './components/welcomePages/Home';
@@ -19,14 +19,13 @@ import Performance from './components/dashboardSidebarPages/Performance';
 import Notifications from './components/dashboardSidebarPages/Notifications';
 import Chatroom from './components/dashboardSidebarPages/Chatroom';
 import Settings from './components/dashboardSidebarPages/Settings';
-//import QuestionPapers from "./components/dashboardSidebarPages/question-papers/QuestionPapers";
-import QuestionPapersList from "./components/dashboardSidebarPages/question-papers/QuestionPapersList";
-import QuestionPaperDetails from "./components/dashboardSidebarPages/question-papers/QuestionPaperDetails";
+import QuestionPapersList from './components/dashboardSidebarPages/question-papers/QuestionPapersList';
+import QuestionPaperDetails from './components/dashboardSidebarPages/question-papers/QuestionPaperDetails';
 import Quizzes from './components/dashboardSidebarPages/quiz/Quizzes';
-import Subjects from "./components/dashboardSidebarPages/subject/Subjects";
+import Subjects from './components/dashboardSidebarPages/subject/Subjects';
+import DigitizedQuestionPapers from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapers';
+import EnglishFALP12020 from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020';
 
-
-// Basic PublicLayout component to wrap public routes
 const PublicLayout = () => (
     <div>
         <Navbar />
@@ -35,6 +34,10 @@ const PublicLayout = () => (
         <ScrollButton />
     </div>
 );
+
+const ProtectedRoute = ({ isAuthenticated, children }) => {
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -46,11 +49,19 @@ const App = () => {
     ]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Check authentication status on mount
     useEffect(() => {
         const token = localStorage.getItem('jwt');
-        setIsAuthenticated(!!token); // Set to true if token exists
+        setIsAuthenticated(!!token);
     }, []);
+
+    const commonProps = {
+        isCollapsed,
+        setIsCollapsed,
+        darkMode,
+        setDarkMode,
+        notifications,
+        setNotifications,
+    };
 
     return (
         <div className="App">
@@ -70,8 +81,6 @@ const App = () => {
                                 </>
                             }
                         />
-                        {/* Commenting out /upload until FileUploader is provided */}
-                        {/* <Route path="/upload" element={<FileUploader />} /> */}
                     </Route>
 
                     {/* Authentication routes */}
@@ -83,198 +92,121 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            isAuthenticated ? (
-                                <Dashboard
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Dashboard {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/subjects"
                         element={
-                            isAuthenticated ? (
-                                <Subjects
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Subjects {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/quizzes"
                         element={
-                            isAuthenticated ? (
-                                <Quizzes
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Quizzes {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
-                        path="/question-papers"
+                        path="/question-papers/list"
                         element={
-                            isAuthenticated ? (
-                                <QuestionPapersList
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <QuestionPapersList {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
-                        path="/question-papers"
+                        path="/question-papers/:id"
                         element={
-                            isAuthenticated ? (
-                                <QuestionPaperDetails
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <QuestionPaperDetails {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
-
                     <Route
                         path="/resources"
                         element={
-                            isAuthenticated ? (
-                                <Resources
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Resources {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/schedule"
                         element={
-                            isAuthenticated ? (
-                                <Schedule
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Schedule {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/performance"
                         element={
-                            isAuthenticated ? (
-                                <Performance
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Performance {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/notifications"
                         element={
-                            isAuthenticated ? (
-                                <Notifications
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Notifications {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/chatroom"
                         element={
-                            isAuthenticated ? (
-                                <Chatroom
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Chatroom {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/settings"
                         element={
-                            isAuthenticated ? (
-                                <Settings
-                                    isCollapsed={isCollapsed}
-                                    setIsCollapsed={setIsCollapsed}
-                                    darkMode={darkMode}
-                                    setDarkMode={setDarkMode}
-                                    notifications={notifications}
-                                    setNotifications={setNotifications}
-                                />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <Settings {...commonProps} />
+                            </ProtectedRoute>
                         }
                     />
-                    <Route path="/question-papers/list" element={<QuestionPapersList  darkMode={darkMode} setDarkMode={setDarkMode}/>} />
-                    <Route path="/question-papers/:id" element={<QuestionPaperDetails />} />
-                    <Route path="/" element={<Login />} />
+                    <Route
+                        path="/digitized-question-papers"
+                        element={
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <DigitizedQuestionPapers {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/digitized-question-papers/:id"
+                        element={
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <QuestionPaperView />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </Router>
         </div>
     );
 };
+
+function QuestionPaperView() {
+    const { id } = useParams();
+    console.log('Viewing paper ID:', id);
+    if (id === '1') {
+        return <EnglishFALP12020 />;
+    }
+    return <div>Paper not found</div>;
+}
 
 export default App;
