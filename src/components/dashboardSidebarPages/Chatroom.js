@@ -129,7 +129,7 @@ const Chatroom = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                         />
                         <button
                             onClick={handleSendMessage}
-                            className="px-4 py-3 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--text-primary)] rounded-r-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)]"
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
                             aria-label="Send message"
                         >
                             Send

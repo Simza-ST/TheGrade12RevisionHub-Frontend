@@ -5,7 +5,7 @@ const SubjectCard = ({ subject, onRemove }) => {
     console.log('SubjectCard subject:', subject);
     return (
         <article
-            className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 rounded-2xl shadow-[var(--shadow)] hover:shadow-lg transition-shadow duration-300"
+            className="bg-[#fafafa] bg-opacity-95 backdrop-blur-sm p-4 rounded-2xl shadow-[var(--shadow)] hover:shadow-lg transition-shadow duration-300 dark:bg-[#374151]"
         >
             <header className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium text-[var(--text-primary)]">{subject}</h3>
@@ -31,7 +31,7 @@ const SubjectCard = ({ subject, onRemove }) => {
             </header>
             <Link
                 to={`/question-papers?subject=${encodeURIComponent(subject)}`}
-                className="px-3 py-1 bg-[var(--accent-primary)] text-white rounded-md hover:bg-[var(--hover-primary)] text-sm transition-colors duration-200"
+                className="px-3 py-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--hover-tertiary)] text-sm transition-colors duration-200"
                 aria-label={`View past papers for ${subject}`}
             >
                 Past Papers

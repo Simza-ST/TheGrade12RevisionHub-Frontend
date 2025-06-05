@@ -111,18 +111,24 @@ pre {
 }
 
 :root {
-  --text-normal: #1f2937;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #e5e7eb; /* Light gray for buttons */
-  --hover-tertiary: #d1d5db; /* Slightly darker gray on hover */
+  --text-primary: #1f2937;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb; /* Very light gray in light mode */
+  --bg-tertiary: #e5e7eb;
+  --hover-tertiary: #d1d5db;
   --accent-primary: #3b82f6;
   --accent-secondary: #8b5cf6;
+  --hover-primary: #2563eb;
+  --hover-secondary: #7c3aed;
 }
 [data-theme='dark'] {
-  --text-normal: #f3f4f6;
-  --bg-secondary: #374151;
-  --bg-tertiary: #4b5563; /* Darker gray for buttons */
-  --hover-tertiary: #6b7280; /* Lighter gray on hover */
+  --text-primary: #f3f4f6;
+  --bg-primary: #1f2937;
+  --bg-secondary: #374151; /* Dark gray in dark mode */
+  --bg-tertiary: #4b5563;
+  --hover-tertiary: #6b7280;
   --accent-primary: #60a5fa;
   --accent-secondary: #a78bfa;
+  --hover-primary: #3b82f6;
+  --hover-secondary: #8b5cf6;
 }

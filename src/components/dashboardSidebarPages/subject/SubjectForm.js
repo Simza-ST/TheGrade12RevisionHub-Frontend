@@ -31,7 +31,7 @@ const SubjectForm = ({ subjects, selectedSubject, onSubjectSelect, onSubmit, dar
         </div>
         <button
             type="submit"
-            className="px-4 py-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)] transition-colors duration-200"
+            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
         >
             Add Subject
         </button>

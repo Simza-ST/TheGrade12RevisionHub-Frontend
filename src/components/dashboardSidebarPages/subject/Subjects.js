@@ -165,12 +165,12 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                         </button>
                     </div>
                 </div>
-                <section className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)]">
+                <section className="p-6 rounded-2xl shadow-2xl" style={{ backgroundColor: '#ffffff', position: 'relative', zIndex: 1000 }}>
                     <header className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Subjects</h2>
                         <button
                             onClick={() => setIsAdding(!isAdding)}
-                            className="px-4 py-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)] transition-colors duration-200"
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
                         >
                             {isAdding ? 'Cancel' : 'Add new subject'}
                         </button>
