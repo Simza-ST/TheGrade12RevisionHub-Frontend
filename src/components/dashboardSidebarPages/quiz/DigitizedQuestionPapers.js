@@ -43,7 +43,7 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
             console.log('Enrolled subjects set:', enrolledSubjects);
 
             // Fetch digitized question papers
-            const papersUrl = `${API_BASE_URL}/user/digitized-question-papers${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
+            const papersUrl = `${API_BASE_URL}/user${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
             console.log('Fetching papers from:', papersUrl);
             const papersResponse = await fetch(papersUrl, { headers });
             const papersData = await papersResponse.json();
