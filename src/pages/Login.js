@@ -20,10 +20,10 @@ const Login = ({ setIsAuthenticated }) => {
             setError('Please enter a valid email address.');
             return;
         }
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters long.');
-            return;
-        }
+        // if (password.length < 8) {
+        //     setError('Password must be at least 8 characters long.');
+        //     return;
+        // }
 
         try {
             const response = await fetch(`${API_BASE_URL}/login`, {

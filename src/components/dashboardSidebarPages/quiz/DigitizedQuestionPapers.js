@@ -81,13 +81,7 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
                 read: false,
             },
         ]);
-        if (isInteractive) {
-            navigate(`/digitized-question-papers/${paper.id}`);
-        } else {
-            const viewUrl = `${API_BASE_URL}/digitized-question-papers/${paper.id}/view`;
-            console.log('Viewing paper at:', viewUrl);
-            window.open(viewUrl, '_blank');
-        }
+        navigate(`/digitized-question-papers/${paper.id}`);
     };
 
     const handleRetry = () => {
