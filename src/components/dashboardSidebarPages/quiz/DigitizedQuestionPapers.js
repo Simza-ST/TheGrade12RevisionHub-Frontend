@@ -18,6 +18,10 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
+
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
@@ -31,37 +35,28 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
                 'Content-Type': 'application/json',
             };
 
-            // Fetch enrolled subjects
             const subjectsResponse = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers });
             const subjectsData = await subjectsResponse.json();
-            console.log('Enrolled subjects response:', subjectsData);
             if (!subjectsResponse.ok || !subjectsData.success) {
                 throw new Error(subjectsData.message || 'Failed to fetch enrolled subjects');
             }
             const enrolledSubjects = subjectsData.data.map(s => s.subjectName || s).sort();
             setSubjects(enrolledSubjects);
-            console.log('Enrolled subjects set:', enrolledSubjects);
 
-            // Fetch digitized question papers
             const papersUrl = `${API_BASE_URL}/user${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
-            console.log('Fetching papers from:', papersUrl);
             const papersResponse = await fetch(papersUrl, { headers });
             const papersData = await papersResponse.json();
-            console.log('Papers response:', papersData);
             if (!papersResponse.ok || !papersData.success) {
                 throw new Error(papersData.message || `Failed to fetch digitized question papers: HTTP ${papersResponse.status}`);
             }
 
-            console.log('Raw papers data:', papersData.data);
             const filteredPapers = filterSubject
                 ? (papersData.data || []).filter(paper =>
                     (paper.subject?.subjectName || paper.subjectName || '').toLowerCase() === filterSubject.toLowerCase())
                 : (papersData.data || []);
-            console.log('Filtered papers:', filteredPapers);
             setQuestionPapers(filteredPapers);
             setLoading(false);
         } catch (err) {
-            console.error('Fetch error:', err);
             setError(`Error fetching data: ${err.message}`);
             setLoading(false);
         }
@@ -104,103 +99,344 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-[var(--bg-primary)]">
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <main
-                className={`flex-1 p-6 sm:p-8 transition-all duration-300 max-w-5xl mx-auto w-full ${
-                    isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
-                }`}
-            >
-                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-[var(--text-primary)]">Digitized Question Papers</h1>
-                        <p className="text-sm mt-1 text-[var(--text-secondary)]">Access digitized past papers, {user.name}!</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <Link
-                            to="/notifications"
-                            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
-                            aria-label={`View notifications (${notificationCount} unread)`}
-                        >
-                            🔔
-                            {notificationCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    {notificationCount}
-                                </span>
-                            )}
-                        </Link>
-                        <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
-                            aria-label="Toggle dark mode"
-                        >
-                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                        </button>
-                    </div>
-                </div>
-                <section className="p-6 rounded-2xl shadow-2xl" style={{ backgroundColor: '#ffffff', position: 'relative', zIndex: 1000 }}>
-                    <header className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Digitized Question Papers</h2>
-                    </header>
-                    {error && (
-                        <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-[var(--text-primary)] flex justify-between items-center">
-                            <span>{error}</span>
-                            <button
-                                onClick={handleRetry}
-                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+        <div className="full">
+            <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
+                        /* Prevent transitions and animations globally */
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
+                        /* Full wrapper */
+                        .full {
+                            width: 100%;
+                            min-height: 100vh;
+                            position: relative;
+                            z-index: 10;
+                        }
+                        /* Base styles */
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
+                        .bg-[var(--bg-secondary)] {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        }
+                        .bg-[var(--bg-tertiary)] {
+                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        }
+                        .bg-[var(--accent-primary)] {
+                            background-color: var(--accent-primary, #007bff);
+                        }
+                        .bg-[var(--accent-secondary)] {
+                            background-color: var(--accent-secondary, #dc3545);
+                        }
+                        .text-[var(--text-primary)] {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        }
+                        .text-[var(--text-secondary)] {
+                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                        }
+                        .text-white {
+                            color: #ffffff;
+                        }
+                        /* Hover states */
+                        .hover\\:bg-[var(--hover-tertiary)]:hover {
+                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                        }
+                        .hover\\:bg-[var(--hover-primary)]:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        /* Layout styles */
+                        .flex {
+                            display: flex;
+                        }
+                        .min-h-screen {
+                            min-height: 100vh;
+                        }
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
+                        }
+                        .justify-between {
+                            justify-content: space-between;
+                        }
+                        .items-center {
+                            align-items: center;
+                        }
+                        .flex-1 {
+                            flex: 1;
+                        }
+                        .gap-4 {
+                            gap: 16px;
+                        }
+                        .p-6 {
+                            padding: 24px;
+                        }
+                        .sm\\:p-8 {
+                            padding: 32px;
+                        }
+                        .rounded-2xl {
+                            border-radius: 16px;
+                        }
+                        .rounded-lg {
+                            border-radius: 8px;
+                        }
+                        .rounded-md {
+                            border-radius: 6px;
+                        }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
+                        .shadow-[var(--shadow)] {
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        /* Typography */
+                        .text-3xl {
+                            font-size: 24px;
+                        }
+                        .text-xl {
+                            font-size: 18px;
+                        }
+                        .text-lg {
+                            font-size: 16px;
+                        }
+                        .text-sm {
+                            font-size: 12px;
+                        }
+                        .text-xs {
+                            font-size: 10px;
+                        }
+                        .font-bold {
+                            font-weight: 700;
+                        }
+                        .font-semibold {
+                            font-weight: 600;
+                        }
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        /* Form elements */
+                        .form-label {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                            display: block;
+                        }
+                        .form-input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 14px;
+                        }
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        /* Button styles */
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        /* Grid layout */
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .col-span-full {
+                            grid-column: 1 / -1;
+                        }
+                        /* Notification badge */
+                        .-top-2 {
+                            top: -8px;
+                        }
+                        .-right-2 {
+                            right: -8px;
+                        }
+                        .h-5 {
+                            height: 20px;
+                        }
+                        .w-5 {
+                            width: 20px;
+                        }
+                        /* Custom section background */
+                        .paper-section {
+                            background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
+                        }
+                        /* Service card */
+                        .service-card {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            padding: 16px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        .hover\\:shadow-lg:hover {
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+                        }
+                        /* Loader */
+                        .animate-spin {
+                            animation: spin 1s linear infinite !important;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        /* Sidebar margins */
+                        .ml-16 {
+                            margin-left: 64px;
+                        }
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        /* Responsive adjustments */
+                        @media (min-width: 640px) {
+                            .sm\\:grid-cols-2 {
+                                grid-template-columns: repeat(2, 1fr);
+                            }
+                            .sm\\:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        @media (min-width: 768px) {
+                            .md\\:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                        }
+                    `}
+                </style>
+                <Sidebar
+                    user={user}
+                    onLogout={handleLogout}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                    darkMode={darkMode}
+                />
+                <div
+                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
+                >
+                    <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Digitized Question Papers</h1>
+                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Access digitized past papers, {user.name}!</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <Link
+                                to="/notifications"
+                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label={`View notifications (${notificationCount} unread)`}
                             >
-                                Retry
+                                🔔
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
+                                )}
+                            </Link>
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label="Toggle dark mode"
+                            >
+                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                             </button>
                         </div>
-                    )}
-                    {!error && (
-                        <>
-                            <div className="mb-6">
-                                <label htmlFor="filterSubject" className="block text-[var(--text-primary)] mb-2 font-medium">
-                                    Filter by Subject
-                                </label>
-                                <select
-                                    id="filterSubject"
-                                    value={filterSubject}
-                                    onChange={(e) => setFilterSubject(e.target.value)}
-                                    className="text-lg p-2 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--accent-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)] w-full"
+                    </div>
+                    <div className="paper-section">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Digitized Question Papers</h2>
+                        </div>
+                        {error && (
+                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
+                                <span>{error}</span>
+                                <button
+                                    onClick={handleRetry}
+                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                 >
-                                    <option value="">All Subjects</option>
-                                    {subjects.map((subject, index) => (
-                                        <option key={index} value={subject}>
-                                            {subject}
-                                        </option>
-                                    ))}
-                                </select>
+                                    Retry
+                                </button>
                             </div>
-                            <section className="mt-6">
-                                <h3 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Papers</h3>
-                                {questionPapers.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        {questionPapers.map((paper, index) => (
-                                            <QuestionPaperCard
-                                                key={paper.id || index}
-                                                paper={paper}
-                                                onView={handleViewPaper}
-                                            />
+                        )}
+                        {!error && (
+                            <>
+                                <div className="mb-6">
+                                    <label htmlFor="filterSubject" className="form-label">
+                                        Filter by Subject
+                                    </label>
+                                    <select
+                                        id="filterSubject"
+                                        value={filterSubject}
+                                        onChange={(e) => setFilterSubject(e.target.value)}
+                                        className="form-input"
+                                    >
+                                        <option value="">All Subjects</option>
+                                        {subjects.map((subject, index) => (
+                                            <option key={subject || index} value={subject}>
+                                                {subject}
+                                            </option>
                                         ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-[var(--text-secondary)]">
-                                        No digitized question papers available{filterSubject ? ` for ${filterSubject}` : ''}.
-                                    </p>
-                                )}
-                            </section>
-                        </>
-                    )}
-                </section>
-            </main>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {questionPapers.length > 0 ? (
+                                        questionPapers.map((paper, index) => (
+                                            <div
+                                                key={paper.id || `paper-${index}`}
+                                                className="service-card hover:shadow-lg"
+                                            >
+                                                <QuestionPaperCard
+                                                    paper={paper}
+                                                    onView={handleViewPaper}
+                                                    darkMode={darkMode}
+                                                />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-[var(--text-secondary)] col-span-full">
+                                            No digitized question papers available{filterSubject ? ` for ${filterSubject}` : ''}.
+                                        </p>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

@@ -2,10 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { API_BASE_URL, getAuthHeaders } from '../utils/api';
 
-/**
- * Custom hook to manage question papers data and API interactions
- * @returns {Object} State and functions for question papers
- */
 export const useQuestionPapers = () => {
     const navigate = useNavigate();
     const { subject } = useParams();
@@ -22,34 +18,31 @@ export const useQuestionPapers = () => {
 
     // Fetch enrolled subjects on mount
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        console.log('JWT Token:', token);
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-
         const fetchSubjects = async () => {
             setLoading(true);
+            const token = localStorage.getItem('jwt');
+            if (!token) {
+                setError('Please log in to access question papers.');
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await fetch(`${API_BASE_URL}/enrolled-subjects`, {
                     headers: getAuthHeaders(),
                 });
-                console.log('Subjects API status:', response.status);
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt');
-                    navigate('/login');
+                    setError('Session expired. Please log in again.');
+                    setLoading(false);
                     return;
                 }
                 if (!response.ok) {
                     throw new Error(`Failed to fetch subjects: HTTP ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Subjects API data:', data);
                 if (data && Array.isArray(data.data)) {
                     setSubjects(data.data);
                     const decodedSubject = subject ? decodeURIComponent(subject) : '';
-                    console.log('URL Subject:', decodedSubject);
                     if (decodedSubject && data.data.includes(decodedSubject)) {
                         setSelectedSubject(decodedSubject);
                     } else if (decodedSubject) {
@@ -60,7 +53,6 @@ export const useQuestionPapers = () => {
                 }
             } catch (err) {
                 setError(`Error fetching subjects: ${err.message}`);
-                console.error('Error:', err);
             } finally {
                 setLoading(false);
             }
@@ -75,23 +67,21 @@ export const useQuestionPapers = () => {
                 setQuestionPapers([]);
                 return;
             }
+            setLoading(true);
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/question-papers?subjectName=${encodeURIComponent(selectedSubject)}`,
                     { headers: getAuthHeaders() }
                 );
-                console.log('Papers API status:', response.status);
-                console.log('Papers API URL:', `${API_BASE_URL}/question-papers?subjectName=${encodeURIComponent(selectedSubject)}`);
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt');
-                    navigate('/login');
+                    setError('Session expired. Please log in again.');
+                    setLoading(false);
                     return;
                 }
                 if (!response.ok) {
                     throw new Error(`Failed to fetch papers: HTTP ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Papers API data:', data);
                 let papers = [];
                 if (Array.isArray(data)) {
                     papers = data;
@@ -112,11 +102,12 @@ export const useQuestionPapers = () => {
                 );
             } catch (err) {
                 setError(`Error fetching papers: ${err.message}`);
-                console.error('Error:', err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchQuestionPapers();
-    }, [selectedSubject, navigate]);
+    }, [selectedSubject]);
 
     // View PDF
     const viewPdf = async (paperId) => {
@@ -125,10 +116,8 @@ export const useQuestionPapers = () => {
             const response = await fetch(`${API_BASE_URL}/question-papers/${paperId}/view`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
             });
-            console.log('View PDF API status:', response.status);
             if (response.status === 401) {
-                localStorage.removeItem('jwt');
-                navigate('/login');
+                setError('Session expired. Please log in again.');
                 return;
             }
             if (!response.ok) {
@@ -153,10 +142,8 @@ export const useQuestionPapers = () => {
             const response = await fetch(`${API_BASE_URL}/question-papers/${paperId}/download`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
             });
-            console.log('Download PDF API status:', response.status);
             if (response.status === 401) {
-                localStorage.removeItem('jwt');
-                navigate('/login');
+                setError('Session expired. Please log in again.');
                 return;
             }
             if (!response.ok) {
@@ -178,15 +165,19 @@ export const useQuestionPapers = () => {
         }
     };
 
-    // Reset error
+    // Reset error and optionally log out
     const resetError = () => {
+        if (error && (error.includes('Session expired') || error.includes('Please log in'))) {
+            localStorage.removeItem('jwt');
+            navigate('/login');
+            return;
+        }
         setError(null);
         setLoading(true);
         fetch(`${API_BASE_URL}/enrolled-subjects`, { headers: getAuthHeaders() })
             .then((res) => {
                 if (res.status === 401) {
-                    localStorage.removeItem('jwt');
-                    navigate('/login');
+                    setError('Session expired. Please log in again.');
                     return;
                 }
                 return res.json();

@@ -37,21 +37,16 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                     'Content-Type': 'application/json',
                 };
 
-                // Fetch enrolled subjects
                 const subjectsResponse = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers });
                 const subjectsData = await subjectsResponse.json();
-                console.log('Enrolled subjects response:', subjectsData);
                 if (!subjectsResponse.ok || !subjectsData.success) {
                     throw new Error(subjectsData.message || 'Failed to fetch enrolled subjects');
                 }
                 const enrolledSubjects = (subjectsData.data || []).map(s => s.subjectName || s).sort();
                 setSubjects(enrolledSubjects);
-                console.log('Enrolled subjects set:', enrolledSubjects);
 
-                // Fetch quizzes
                 const quizzesResponse = await fetch(`${API_BASE_URL}/user/quizzes`, { headers });
                 const quizzesData = await quizzesResponse.json();
-                console.log('Quizzes response:', quizzesData);
                 if (!quizzesResponse.ok || !quizzesData.success) {
                     throw new Error(quizzesData.message || 'Failed to fetch quizzes');
                 }
@@ -60,7 +55,6 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                     subject: quiz.subject?.subjectName || quiz.subject || 'Unknown',
                 }));
                 setQuizzes(normalizedQuizzes);
-                console.log('Normalized quizzes set:', normalizedQuizzes);
 
                 if (enrolledSubjects.length === 0) {
                     setError('No enrolled subjects found. Please enroll in subjects first.');
@@ -68,7 +62,6 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
 
                 setLoading(false);
             } catch (err) {
-                console.error('Fetch error:', err);
                 setError(`Error fetching data: ${err.message}`);
                 setLoading(false);
             }
@@ -126,6 +119,252 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
     return (
         <div className="full">
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
+                        /* Prevent transitions and animations globally */
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
+                        /* Full wrapper */
+                        .full {
+                            width: 100%;
+                            min-height: 100vh;
+                            position: relative;
+                            z-index: 10;
+                        }
+                        /* Base styles */
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
+                        .bg-[var(--bg-secondary)] {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        }
+                        .bg-[var(--bg-tertiary)] {
+                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        }
+                        .bg-[var(--accent-primary)] {
+                            background-color: var(--accent-primary, #007bff);
+                        }
+                        .bg-[var(--accent-secondary)] {
+                            background-color: var(--accent-secondary, #dc3545);
+                        }
+                        .text-[var(--text-primary)] {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        }
+                        .text-[var(--text-secondary)] {
+                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                        }
+                        .text-white {
+                            color: #ffffff;
+                        }
+                        /* Hover states */
+                        .hover\\:bg-[var(--hover-tertiary)]:hover {
+                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                        }
+                        .hover\\:bg-[var(--hover-primary)]:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .hover\\:text-[var(--hover-secondary)]:hover {
+                            color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
+                        }
+                        /* Layout styles */
+                        .flex {
+                            display: flex;
+                        }
+                        .min-h-screen {
+                            min-height: 100vh;
+                        }
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
+                        }
+                        .justify-between {
+                            justify-content: space-between;
+                        }
+                        .items-center {
+                            align-items: center;
+                        }
+                        .flex-1 {
+                            flex: 1;
+                        }
+                        .gap-4 {
+                            gap: 16px;
+                        }
+                        .p-6 {
+                            padding: 24px;
+                        }
+                        .sm\\:p-8 {
+                            padding: 32px;
+                        }
+                        .rounded-2xl {
+                            border-radius: 16px;
+                        }
+                        .rounded-lg {
+                            border-radius: 8px;
+                        }
+                        .rounded-md {
+                            border-radius: 6px;
+                        }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
+                        .shadow-[var(--shadow)] {
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        /* Typography */
+                        .text-3xl {
+                            font-size: 24px;
+                        }
+                        .text-xl {
+                            font-size: 18px;
+                        }
+                        .text-lg {
+                            font-size: 16px;
+                        }
+                        .text-sm {
+                            font-size: 12px;
+                        }
+                        .text-xs {
+                            font-size: 10px;
+                        }
+                        .font-bold {
+                            font-weight: 700;
+                        }
+                        .font-semibold {
+                            font-weight: 600;
+                        }
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        /* Form elements */
+                        .form-label {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                            display: block;
+                        }
+                        .form-input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 14px;
+                        }
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        /* Button styles */
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        /* Grid layout */
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .col-span-full {
+                            grid-column: 1 / -1;
+                        }
+                        /* Notification badge */
+                        .-top-2 {
+                            top: -8px;
+                        }
+                        .-right-2 {
+                            right: -8px;
+                        }
+                        .h-5 {
+                            height: 20px;
+                        }
+                        .w-5 {
+                            width: 20px;
+                        }
+                        /* Custom section background */
+                        .quiz-section {
+                            background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
+                        }
+                        /* Service card */
+                        .service-card {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            padding: 16px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        .hover\\:shadow-lg:hover {
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+                        }
+                        /* Loader */
+                        .animate-spin {
+                            animation: spin 1s linear infinite !important;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        /* Sidebar margins */
+                        .ml-16 {
+                            margin-left: 64px;
+                        }
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        /* Responsive adjustments */
+                        @media (min-width: 640px) {
+                            .sm\\:grid-cols-2 {
+                                grid-template-columns: repeat(2, 1fr);
+                            }
+                            .sm\\:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        @media (min-width: 768px) {
+                            .md\\:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                        }
+                        /* Underline */
+                        .underline {
+                            text-decoration: underline;
+                        }
+                    `}
+                </style>
                 <Sidebar
                     user={user}
                     onLogout={handleLogout}
@@ -134,12 +373,9 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                     darkMode={darkMode}
                 />
                 <div
-                    className={`
-                        flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-                        ${isCollapsed ? 'ml-16' : 'ml-64'}
-                    `}
+                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
                 >
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
+                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-bold text-[var(--text-primary)]">Quizzes</h1>
                             <p className="text-sm mt-1 text-[var(--text-secondary)]">Test your knowledge, {user.name}!</p>
@@ -152,7 +388,7 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                             >
                                 🔔
                                 {notificationCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-[var(--text-primary)] text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                         {notificationCount}
                                     </span>
                                 )}
@@ -166,50 +402,47 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                             </button>
                         </div>
                     </div>
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+                    <div className="quiz-section">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Quizzes</h2>
                         </div>
-
                         {error && (
-                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-[var(--text-primary)]">
+                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
                                 {error}
                                 {error.includes('No enrolled subjects') && (
                                     <Link
                                         to="/subjects"
-                                        className="ml-2 text-[var(--text-primary)] underline hover:text-[var(--hover-primary)]"
+                                        className="ml-2 text-white underline hover:text-[var(--hover-secondary)]"
                                     >
                                         Enroll in subjects
                                     </Link>
                                 )}
                             </div>
                         )}
-
                         <div className="mb-6">
                             <button
                                 onClick={handleViewQuestionPapers}
-                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                 aria-label="View question papers"
                             >
                                 View Digitized Question Papers
                             </button>
                         </div>
-
                         <div className="mb-6 flex gap-4">
                             <div>
-                                <label htmlFor="filterSubject" className="block text-[var(--text-primary)] mb-2 font-medium">
+                                <label htmlFor="filterSubject" className="form-label">
                                     Filter by Subject
                                 </label>
                                 <select
                                     id="filterSubject"
                                     value={filterSubject}
                                     onChange={(e) => setFilterSubject(e.target.value)}
-                                    className="p-3 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--accent-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]"
+                                    className="form-input"
                                     disabled={subjects.length === 0}
                                 >
                                     <option value="">All Subjects</option>
                                     {subjects.map((subject, index) => (
-                                        <option key={index} value={subject}>
+                                        <option key={subject || index} value={subject}>
                                             {subject}
                                         </option>
                                     ))}
@@ -219,27 +452,26 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                                 )}
                             </div>
                             <div>
-                                <label htmlFor="sortBy" className="block text-[var(--text-primary)] mb-2 font-medium">
+                                <label htmlFor="sortBy" className="form-label">
                                     Sort By
                                 </label>
                                 <select
                                     id="sortBy"
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="p-3 border border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--accent-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]"
+                                    className="form-input"
                                 >
                                     <option value="dueDate">Due Date</option>
                                     <option value="title">Title</option>
                                 </select>
                             </div>
                         </div>
-
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {sortedQuizzes.length > 0 ? (
-                                sortedQuizzes.map((quiz) => (
+                                sortedQuizzes.map((quiz, index) => (
                                     <div
-                                        key={quiz.id}
-                                        className="bg-[var(--bg-secondary)] bg-opacity-90 p-4 rounded-2xl shadow-2xl hover:shadow-lg transition-shadow"
+                                        key={quiz.id || `quiz-${quiz.title}-${index}`}
+                                        className="service-card hover:shadow-lg"
                                     >
                                         <h3 className="text-lg font-medium text-[var(--text-primary)]">{quiz.title}</h3>
                                         <p className="text-sm text-[var(--text-secondary)]">Subject: {quiz.subject}</p>
@@ -247,7 +479,7 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                                         <div className="mt-4">
                                             <button
                                                 onClick={() => handleStartQuiz(quiz.id, quiz.title)}
-                                                className="px-4 py-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--text-primary)] rounded-lg hover:from-[var(--hover-primary)] hover:to-[var(--hover-secondary)]"
+                                                className="btn-primary"
                                             >
                                                 Start Quiz
                                             </button>
@@ -278,7 +510,7 @@ Quizzes.propTypes = {
             message: PropTypes.string.isRequired,
             date: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
-        })
+        }),
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
 };

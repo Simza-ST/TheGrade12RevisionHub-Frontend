@@ -25,6 +25,7 @@ import Quizzes from './components/dashboardSidebarPages/quiz/Quizzes';
 import Subjects from './components/dashboardSidebarPages/subject/Subjects';
 import DigitizedQuestionPapers from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapers';
 import EnglishFALP12020 from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020';
+import { API_BASE_URL, getAuthHeaders } from './utils/api';
 
 const PublicLayout = () => (
     <div>
@@ -50,8 +51,29 @@ const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        setIsAuthenticated(!!token);
+        const validateToken = async () => {
+            const token = localStorage.getItem('jwt');
+            if (!token) {
+                setIsAuthenticated(false);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/profile`, {
+                    headers: getAuthHeaders(),
+                });
+                if (response.status === 401) {
+                    localStorage.removeItem('jwt');
+                    setIsAuthenticated(false);
+                } else if (response.ok) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (err) {
+                setIsAuthenticated(false);
+            }
+        };
+        validateToken();
     }, []);
 
     const commonProps = {
@@ -110,6 +132,14 @@ const App = () => {
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
                                 <Quizzes {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/question-papers"
+                        element={
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <QuestionPapersList {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -186,10 +216,10 @@ const App = () => {
                         }
                     />
                     <Route
-                        path="/digitized-question-papers/:id"
+                        path="/digitized-question-papers"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <QuestionPaperView />
+                                <QuestionPaperView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -202,7 +232,6 @@ const App = () => {
 
 function QuestionPaperView() {
     const { id } = useParams();
-    console.log('Viewing paper ID:', id);
     if (id === '1') {
         return <EnglishFALP12020 />;
     }
