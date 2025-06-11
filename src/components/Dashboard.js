@@ -16,8 +16,6 @@ import CourseMastery from './onDashboardPages/CourseMastery';
 import Schedule from './onDashboardPages/Schedule';
 import RecentActivity from './onDashboardPages/RecentActivity';
 import UpcomingDeadlines from './onDashboardPages/UpcomingDeadlines';
-import QuickLinks from './onDashboardPages/QuickLinks';
-import GoalTracker from './onDashboardPages/GoalTracker';
 import RecommendedResources from './onDashboardPages/RecommendedResources';
 import NotificationsWidget from './onDashboardPages/NotificationsWidget';
 import StudyTimer from './onDashboardPages/StudyTimer';
@@ -89,6 +87,7 @@ PerformanceChart.propTypes = {
 const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [showPopup, setShowPopup] = useState(false); // State for popup
     const [user] = useState({
         name: 'Bianca Doe',
         title: 'CS Honor Student',
@@ -104,7 +103,6 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
     const [schedule, setSchedule] = useState([]);
     const [activities, setActivities] = useState([]);
     const [deadlines, setDeadlines] = useState([]);
-    const [goals, setGoals] = useState([]);
     const [resources, setResources] = useState([]);
     const [quote, setQuote] = useState({ text: '', author: '' });
 
@@ -139,10 +137,6 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
                 { id: 2, title: 'Physics Assignment', dueDate: '2025-06-25' },
                 { id: 3, title: 'History Essay', dueDate: '2025-06-27' },
             ]);
-            setGoals([
-                { id: 1, description: 'Complete 5 quizzes this week', progress: 60 },
-                { id: 2, description: 'Read 2 chapters of Chemistry', progress: 30 },
-            ]);
             setResources([
                 {
                     id: 1,
@@ -176,6 +170,14 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
         navigate('/login');
     };
 
+    const handleTimerFinish = () => {
+        setShowPopup(true);
+    };
+
+    const handleClosePopup = () => {
+        setShowPopup(false);
+    };
+
     if (loading) {
         return (
             <div className="flex min-h-screen justify-center items-center">
@@ -187,87 +189,99 @@ const Dashboard = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notific
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen">
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <div
-                className={`
-          flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-          ${isCollapsed ? 'ml-16' : 'ml-64'}
-        `}
-            >
-                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Dashboard</h1>
-                        <p className="text-sm mt-1 text-[var(--text-secondary)]">Welcome, {user.name}!</p>
+        <>
+            <div className="flex min-h-screen">
+                <Sidebar
+                    user={user}
+                    onLogout={handleLogout}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                    darkMode={darkMode}
+                />
+                <div
+                    className={`
+                        flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+                        ${isCollapsed ? 'ml-16' : 'ml-64'}
+                    `}
+                >
+                    <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Dashboard</h1>
+                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Welcome, {user.name}!</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <Link
+                                to="/notifications"
+                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label={`View notifications (${notificationCount} unread)`}
+                            >
+                                🔔
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-[var(--text-primary)] text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
+                                )}
+                            </Link>
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label="Toggle dark mode"
+                            >
+                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex gap-4">
-                        <Link
-                            to="/notifications"
-                            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                            aria-label={`View notifications (${notificationCount} unread)`}
-                        >
-                            🔔
-                            {notificationCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-[var(--text-primary)] text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    {notificationCount}
-                                </span>
-                            )}
-                        </Link>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
+                            <StatsCard title="Performance" value={stats.performance} icon="📊" />
+                            <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
+                            <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
+                            <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
+                        </div>
+                        <div className="md:col-span-4">
+                            <ProgressOverview courses={courses} />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <CourseMastery courses={courses} />
+                        <Schedule schedule={schedule} />
+                        <PerformanceChart courses={courses} />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <RecentActivity activities={activities} />
+                        <UpcomingDeadlines deadlines={deadlines} />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <RecommendedResources resources={resources} />
+                        <NotificationsWidget notifications={notifications} />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <StudyTimer onTimerFinish={handleTimerFinish} />
+                        <MotivationalQuote quote={quote} />
+                    </div>
+                </div>
+            </div>
+            {showPopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+                        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Time is up!</h3>
+                        <p className="text-[var(--text-secondary)] mb-4">Your study session has ended.</p>
                         <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                            aria-label="Toggle dark mode"
+                            onClick={handleClosePopup}
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] w-full"
+                            aria-label="Close popup"
                         >
-                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                            OK
                         </button>
                     </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                    <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
-                        <StatsCard title="Performance" value={stats.performance} icon="📊" />
-                        <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
-                        <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
-                        <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
-                    </div>
-                    <div className="md:col-span-4">
-                        <ProgressOverview courses={courses} />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <CourseMastery courses={courses} />
-                    <Schedule schedule={schedule} />
-                    <PerformanceChart courses={courses} />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <RecentActivity activities={activities} />
-                    <UpcomingDeadlines deadlines={deadlines} />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <GoalTracker goals={goals} setGoals={setGoals} />
-                    <RecommendedResources resources={resources} />
-                    <NotificationsWidget notifications={notifications} />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <StudyTimer />
-                    <MotivationalQuote quote={quote} />
-                </div>
-
-                <div className="mt-6">
-                    <QuickLinks />
-                </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 };
 

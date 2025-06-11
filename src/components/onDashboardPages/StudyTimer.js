@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
-const StudyTimer = () => {
+const StudyTimer = ({ onTimerFinish }) => {
     const [time, setTime] = useState(0); // Start at 0 seconds
     const [isActive, setIsActive] = useState(false);
     const [customTime, setCustomTime] = useState(''); // For user input in minutes
@@ -11,9 +12,10 @@ const StudyTimer = () => {
             interval = setInterval(() => setTime((prev) => prev - 1), 1000);
         } else if (time <= 0 && isActive) {
             setIsActive(false); // Stop when timer reaches 0
+            onTimerFinish(); // Notify parent when timer finishes
         }
         return () => clearInterval(interval);
-    }, [isActive, time]);
+    }, [isActive, time, onTimerFinish]);
 
     const formatTime = () => {
         const minutes = Math.floor(time / 60);
@@ -72,6 +74,10 @@ const StudyTimer = () => {
             </div>
         </div>
     );
+};
+
+StudyTimer.propTypes = {
+    onTimerFinish: PropTypes.func.isRequired,
 };
 
 export default StudyTimer;
