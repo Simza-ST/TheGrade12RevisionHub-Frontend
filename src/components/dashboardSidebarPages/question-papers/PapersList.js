@@ -8,26 +8,29 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
     );
 
     return (
-        <section className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-2xl">
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-4">Available Papers</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {filteredPapers.length > 0 ? (
                 filteredPapers.map((paper) => (
                     <div
                         key={paper.id}
-                        className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-[var(--bg-secondary)] rounded-md shadow-sm hover:bg-[var(--hover-primary)] transition-colors duration-200 mb-3"
+                        className="service-card hover:shadow-lg"
                     >
-                        <Link
-                            to={`/question-papers/${paper.id}`}
-                            className="text-[var(--text-primary)] text-sm sm:text-base font-medium hover:underline flex-1 mb-2 sm:mb-0"
-                        >
-                            {paper.title} ({paper.subject}, {paper.year})
-                        </Link>
-                        <div className="flex gap-3 w-full sm:w-auto">
+                        <h3 className="text-lg font-medium text-[var(--text-primary)]">
+                            <Link
+                                to={`/question-papers/${paper.id}`}
+                                className="hover:underline"
+                            >
+                                {paper.title}
+                            </Link>
+                        </h3>
+                        <p className="text-sm text-[var(--text-secondary)]">Subject: {paper.subject}</p>
+                        <p className="text-sm text-[var(--accent-primary)]">Year: {paper.year}</p>
+                        <div className="mt-4 flex gap-2">
                             <Tooltip text="Preview in browser">
                                 <button
                                     onClick={() => onViewPdf(paper.id)}
                                     disabled={pdfLoading}
-                                    className="px-3 py-1 bg-[var(--accent-primary)] text-[var(--text-primary)] text-sm rounded-md hover:bg-[var(--hover-primary)] disabled:bg-[var(--border)] disabled:hover:bg-[var(--border)] transition-colors duration-200"
+                                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label={`View ${paper.title}`}
                                 >
                                     {pdfLoading ? 'Loading...' : 'View'}
@@ -37,7 +40,7 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                                 <button
                                     onClick={() => onDownloadPdf(paper.id, paper.title)}
                                     disabled={pdfLoading}
-                                    className="px-3 py-1 bg-[var(--accent-primary)] text-[var(--text-primary)] text-sm rounded-md hover:bg-[var(--hover-primary)] disabled:bg-[var(--border)] disabled:hover:bg-[var(--border)] transition-colors duration-200"
+                                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label={`Download ${paper.title}`}
                                 >
                                     {pdfLoading ? 'Loading...' : 'Download'}
@@ -47,13 +50,97 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                     </div>
                 ))
             ) : (
-                <p className="text-[var(--text-secondary)] text-sm sm:text-base">
+                <p className="text-[var(--text-secondary)] col-span-full">
                     {selectedSubject
                         ? `No papers for ${selectedSubject}${selectedYear ? ` (${selectedYear})` : ''}. Try another filter!`
                         : 'Select a subject to view papers.'}
                 </p>
             )}
-        </section>
+            <style>
+                {`
+                    .grid {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 16px;
+                    }
+                    .sm\\:grid-cols-2 {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                    .md\\:grid-cols-3 {
+                        grid-template-columns: repeat(3, 1fr);
+                    }
+                    .col-span-full {
+                        grid-column: 1 / -1;
+                    }
+                    .service-card {
+                        background-color: var(--bg-secondary);
+                        padding: 16px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+                    .hover\\:shadow-lg:hover {
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+                    }
+                    .btn-primary {
+                        background-color: var(--accent-primary, #007bff);
+                        color: #ffffff;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--hover-primary, #0056b3);
+                    }
+                    .text-[var(--text-primary)] {
+                        color: var(--text-primary);
+                    }
+                    .text-[var(--text-secondary)] {
+                        color: var(--text-secondary);
+                    }
+                    .text-[var(--accent-primary)] {
+                        color: var(--accent-primary, #007bff);
+                    }
+                    .text-lg {
+                        font-size: 16px;
+                    }
+                    .text-sm {
+                        font-size: 12px;
+                    }
+                    .font-medium {
+                        font-weight: 500;
+                    }
+                    .mt-4 {
+                        margin-top: 16px;
+                    }
+                    .flex {
+                        display: flex;
+                    }
+                    .gap-2 {
+                        gap: 8px;
+                    }
+                    .disabled\\:cursor-not-allowed:disabled {
+                        cursor: not-allowed;
+                    }
+                    .disabled\\:opacity-50:disabled {
+                        opacity: 0.5;
+                    }
+                    .hover\\:underline:hover {
+                        text-decoration: underline;
+                    }
+                    @media (min-width: 640px) {
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                    @media (min-width: 768px) {
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                    }
+                `}
+            </style>
+        </div>
     );
 };
 

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const QuestionPaperCard = ({ paper, onView, darkMode }) => (
+const DigitizedQuestionPaperCard = ({ paper, onView, darkMode }) => (
     <div>
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">
             {paper.fileName || 'Untitled Paper'}
@@ -24,7 +24,7 @@ const QuestionPaperCard = ({ paper, onView, darkMode }) => (
     </div>
 );
 
-QuestionPaperCard.propTypes = {
+DigitizedQuestionPaperCard.propTypes = {
     paper: PropTypes.shape({
         id: PropTypes.number,
         fileName: PropTypes.string,
@@ -40,4 +40,4 @@ QuestionPaperCard.propTypes = {
     darkMode: PropTypes.bool.isRequired,
 };
 
-export default QuestionPaperCard;
+export default DigitizedQuestionPaperCard;

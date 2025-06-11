@@ -5,8 +5,6 @@ import Sidebar from '../Sidebar';
 import FilterSection from './FilterSection';
 import PapersList from './PapersList';
 import PDFModal from './PDFModal';
-import ErrorDialog from './ErrorDialog';
-import LoadingSpinner from './LoadingSpinner';
 import { useQuestionPapers } from '../../../hooks/useQuestionPapers';
 
 const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
@@ -43,14 +41,12 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
     };
 
     const handleSubjectChange = (e) => {
-        const newSubject = e.target.value;
-        setSelectedSubject(newSubject);
+        setSelectedSubject(e.target.value);
         setSelectedYear('');
     };
 
     const handleYearChange = (e) => {
-        const newYear = e.target.value;
-        setSelectedYear(newYear);
+        setSelectedYear(e.target.value);
     };
 
     const years = [...new Set(questionPapers.map((paper) => paper.year))].sort();
@@ -58,8 +54,8 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
     if (loading) {
         return (
             <div className="full">
-                <div className={`flex min-h-screen bg-[var(--bg-secondary)] justify-center items-center ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <LoadingSpinner />
+                <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
                 </div>
             </div>
         );
@@ -67,7 +63,7 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-secondary)]">
+            <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
                         * {
@@ -81,8 +77,11 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                             position: relative;
                             z-index: 10;
                         }
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
                         .bg-[var(--bg-secondary)] {
-                            background-color: #ffffff;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                         }
                         .bg-[var(--bg-tertiary)] {
                             background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
@@ -108,17 +107,20 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                         .hover\\:bg-[var(--hover-primary)]:hover {
                             background-color: var(--hover-primary, #0056b3);
                         }
+                        .hover\\:text-[var(--hover-secondary)]:hover {
+                            color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
+                        }
                         .flex {
                             display: flex;
                         }
                         .min-h-screen {
                             min-height: 100vh;
                         }
-                        .flex-1 {
-                            flex: 1;
-                        }
                         .min-w-0 {
                             min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
                         }
                         .justify-between {
                             justify-content: space-between;
@@ -126,59 +128,17 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                         .items-center {
                             align-items: center;
                         }
-                        .justify-center {
-                            justify-content: center;
+                        .flex-1 {
+                            flex: 1;
                         }
                         .gap-4 {
                             gap: 16px;
                         }
-                        .p-4 {
-                            padding: 16px;
-                        }
                         .p-6 {
-                            padding: 24px;
-                        }
-                        .sm\\:p-6 {
                             padding: 24px;
                         }
                         .sm\\:p-8 {
                             padding: 32px;
-                        }
-                        .mb-3 {
-                            margin-bottom: 12px;
-                        }
-                        .mb-6 {
-                            margin-bottom: 24px;
-                        }
-                        .mt-1 {
-                            margin-top: 4px;
-                        }
-                        .text-3xl {
-                            font-size: 24px;
-                        }
-                        .text-lg {
-                            font-size: 16px;
-                        }
-                        .sm\\:text-xl {
-                            font-size: 20px;
-                        }
-                        .text-sm {
-                            font-size: 12px;
-                        }
-                        .text-base {
-                            font-size: 14px;
-                        }
-                        .sm\\:text-base {
-                            font-size: 14px;
-                        }
-                        .text-xs {
-                            font-size: 10px;
-                        }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
                         }
                         .rounded-2xl {
                             border-radius: 16px;
@@ -189,40 +149,88 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                         .rounded-md {
                             border-radius: 6px;
                         }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
                         .shadow-[var(--shadow)] {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
-                        .shadow-2xl {
-                            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+                        .text-3xl {
+                            font-size: 24px;
                         }
-                        .quiz-section {
-                            background: #ffffff;
-                            background-color: #ffffff;
-                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                            padding: 32px;
-                            border-radius: 16px;
+                        .text-xl {
+                            font-size: 18px;
                         }
-                        .list-disc {
-                            list-style-type: disc;
+                        .text-lg {
+                            font-size: 16px;
                         }
-                        .list-inside {
-                            list-style-position: inside;
+                        .text-sm {
+                            font-size: 12px;
                         }
-                        .space-y-1 {
-                            margin-bottom: 4px;
+                        .text-xs {
+                            font-size: 10px;
                         }
-                        .ml-16 {
-                            margin-left: 64px;
+                        .font-bold {
+                            font-weight: 700;
                         }
-                        .ml-64 {
-                            margin-left: 256px;
+                        .font-semibold {
+                            font-weight: 600;
                         }
-                        .w-full {
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        .form-label {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                            display: block;
+                        }
+                        .form-input {
                             width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 14px;
                         }
-                        .relative {
-                            position: relative;
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .col-span-full {
+                            grid-column: 1 / -1;
                         }
                         .-top-2 {
                             top: -8px;
@@ -236,28 +244,62 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                         .w-5 {
                             width: 20px;
                         }
-                        .rounded-full {
-                            border-radius: 9999px;
+                        .quiz-section {
+                            background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
                         }
-                        .px-4 {
-                            padding-left: 16px;
-                            padding-right: 16px;
+                        .service-card {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            padding: 16px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
-                        .py-2 {
-                            padding-top: 8px;
-                            padding-bottom: 8px;
+                        .hover\\:shadow-lg:hover {
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
                         }
-                        .p-3 {
-                            padding: 12px;
+                        .animate-spin {
+                            animation: spin 1s linear infinite !important;
                         }
-                        .bg-opacity-95 {
-                            --tw-bg-opacity: 0.95;
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
                         }
-                        .backdrop-blur-sm {
-                            backdrop-filter: blur(4px);
+                        .ml-16 {
+                            margin-left: 64px;
                         }
-                        .text-center {
-                            text-align: center;
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        @media (min-width: 640px) {
+                            .sm\\:grid-cols-2 {
+                                grid-template-columns: repeat(2, 1fr);
+                            }
+                            .sm\\:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        @media (min-width: 768px) {
+                            .md\\:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                        }
+                        .underline {
+                            text-decoration: underline;
+                        }
+                        .list-disc {
+                            list-style-type: disc;
+                        }
+                        .list-inside {
+                            list-style-position: inside;
+                        }
+                        .space-y-1 > * + * {
+                            margin-top: 4px;
                         }
                     `}
                 </style>
@@ -296,40 +338,56 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                             </button>
                         </div>
                     </div>
-                    <section className="quiz-section">
-                        <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mb-3">Explore Past Papers</h2>
-                        <p className="text-[var(--text-secondary)] text-sm sm:text-base mb-3">
-                            Filter by subject and year to find exam papers and boost your prep!
-                        </p>
-                        <p className="bg-[var(--bg-secondary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-3">
-                            <strong>NB:</strong> Past papers can improve your score by up to 20%.
-                        </p>
-                        <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
-                        <ul className="list-disc list-inside text-[var(--text-secondary)] text-sm sm:text-base space-y-1">
-                            <li>Filter by subject/year.</li>
-                            <li>Preview with.</li>
-                            <li>Save offline with.</li>
-                            <li>Check details for more info.</li>
-                        </ul>
-                    </section>
-                    <FilterSection
-                        subjects={subjects}
-                        selectedSubject={selectedSubject}
-                        onSubjectChange={handleSubjectChange}
-                        years={years}
-                        selectedYear={selectedYear}
-                        onYearChange={handleYearChange}
-                        darkMode={darkMode}
-                    />
-                    {error && <ErrorDialog error={error} onRetry={resetError} />}
-                    <PapersList
-                        papers={questionPapers}
-                        selectedSubject={selectedSubject}
-                        selectedYear={selectedYear}
-                        pdfLoading={pdfLoading}
-                        onViewPdf={viewPdf}
-                        onDownloadPdf={downloadPdf}
-                    />
+                    <div className="quiz-section">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Past Papers</h2>
+                        </div>
+                        {error && (
+                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
+                                {error}
+                                <button
+                                    onClick={resetError}
+                                    className="ml-2 text-white underline hover:text-[var(--hover-secondary)]"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        )}
+                        <div className="mb-6">
+                            <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                Filter by subject and year to find exam papers and boost your prep!
+                            </p>
+                            <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                <strong>NB:</strong> Past papers can improve your score by up to 20%.
+                            </p>
+                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                            <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                <li>Filter by subject and year to narrow down papers.</li>
+                                <li>Preview papers using the <strong>View</strong> button.</li>
+                                <li>Save papers offline with the <strong>Download</strong> button.</li>
+                                <li>Check paper details for more information.</li>
+                            </ul>
+                        </div>
+                        <FilterSection
+                            subjects={subjects}
+                            selectedSubject={selectedSubject}
+                            onSubjectChange={handleSubjectChange}
+                            years={years}
+                            selectedYear={selectedYear}
+                            onYearChange={handleYearChange}
+                            darkMode={darkMode}
+                        />
+                        <div className="mt-6">
+                            <PapersList
+                                papers={questionPapers}
+                                selectedSubject={selectedSubject}
+                                selectedYear={selectedYear}
+                                pdfLoading={pdfLoading}
+                                onViewPdf={viewPdf}
+                                onDownloadPdf={downloadPdf}
+                            />
+                        </div>
+                    </div>
                     <PDFModal
                         showModal={showModal}
                         onClose={() => setShowModal(false)}
@@ -348,7 +406,7 @@ QuestionPaperList.propTypes = {
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
-    setDarkMode: PropTypes.bool.isRequired,
+    setDarkMode: PropTypes.func.isRequired,
     notifications: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.number.isRequired,

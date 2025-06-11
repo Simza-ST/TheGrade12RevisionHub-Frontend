@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../Sidebar';
-import QuestionPaperCard from './QuestionPaperCard';
+import DigitizedQuestionPaperCard from './DigitizedQuestionPaperCard';
 
 const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
@@ -419,7 +419,7 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
                                                 key={paper.id || `paper-${index}`}
                                                 className="service-card hover:shadow-lg"
                                             >
-                                                <QuestionPaperCard
+                                                <DigitizedQuestionPaperCard
                                                     paper={paper}
                                                     onView={handleViewPaper}
                                                     darkMode={darkMode}

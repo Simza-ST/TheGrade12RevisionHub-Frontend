@@ -5,7 +5,7 @@ const SubjectCard = ({ subject, onRemove }) => {
     console.log('SubjectCard subject:', subject);
     return (
         <article
-            className="bg-[#fafafa] bg-opacity-95 backdrop-blur-sm p-4 rounded-2xl shadow-[var(--shadow)] hover:shadow-lg transition-shadow duration-300 dark:bg-[#374151]"
+            className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-[var(--shadow)] hover:shadow-lg"
         >
             <header className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-medium text-[var(--text-primary)]">{subject}</h3>

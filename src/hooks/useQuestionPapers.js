@@ -34,6 +34,7 @@ export const useQuestionPapers = () => {
                 if (response.status === 401) {
                     setError('Session expired. Please log in again.');
                     setLoading(false);
+                    navigate('/login');
                     return;
                 }
                 if (!response.ok) {
@@ -41,9 +42,10 @@ export const useQuestionPapers = () => {
                 }
                 const data = await response.json();
                 if (data && Array.isArray(data.data)) {
-                    setSubjects(data.data);
+                    const sortedSubjects = data.data.sort();
+                    setSubjects(sortedSubjects);
                     const decodedSubject = subject ? decodeURIComponent(subject) : '';
-                    if (decodedSubject && data.data.includes(decodedSubject)) {
+                    if (decodedSubject && sortedSubjects.includes(decodedSubject)) {
                         setSelectedSubject(decodedSubject);
                     } else if (decodedSubject) {
                         setError(`Invalid subject: ${decodedSubject}`);
@@ -76,6 +78,7 @@ export const useQuestionPapers = () => {
                 if (response.status === 401) {
                     setError('Session expired. Please log in again.');
                     setLoading(false);
+                    navigate('/login');
                     return;
                 }
                 if (!response.ok) {
@@ -107,7 +110,7 @@ export const useQuestionPapers = () => {
             }
         };
         fetchQuestionPapers();
-    }, [selectedSubject]);
+    }, [selectedSubject, navigate]);
 
     // View PDF
     const viewPdf = async (paperId) => {
@@ -118,6 +121,7 @@ export const useQuestionPapers = () => {
             });
             if (response.status === 401) {
                 setError('Session expired. Please log in again.');
+                navigate('/login');
                 return;
             }
             if (!response.ok) {
@@ -144,6 +148,7 @@ export const useQuestionPapers = () => {
             });
             if (response.status === 401) {
                 setError('Session expired. Please log in again.');
+                navigate('/login');
                 return;
             }
             if (!response.ok) {
@@ -178,13 +183,14 @@ export const useQuestionPapers = () => {
             .then((res) => {
                 if (res.status === 401) {
                     setError('Session expired. Please log in again.');
+                    navigate('/login');
                     return;
                 }
                 return res.json();
             })
             .then((data) => {
                 if (data && Array.isArray(data.data)) {
-                    setSubjects(data.data);
+                    setSubjects(data.data.sort());
                 }
                 setLoading(false);
             })
