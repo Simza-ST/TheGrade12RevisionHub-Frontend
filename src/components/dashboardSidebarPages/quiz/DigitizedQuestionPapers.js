@@ -28,7 +28,8 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
             setError('');
             const token = localStorage.getItem('jwt');
             if (!token) {
-                throw new Error('No authentication token found');
+                navigate('/login');
+                return;
             }
             const headers = {
                 Authorization: `Bearer ${token}`,
@@ -36,6 +37,11 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
             };
 
             const subjectsResponse = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers });
+            if (subjectsResponse.status === 401) {
+                localStorage.removeItem('jwt');
+                navigate('/login');
+                return;
+            }
             const subjectsData = await subjectsResponse.json();
             if (!subjectsResponse.ok || !subjectsData.success) {
                 throw new Error(subjectsData.message || 'Failed to fetch enrolled subjects');
@@ -45,6 +51,11 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
 
             const papersUrl = `${API_BASE_URL}/user${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
             const papersResponse = await fetch(papersUrl, { headers });
+            if (papersResponse.status === 401) {
+                localStorage.removeItem('jwt');
+                navigate('/login');
+                return;
+            }
             const papersData = await papersResponse.json();
             if (!papersResponse.ok || !papersData.success) {
                 throw new Error(papersData.message || `Failed to fetch digitized question papers: HTTP ${papersResponse.status}`);
@@ -60,7 +71,7 @@ const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDar
             setError(`Error fetching data: ${err.message}`);
             setLoading(false);
         }
-    }, [API_BASE_URL, filterSubject]);
+    }, [API_BASE_URL, filterSubject, navigate]);
 
     useEffect(() => {
         fetchData();
