@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from './Sidebar';
+import { v4 as uuidv4 } from 'uuid';
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -15,7 +16,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
-    const [groupSearchQuery, setGroupSearchQuery] = useState('');
     const [privateSearchQuery, setPrivateSearchQuery] = useState('');
     const [createGroupSearchQuery, setCreateGroupSearchQuery] = useState('');
     const [groupName, setGroupName] = useState('');
@@ -93,16 +93,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         }
     }, []);
 
-    // Debounced search
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            if (user) {
-                fetchUsers(groupSearchQuery, 'group');
-            }
-        }, 300);
-        return () => clearTimeout(delayDebounceFn);
-    }, [groupSearchQuery, user, fetchUsers]);
-
+    // Debounced search for private and create group
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             if (user) {
@@ -162,8 +153,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 let url;
                 if (chatMode === 'group') {
                     url = selectedGroupId
-                        ? `http://localhost:6262/api/chat/group/${selectedGroupId}${groupSearchQuery && selectedUserId ? `?senderId=${selectedUserId}` : ''}`
-                        : `http://localhost:6262/api/chat/group${groupSearchQuery && selectedUserId ? `?senderId=${selectedUserId}` : ''}`;
+                        ? `http://localhost:6262/api/chat/group/${selectedGroupId}`
+                        : `http://localhost:6262/api/chat/group`;
                 } else if (chatMode === 'private' && selectedUserId) {
                     url = `http://localhost:6262/api/chat/private/${selectedUserId}`;
                 } else {
@@ -184,7 +175,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         recipientId: msg.recipientId ? Number(msg.recipientId) : null,
                         groupId: msg.groupId ? Number(msg.groupId) : null,
                         timestamp: formatDate(msg.createdAt),
-                    })));
+                    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
                 } else {
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
                 }
@@ -196,10 +187,10 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             }
         };
         fetchMessages();
-    }, [user, chatMode, selectedUserId, selectedGroupId, groupSearchQuery]);
+    }, [user, chatMode, selectedUserId, selectedGroupId]);
 
-    // Date formatting
-    const formatDate = (dateString) => {
+    // Date formatting with time zone and adjustment
+    const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
         if (!dateString || typeof dateString !== 'string') {
             return 'Unknown Date';
         }
@@ -207,8 +198,15 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         if (isNaN(date.getTime())) {
             return 'Invalid Date';
         }
-        return date.toLocaleString('en-US', {
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
+        // Subtract 2 hours to correct the 2-hour ahead discrepancy
+        const adjustedDate = new Date(date.getTime() - (2 * 60 * 60 * 1000));
+        return adjustedDate.toLocaleString('en-US', {
+            timeZone,
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
         });
     };
 
@@ -232,18 +230,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     console.log('Received group message:', message.body);
                     if (chatMode === 'group' && !selectedGroupId) {
                         const data = JSON.parse(message.body);
-                        if (!groupSearchQuery || data.senderId === selectedUserId) {
-                            setMessages((prev) => [
-                                ...prev,
-                                {
-                                    ...data,
-                                    senderId: Number(data.senderId),
-                                    recipientId: data.recipientId ? Number(data.recipientId) : null,
-                                    groupId: data.groupId ? Number(data.groupId) : null,
-                                    timestamp: formatDate(data.createdAt),
-                                },
-                            ]);
-                        }
+                        updateMessagesWithServerResponse(data);
                     }
                 });
 
@@ -252,18 +239,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         console.log(`Received group message for group ${group.id}:`, message.body);
                         if (chatMode === 'group' && selectedGroupId === group.id) {
                             const data = JSON.parse(message.body);
-                            if (!groupSearchQuery || data.senderId === selectedUserId) {
-                                setMessages((prev) => [
-                                    ...prev,
-                                    {
-                                        ...data,
-                                        senderId: Number(data.senderId),
-                                        recipientId: data.recipientId ? Number(data.recipientId) : null,
-                                        groupId: data.groupId ? Number(data.groupId) : null,
-                                        timestamp: formatDate(data.createdAt),
-                                    },
-                                ]);
-                            }
+                            updateMessagesWithServerResponse(data);
                         }
                     });
                 });
@@ -276,16 +252,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                             (data.senderId === user.id && data.recipientId === Number(selectedUserId)) ||
                             (data.senderId === Number(selectedUserId) && data.recipientId === user.id)
                         ) {
-                            setMessages((prev) => [
-                                ...prev,
-                                {
-                                    ...data,
-                                    senderId: Number(data.senderId),
-                                    recipientId: data.recipientId ? Number(data.recipientId) : null,
-                                    groupId: data.groupId ? Number(data.groupId) : null,
-                                    timestamp: formatDate(data.createdAt),
-                                },
-                            ]);
+                            updateMessagesWithServerResponse(data);
                         }
                     }
                 });
@@ -310,7 +277,42 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 stompClientRef.current = null;
             }
         };
-    }, [user, groups, chatMode, selectedUserId, selectedGroupId, groupSearchQuery]);
+    }, [user, groups, chatMode, selectedUserId, selectedGroupId]);
+
+    const updateMessagesWithServerResponse = (data) => {
+        setMessages((prev) => {
+            const existingIndex = prev.findIndex((msg) =>
+                msg.tempId && msg.content === data.content && msg.senderId === Number(data.senderId)
+            );
+            if (existingIndex !== -1) {
+                // Replace the local message with the server version
+                const updatedMessages = [...prev];
+                updatedMessages[existingIndex] = {
+                    ...data,
+                    senderId: Number(data.senderId),
+                    recipientId: data.recipientId ? Number(data.recipientId) : null,
+                    groupId: data.groupId ? Number(data.groupId) : null,
+                    timestamp: formatDate(data.createdAt),
+                    id: data.id || uuidv4(),
+                };
+                return updatedMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (!prev.some((msg) => msg.id === data.id)) {
+                // Add new message if no match
+                return [
+                    ...prev,
+                    {
+                        ...data,
+                        senderId: Number(data.senderId),
+                        recipientId: data.recipientId ? Number(data.recipientId) : null,
+                        groupId: data.groupId ? Number(data.groupId) : null,
+                        timestamp: formatDate(data.createdAt),
+                        id: data.id || uuidv4(),
+                    },
+                ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+            return prev.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Skip if duplicate by id but sort
+        });
+    };
 
     const handleSendMessage = () => {
         console.log('handleSendMessage called', { newMessage, user, stompClient, chatMode, selectedUserId, selectedGroupId });
@@ -334,20 +336,23 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             setError('Select a user for private chat');
             return;
         }
+        const tempId = uuidv4();
         const message = {
             senderId: Number(user.id),
             recipientId: chatMode === 'private' ? Number(selectedUserId) : null,
             groupId: chatMode === 'group' && selectedGroupId ? Number(selectedGroupId) : null,
             content: newMessage,
             type: chatMode === 'private' ? 'PRIVATE' : 'GROUP',
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(), // Local time as initial value
+            tempId,
         };
         try {
-            console.log('Sending message:', message);
+            console.log('Sending message with local time:', { message, localTime: new Date().toISOString() });
             stompClient.publish({
                 destination: chatMode === 'private' ? '/app/chat/private' : selectedGroupId ? `/app/chat/group/${selectedGroupId}` : '/app/chat/group',
                 body: JSON.stringify(message),
             });
+            // Add locally with tempId, to be updated by server response
             setMessages((prev) => [
                 ...prev,
                 {
@@ -356,8 +361,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     recipientId: message.recipientId ? Number(message.recipientId) : null,
                     groupId: message.groupId ? Number(message.groupId) : null,
                     timestamp: formatDate(message.createdAt),
+                    id: tempId,
                 },
-            ]);
+            ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
             setNewMessage('');
         } catch (error) {
             console.error('Send message error:', error);
@@ -535,7 +541,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                             onClick={() => {
                                 setChatMode('group');
                                 setSelectedUserId(null);
-                                setGroupSearchQuery('');
                                 setPrivateSearchQuery('');
                                 setMessages([]);
                             }}
@@ -547,7 +552,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                             onClick={() => {
                                 setChatMode('private');
                                 setSelectedUserId(null);
-                                setGroupSearchQuery('');
                                 setPrivateSearchQuery('');
                                 setMessages([]);
                             }}
@@ -559,7 +563,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                             onClick={() => {
                                 setChatMode('createGroup');
                                 setSelectedUserId(null);
-                                setGroupSearchQuery('');
                                 setPrivateSearchQuery('');
                                 setCreateGroupSearchQuery('');
                                 setMessages([]);
@@ -574,53 +577,39 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         <div>
                             <h2 className="text-xl font-semibold mb-4 text-white">Group Chats</h2>
                             <div className="flex flex-col gap-2 mb-4">
-                                <input
-                                    type="text"
-                                    value={groupSearchQuery}
+                                <select
+                                    value={selectedGroupId || ''}
                                     onChange={(e) => {
-                                        setGroupSearchQuery(e.target.value);
-                                        setSelectedUserId(null);
+                                        setSelectedGroupId(Number(e.target.value) || null);
+                                        setMessages([]);
                                     }}
-                                    placeholder="Search users..."
-                                    className="p-2 rounded-lg bg-teal-700 text-white border border-gray-600 focus:ring-2 focus:ring-teal-400 w-full sm:w-64"
-                                    aria-label="Search users"
-                                />
-                                {groupSearchQuery && (
-                                    <select
-                                        value={selectedUserId || ''}
-                                        onChange={(e) => setSelectedUserId(Number(e.target.value))}
-                                        className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
-                                        disabled={users.length === 0}
-                                    >
-                                        <option value="" disabled>
-                                            Select a user
+                                    className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
+                                    disabled={groups.length === 0}
+                                >
+                                    <option value="">All Groups</option>
+                                    {groups.map((g) => (
+                                        <option key={g.id} value={g.id}>
+                                            {g.name}
                                         </option>
-                                        {users.map((u) => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.firstName} {u.lastName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
+                                    ))}
+                                </select>
                             </div>
                             <div className="max-h-96 overflow-y-auto mb-4">
                                 {messages.length > 0 ? (
-                                    messages.map((message) => (
+                                    messages.map((msg) => (
                                         <div
-                                            key={message.id}
-                                            className={`p-2 border-b border-gray-600 ${
-                                                message.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'
-                                            }`}
+                                            key={msg.id || msg.tempId}
+                                            className={`p-2 my-1 border-b border-gray-600 ${msg.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'}`}
                                         >
                                             <span className="font-medium text-white">
-                                                {users.find(u => u.id === message.senderId)?.firstName || message.senderId}:
+                                                {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
                                             </span>
-                                            <span className="text-gray-300"> {message.content}</span>
-                                            <span className="text-sm text-gray-400 block">{message.timestamp}</span>
+                                            <span className="text-gray-300"> {msg.content}</span>
+                                            <span className="text-sm text-gray-400 block">{msg.timestamp}</span>
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-gray-300">No messages yet.</p>
+                                    <p className="text-gray-300">No messages found.</p>
                                 )}
                             </div>
                             <div className="flex gap-2">
@@ -630,7 +619,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type a message..."
                                     className="flex-1 p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
-                                    aria-label="Type a message"
+                                    aria-label="Message input"
                                 />
                                 <button
                                     onClick={handleSendMessage}
@@ -660,7 +649,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         const userId = e.target.value ? Number(e.target.value) : null;
                                         setSelectedUserId(userId);
                                         setMessages([]);
-                                        console.log('Selected user ID:', userId);
+                                        console.log('Selected user:', userId);
                                     }}
                                     className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
                                     disabled={users.length === 0}
@@ -675,18 +664,16 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                             </div>
                             <div className="max-h-96 overflow-y-auto mb-4">
                                 {messages.length > 0 ? (
-                                    messages.map((message) => (
+                                    messages.map((msg) => (
                                         <div
-                                            key={message.id}
-                                            className={`p-2 border-b border-gray-600 ${
-                                                message.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'
-                                            }`}
+                                            key={msg.id || msg.tempId}
+                                            className={`p-2 my-1 border-b border-gray-600 ${msg.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'}`}
                                         >
                                             <span className="font-medium text-white">
-                                                {users.find(u => u.id === message.senderId)?.firstName || message.senderId}:
+                                                {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
                                             </span>
-                                            <span className="text-gray-300"> {message.content}</span>
-                                            <span className="text-sm text-gray-400 block">{message.timestamp}</span>
+                                            <span className="text-gray-300"> {msg.content}</span>
+                                            <span className="text-sm text-gray-400 block">{msg.timestamp}</span>
                                         </div>
                                     ))
                                 ) : (
@@ -706,8 +693,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 <button
                                     onClick={handleSendMessage}
                                     className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
-                                    aria-label="Send message"
                                     disabled={!selectedUserId}
+                                    aria-label="Send message"
                                 >
                                     Send
                                 </button>
@@ -717,23 +704,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     {chatMode === 'createGroup' && (
                         <div>
                             <h2 className="text-xl font-semibold mb-4 text-white">Manage Groups</h2>
-                            <div className="flex flex-col gap-2 mb-4">
-                                <select
-                                    value={selectedGroupId || ''}
-                                    onChange={(e) => {
-                                        setSelectedGroupId(Number(e.target.value) || null);
-                                        setMessages([]);
-                                    }}
-                                    className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
-                                    disabled={groups.length === 0}
-                                >
-                                    <option value="">All Groups</option>
-                                    {groups.map((g) => (
-                                        <option key={g.id} value={g.id}>
-                                            {g.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="flex flex-col">
                                 <div className="max-h-48 overflow-y-auto mt-2">
                                     {groups.map((g) => (
                                         <div key={g.id} className="flex items-center justify-between p-2 bg-teal-800 rounded-lg mb-2">
