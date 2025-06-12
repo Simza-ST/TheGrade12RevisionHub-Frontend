@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Sidebar from './Sidebar';
+import Sidebar from '../common/Sidebar';
 
 const Resources = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();

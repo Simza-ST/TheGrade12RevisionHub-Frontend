@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from '../Sidebar';
+import Sidebar from '../../common/Sidebar';
 import DigitizedQuestionPaperCard from './DigitizedQuestionPaperCard';
 
 const DigitizedQuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import './Sidebar.css';
+import './sidebar.css';
 
 const UserProfile = ({ user, onLogout }) => {
     if (!user) {

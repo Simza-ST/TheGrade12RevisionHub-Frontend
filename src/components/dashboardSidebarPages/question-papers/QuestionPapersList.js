@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Sidebar from '../Sidebar';
+import Sidebar from '../../common/Sidebar';
 import FilterSection from './FilterSection';
 import PapersList from './PapersList';
 import PDFModal from './PDFModal';

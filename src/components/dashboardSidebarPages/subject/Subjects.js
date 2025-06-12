@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Sidebar from '../Sidebar';
+import Sidebar from '../../common/Sidebar';
 import SubjectForm from './SubjectForm';
 import SubjectCard from './SubjectCard';
 import MessageBanner from '../../MessageBanner';

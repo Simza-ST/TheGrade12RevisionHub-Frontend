@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import Sidebar from './Sidebar';
+import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {

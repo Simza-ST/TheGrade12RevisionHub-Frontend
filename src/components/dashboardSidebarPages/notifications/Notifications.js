@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import Sidebar from './Sidebar';
+import Sidebar from '../../common/Sidebar';
 import LoadingSpinner from './LoadingSpinner';
 import NotificationHeader from './NotificationHeader';
 import NotificationControls from './NotificationControls';

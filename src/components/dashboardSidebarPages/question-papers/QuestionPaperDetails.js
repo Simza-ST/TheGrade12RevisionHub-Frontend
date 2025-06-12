@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import Sidebar from '../Sidebar';
+import Sidebar from '../../common/Sidebar';
 import Tooltip from './Tooltip';
 
 const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {

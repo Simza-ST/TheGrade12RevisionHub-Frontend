@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Sidebar from './dashboardSidebarPages/Sidebar';
+import Sidebar from './common/Sidebar';
 import { Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
