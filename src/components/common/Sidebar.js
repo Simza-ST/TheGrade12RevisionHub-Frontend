@@ -9,23 +9,39 @@ const UserProfile = ({ user, onLogout }) => {
     }
 
     return (
-        <div className="flex items-center space-x-4 p-4 bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md rounded-2xl shadow-2xl">
+        <div className="flex items-center space-x-4 p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-lg">
             <img
                 src={user.profilePicture || '/default-avatar.png'}
                 alt="Profile"
-                className="w-10 h-10 rounded-full border-2 border-[var(--accent-primary)]"
+                className="w-12 h-12 rounded-full border-2 border-[var(--accent-primary)] object-cover"
             />
             <div className="flex-1">
-                <h2 className="text-sm font-semibold text-[var(--text-primary)]">{user.name || 'Unknown User'}</h2>
-                <p className="text-xs text-[var(--text-secondary)]">{user.title || 'No Title'}</p>
+                <h2 className="text-base font-bold text-[var(--text-primary)]">
+                    {user.name || 'Unknown User'}
+                </h2>
+                <p className="text-sm font-medium text-[var(--text-secondary)] mt-1">
+                    {user.email || 'No Email'}
+                </p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    {user.title || 'No Role'}
+                </p>
             </div>
+            <button
+                onClick={onLogout}
+                className="p-2 bg-[var(--hover-tertiary)] hover:bg-red-600 text-[var(--text-primary)] rounded-lg"
+                aria-label="Logout"
+            >
+                🚪
+            </button>
         </div>
     );
 };
 
 UserProfile.propTypes = {
     user: PropTypes.shape({
+        id: PropTypes.number,
         name: PropTypes.string,
+        email: PropTypes.string,
         title: PropTypes.string,
         profilePicture: PropTypes.string,
     }),
@@ -49,10 +65,10 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
     return (
         <nav
             className={`
-        h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] flex flex-col fixed top-0 left-0
-        transition-all duration-300 ease-in-out shadow-2xl z-30
-        ${isCollapsed ? 'w-16' : 'w-64'}
-      `}
+                h-screen bg-[var(--bg-secondary)] text-[var(--text-primary)] flex flex-col fixed top-0 left-0
+                shadow-md z-30
+                ${isCollapsed ? 'w-16' : 'w-64'}
+            `}
         >
             <div className="flex items-center justify-between p-6">
                 {!isCollapsed && (
@@ -60,7 +76,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
                 )}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="p-2 bg-[var(--bg-secondary)] hover:bg-[var(--hover-tertiary)] text-[var(--text-primary)] rounded-2xl shadow-2xl transition-colors"
+                    className="p-2 bg-[var(--bg-secondary)] hover:bg-[var(--hover-tertiary)] text-[var(--text-primary)] rounded-2xl shadow-md"
                     aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
                     <svg
@@ -86,10 +102,10 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
                             to={item.path}
                             onClick={item.onClick}
                             className={`
-                flex items-center w-full py-2 px-3 rounded-lg
-                hover:bg-[var(--hover-tertiary)] hover:shadow-sm transition-all duration-200
-                ${isCollapsed ? 'justify-center' : ''}
-              `}
+                                flex items-center w-full py-2 px-3 rounded-lg
+                                hover:bg-[var(--hover-tertiary)] hover:shadow-sm
+                                ${isCollapsed ? 'justify-center' : ''}
+                            `}
                             title={isCollapsed ? item.name : ''}
                             aria-label={`Navigate to ${item.name}`}
                         >
@@ -112,13 +128,15 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
 
 Sidebar.propTypes = {
     user: PropTypes.shape({
+        id: PropTypes.number,
         name: PropTypes.string,
+        email: PropTypes.string,
         title: PropTypes.string,
         profilePicture: PropTypes.string,
     }),
     onLogout: PropTypes.func.isRequired,
     isCollapsed: PropTypes.bool.isRequired,
-    setIsCollapsed: PropTypes.func.isRequired,
+    setIsCollapsed: PropTypes.func,
     darkMode: PropTypes.bool.isRequired,
 };
 

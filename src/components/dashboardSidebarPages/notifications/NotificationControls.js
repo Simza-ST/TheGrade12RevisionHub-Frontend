@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types';
 
-// Component for the notification controls (filter and buttons)
 const NotificationControls = ({ filterType, setFilterType, markAllAsRead, deleteAllNotifications, unreadNotifications, totalNotifications }) => (
     <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-white">Your Notifications</h2>
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Notifications</h2>
         <div className="flex items-center gap-4">
             <select
-                className="border rounded-lg px-2 py-1 text-sm text-white bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="form-input"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
             >
@@ -14,23 +13,21 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                 <option value="info">Info</option>
                 <option value="warning">Warning</option>
                 <option value="error">Error</option>
-                <option value="birthday">birthday</option>
-                <option value="Read">Read</option>
-                <option value="unRead">unRead</option>
-                <option value="quiz">quiz</option>
+                <option value="birthday">Birthday</option>
+                <option value="read">Read</option>
+                <option value="unread">Unread</option>
+                <option value="quiz">Quiz</option>
             </select>
             <button
                 onClick={markAllAsRead}
-                className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition transform hover:-translate-y-1"
-                style={{ boxShadow: '2px 6px 15px rgba(0, 0, 200, 0.4)' }}
+                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] text-sm rounded-lg hover:bg-[var(--hover-tertiary)] whitespace-nowrap"
                 disabled={unreadNotifications === 0}
             >
                 Mark All as Read
             </button>
             <button
                 onClick={deleteAllNotifications}
-                className="text-sm bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition transform hover:-translate-y-1"
-                style={{ boxShadow: '2px 6px 15px rgba(250, 0, 20, 0.4)' }}
+                className="px-4 py-2 bg-[var(--accent-secondary)] text-white text-sm rounded-lg hover:bg-[var(--hover-secondary)] whitespace-nowrap"
                 disabled={totalNotifications === 0}
             >
                 Delete All

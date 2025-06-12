@@ -8,7 +8,7 @@ const FilterSection = ({
                            selectedYear = '',
                            onYearChange,
                        }) => (
-        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-4 items-center">
+        <div className="mb-6 flex gap-4">
             <label
                 htmlFor="subjects-select"
                 className="text-[var(--text-primary)] font-semibold text-lg"

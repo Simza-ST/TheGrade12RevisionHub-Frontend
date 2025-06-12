@@ -27,6 +27,11 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const [editGroupId, setEditGroupId] = useState(null);
     const [editGroupName, setEditGroupName] = useState('');
 
+    // Set theme attribute for light/dark mode
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
+
     // Fetch user details
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -198,7 +203,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         if (isNaN(date.getTime())) {
             return 'Invalid Date';
         }
-        // Subtract 2 hours to correct the 2-hour ahead discrepancy
         const adjustedDate = new Date(date.getTime() - (2 * 60 * 60 * 1000));
         return adjustedDate.toLocaleString('en-US', {
             timeZone,
@@ -210,7 +214,41 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         });
     };
 
-    // WebSocket setup
+    // Memoize updateMessagesWithServerResponse
+    const updateMessagesWithServerResponse = useCallback((data) => {
+        setMessages((prev) => {
+            const existingIndex = prev.findIndex((msg) =>
+                msg.tempId && msg.content === data.content && msg.senderId === Number(data.senderId)
+            );
+            if (existingIndex !== -1) {
+                const updatedMessages = [...prev];
+                updatedMessages[existingIndex] = {
+                    ...data,
+                    senderId: Number(data.senderId),
+                    recipientId: data.recipientId ? Number(data.recipientId) : null,
+                    groupId: data.groupId ? Number(data.groupId) : null,
+                    timestamp: formatDate(data.createdAt),
+                    id: data.id || uuidv4(),
+                };
+                return updatedMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (!prev.some((msg) => msg.id === data.id)) {
+                return [
+                    ...prev,
+                    {
+                        ...data,
+                        senderId: Number(data.senderId),
+                        recipientId: data.recipientId ? Number(data.recipientId) : null,
+                        groupId: data.groupId ? Number(data.groupId) : null,
+                        timestamp: formatDate(data.createdAt),
+                        id: data.id || uuidv4(),
+                    },
+                ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+            return prev.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        });
+    }, []); // Empty dependency array since it doesn't depend on props or state
+
+    // WebSocket setup with updateMessagesWithServerResponse in dependency array
     useEffect(() => {
         if (!user || stompClientRef.current) return;
 
@@ -277,62 +315,22 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 stompClientRef.current = null;
             }
         };
-    }, [user, groups, chatMode, selectedUserId, selectedGroupId]);
-
-    const updateMessagesWithServerResponse = (data) => {
-        setMessages((prev) => {
-            const existingIndex = prev.findIndex((msg) =>
-                msg.tempId && msg.content === data.content && msg.senderId === Number(data.senderId)
-            );
-            if (existingIndex !== -1) {
-                // Replace the local message with the server version
-                const updatedMessages = [...prev];
-                updatedMessages[existingIndex] = {
-                    ...data,
-                    senderId: Number(data.senderId),
-                    recipientId: data.recipientId ? Number(data.recipientId) : null,
-                    groupId: data.groupId ? Number(data.groupId) : null,
-                    timestamp: formatDate(data.createdAt),
-                    id: data.id || uuidv4(),
-                };
-                return updatedMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            } else if (!prev.some((msg) => msg.id === data.id)) {
-                // Add new message if no match
-                return [
-                    ...prev,
-                    {
-                        ...data,
-                        senderId: Number(data.senderId),
-                        recipientId: data.recipientId ? Number(data.recipientId) : null,
-                        groupId: data.groupId ? Number(data.groupId) : null,
-                        timestamp: formatDate(data.createdAt),
-                        id: data.id || uuidv4(),
-                    },
-                ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            }
-            return prev.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Skip if duplicate by id but sort
-        });
-    };
+    }, [user, groups, chatMode, selectedUserId, selectedGroupId, updateMessagesWithServerResponse]);
 
     const handleSendMessage = () => {
-        console.log('handleSendMessage called', { newMessage, user, stompClient, chatMode, selectedUserId, selectedGroupId });
         if (!newMessage.trim()) {
-            console.warn('Empty message');
             setError('Message cannot be empty');
             return;
         }
         if (!user) {
-            console.error('No user');
             setError('User not authenticated');
             return;
         }
         if (!stompClient || !stompClient.connected) {
-            console.error('No active WebSocket connection');
             setError('No WebSocket connection');
             return;
         }
         if (chatMode === 'private' && !selectedUserId) {
-            console.error('No recipient selected for private chat');
             setError('Select a user for private chat');
             return;
         }
@@ -343,16 +341,14 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             groupId: chatMode === 'group' && selectedGroupId ? Number(selectedGroupId) : null,
             content: newMessage,
             type: chatMode === 'private' ? 'PRIVATE' : 'GROUP',
-            createdAt: new Date().toISOString(), // Local time as initial value
+            createdAt: new Date().toISOString(),
             tempId,
         };
         try {
-            console.log('Sending message with local time:', { message, localTime: new Date().toISOString() });
             stompClient.publish({
                 destination: chatMode === 'private' ? '/app/chat/private' : selectedGroupId ? `/app/chat/group/${selectedGroupId}` : '/app/chat/group',
                 body: JSON.stringify(message),
             });
-            // Add locally with tempId, to be updated by server response
             setMessages((prev) => [
                 ...prev,
                 {
@@ -479,14 +475,10 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         navigate('/login');
     };
 
-    useEffect(() => {
-        console.log('selectedUserId updated:', selectedUserId);
-    }, [selectedUserId]);
-
     if (loading || !user) {
         return (
-            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"></div>
+            <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
             </div>
         );
     }
@@ -494,327 +486,515 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <div
-                className={`
-                    flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-                    ${isCollapsed ? 'ml-16' : 'ml-64'}
-                `}
-            >
-                <div className="bg-gradient-to-r from-teal-600 to-red-600 text-white p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold">Chatroom</h1>
-                        <p className="text-sm mt-1 text-gray-300">Connect with peers, {user.name}!</p>
-                    </div>
-                    <div className="flex gap-4">
-                        <Link
-                            to="/notifications"
-                            className="relative px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
-                            aria-label={`View notifications (${notificationCount} unread)`}
-                        >
-                            🔔
-                            {notificationCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    {notificationCount}
-                                </span>
-                            )}
-                        </Link>
-                        <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            className="px-4 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600"
-                            aria-label="Toggle dark mode"
-                        >
-                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                        </button>
-                    </div>
-                </div>
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <div className="flex gap-4 mb-4">
-                        <button
-                            onClick={() => {
-                                setChatMode('group');
-                                setSelectedUserId(null);
-                                setPrivateSearchQuery('');
-                                setMessages([]);
-                            }}
-                            className={`px-4 py-2 rounded-lg ${chatMode === 'group' ? 'bg-teal-600' : 'bg-gray-600'} text-white`}
-                        >
-                            Group Chats
-                        </button>
-                        <button
-                            onClick={() => {
-                                setChatMode('private');
-                                setSelectedUserId(null);
-                                setPrivateSearchQuery('');
-                                setMessages([]);
-                            }}
-                            className={`px-4 py-2 rounded-lg ${chatMode === 'private' ? 'bg-teal-600' : 'bg-gray-600'} text-white`}
-                        >
-                            Private Chat
-                        </button>
-                        <button
-                            onClick={() => {
-                                setChatMode('createGroup');
-                                setSelectedUserId(null);
-                                setPrivateSearchQuery('');
-                                setCreateGroupSearchQuery('');
-                                setMessages([]);
-                            }}
-                            className={`px-4 py-2 rounded-lg ${chatMode === 'createGroup' ? 'bg-teal-600' : 'bg-gray-600'} text-white`}
-                        >
-                            Create Group
-                        </button>
-                    </div>
-                    {error && <p className="text-red-400 mb-4">{error}</p>}
-                    {chatMode === 'group' && (
+        <div className="full">
+            <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
+                        .full {
+                            width: 100%;
+                            min-height: 100vh;
+                            position: relative;
+                            z-index: 10;
+                        }
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
+                        .bg-[var(--bg-secondary)] {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        }
+                        .bg-[var(--bg-tertiary)] {
+                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        }
+                        .bg-[var(--accent-primary)] {
+                            background-color: var(--accent-primary, #007bff);
+                        }
+                        .bg-[var(--accent-secondary)] {
+                            background-color: var(--accent-secondary, #dc3545);
+                        }
+                        .text-[var(--text-primary)] {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        }
+                        .text-[var(--text-secondary)] {
+                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                        }
+                        .hover\\:bg-[var(--hover-tertiary)]:hover {
+                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                        }
+                        .hover\\:bg-[var(--hover-primary)]:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .flex {
+                            display: flex;
+                        }
+                        .min-h-screen {
+                            min-height: 100vh;
+                        }
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
+                        }
+                        .justify-between {
+                            justify-content: space-between;
+                        }
+                        .items-center {
+                            align-items: center;
+                        }
+                        .flex-1 {
+                            flex: 1;
+                        }
+                        .gap-4 {
+                            gap: 16px;
+                        }
+                        .p-6 {
+                            padding: 24px;
+                        }
+                        .sm\\:p-8 {
+                            padding: 32px;
+                        }
+                        .rounded-2xl {
+                            border-radius: 16px;
+                        }
+                        .rounded-lg {
+                            border-radius: 8px;
+                        }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
+                        .shadow-[var(--shadow)] {
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        .text-3xl {
+                            font-size: 24px;
+                        }
+                        .text-xl {
+                            font-size: 18px;
+                        }
+                        .text-lg {
+                            font-size: 16px;
+                        }
+                        .text-sm {
+                            font-size: 12px;
+                        }
+                        .text-xs {
+                            font-size: 10px;
+                        }
+                        .font-bold {
+                            font-weight: 700;
+                        }
+                        .font-semibold {
+                            font-weight: 600;
+                        }
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        .form-input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 14px;
+                        }
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .-top-2 {
+                            top: -8px;
+                        }
+                        .-right-2 {
+                            right: -8px;
+                        }
+                        .h-5 {
+                            height: 20px;
+                        }
+                        .w-5 {
+                            width: 20px;
+                        }
+                        .chat-section {
+                            background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
+                        }
+                        .ml-16 {
+                            margin-left: 64px;
+                        }
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        @media (min-width: 640px) {
+                            .sm\\:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                            .sm\\:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        .underline {
+                            text-decoration: underline;
+                        }
+                    `}
+                </style>
+                <Sidebar
+                    user={user}
+                    onLogout={handleLogout}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                    darkMode={darkMode}
+                />
+                <div
+                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
+                >
+                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
-                            <h2 className="text-xl font-semibold mb-4 text-white">Group Chats</h2>
-                            <div className="flex flex-col gap-2 mb-4">
-                                <select
-                                    value={selectedGroupId || ''}
-                                    onChange={(e) => {
-                                        setSelectedGroupId(Number(e.target.value) || null);
-                                        setMessages([]);
-                                    }}
-                                    className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
-                                    disabled={groups.length === 0}
-                                >
-                                    <option value="">All Groups</option>
-                                    {groups.map((g) => (
-                                        <option key={g.id} value={g.id}>
-                                            {g.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="max-h-96 overflow-y-auto mb-4">
-                                {messages.length > 0 ? (
-                                    messages.map((msg) => (
-                                        <div
-                                            key={msg.id || msg.tempId}
-                                            className={`p-2 my-1 border-b border-gray-600 ${msg.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'}`}
-                                        >
-                                            <span className="font-medium text-white">
-                                                {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
-                                            </span>
-                                            <span className="text-gray-300"> {msg.content}</span>
-                                            <span className="text-sm text-gray-400 block">{msg.timestamp}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-gray-300">No messages found.</p>
-                                )}
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
-                                    aria-label="Message input"
-                                />
-                                <button
-                                    onClick={handleSendMessage}
-                                    className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
-                                    aria-label="Send message"
-                                >
-                                    Send
-                                </button>
-                            </div>
+                            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Chatroom</h1>
+                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Connect with peers, {user.name}!</p>
                         </div>
-                    )}
-                    {chatMode === 'private' && (
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4 text-white">Private Chat</h2>
-                            <div className="flex flex-col gap-2 mb-4">
-                                <input
-                                    type="text"
-                                    value={privateSearchQuery}
-                                    onChange={(e) => setPrivateSearchQuery(e.target.value)}
-                                    placeholder="Search users..."
-                                    className="p-2 rounded-lg bg-teal-700 text-white border border-gray-600 focus:ring-2 focus:ring-teal-400 w-full sm:w-64"
-                                    aria-label="Search users"
-                                />
-                                <select
-                                    value={selectedUserId || ''}
-                                    onChange={(e) => {
-                                        const userId = e.target.value ? Number(e.target.value) : null;
-                                        setSelectedUserId(userId);
-                                        setMessages([]);
-                                        console.log('Selected user:', userId);
-                                    }}
-                                    className="p-2 rounded-lg bg-teal-700 text-white w-full sm:w-64"
-                                    disabled={users.length === 0}
-                                >
-                                    <option value="">Select a user</option>
-                                    {users.map((u) => (
-                                        <option key={u.id} value={u.id}>
-                                            {u.firstName} {u.lastName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="max-h-96 overflow-y-auto mb-4">
-                                {messages.length > 0 ? (
-                                    messages.map((msg) => (
-                                        <div
-                                            key={msg.id || msg.tempId}
-                                            className={`p-2 my-1 border-b border-gray-600 ${msg.senderId === user.id ? 'bg-teal-700' : 'bg-gray-700'}`}
-                                        >
-                                            <span className="font-medium text-white">
-                                                {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
-                                            </span>
-                                            <span className="text-gray-300"> {msg.content}</span>
-                                            <span className="text-sm text-gray-400 block">{msg.timestamp}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-gray-300">No messages yet.</p>
+                        <div className="flex gap-4">
+                            <Link
+                                to="/notifications"
+                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label={`View notifications (${notificationCount} unread)`}
+                            >
+                                🔔
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
                                 )}
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 bg-teal-700 text-white"
-                                    aria-label="Type a message"
-                                    disabled={!selectedUserId}
-                                />
-                                <button
-                                    onClick={handleSendMessage}
-                                    className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
-                                    disabled={!selectedUserId}
-                                    aria-label="Send message"
-                                >
-                                    Send
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    {chatMode === 'createGroup' && (
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4 text-white">Manage Groups</h2>
-                            <div className="flex flex-col">
-                                <div className="max-h-48 overflow-y-auto mt-2">
-                                    {groups.map((g) => (
-                                        <div key={g.id} className="flex items-center justify-between p-2 bg-teal-800 rounded-lg mb-2">
-                                            <span className="text-white">{g.name}</span>
-                                            {user && g.creatorId === user.id && (
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditGroupId(g.id);
-                                                            setEditGroupName(g.name);
-                                                        }}
-                                                        className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                        aria-label={`Edit group ${g.name}`}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteGroup(g.id)}
-                                                        className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                                                        aria-label={`Delete group ${g.name}`}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2 text-white">Create New Group</h3>
-                            <div className="flex flex-col gap-2 mb-4">
-                                <input
-                                    type="text"
-                                    value={groupName}
-                                    onChange={(e) => setGroupName(e.target.value)}
-                                    placeholder="Enter group name..."
-                                    className="p-2 rounded-lg bg-teal-700 text-white border border-gray-600 focus:ring-2 focus:ring-teal-400 w-full sm:w-64"
-                                    aria-label="Group name"
-                                />
-                                <input
-                                    type="text"
-                                    value={createGroupSearchQuery}
-                                    onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
-                                    placeholder="Search users..."
-                                    className="p-2 rounded-lg bg-teal-700 text-white border border-gray-600 focus:ring-2 focus:ring-teal-400 w-full sm:w-64"
-                                    aria-label="Search users"
-                                />
-                                {createGroupSearchQuery && (
-                                    <div className="max-h-48 overflow-y-auto">
-                                        {users.map((u) => (
-                                            <div
-                                                key={u.id}
-                                                className="flex items-center p-2 border-b border-gray-600"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedMemberIds.includes(u.id)}
-                                                    onChange={() => toggleMember(u.id)}
-                                                    className="mr-4"
-                                                    aria-label={`Select ${u.firstName} ${u.lastName}`}
-                                                />
-                                                <span className="text-white">{u.firstName} {u.lastName}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                            </Link>
                             <button
-                                onClick={handleCreateGroup}
-                                className="px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg hover:from-teal-700 hover:to-red-700"
-                                aria-label="Create group"
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                aria-label="Toggle dark mode"
+                            >
+                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="chat-section">
+                        <div className="flex gap-4 mb-4">
+                            <button
+                                onClick={() => {
+                                    setChatMode('group');
+                                    setSelectedUserId(null);
+                                    setPrivateSearchQuery('');
+                                    setMessages([]);
+                                }}
+
+                                className={`px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? '' : 'px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]'}`}
+                            >
+                                Group Chats
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setChatMode('private');
+                                    setSelectedUserId(null);
+                                    setPrivateSearchQuery('');
+                                    setMessages([]);
+                                }}
+                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                            >
+                                Private Chat
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setChatMode('createGroup');
+                                    setSelectedUserId(null);
+                                    setPrivateSearchQuery('');
+                                    setCreateGroupSearchQuery('');
+                                    setMessages([]);
+                                }}
+                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                             >
                                 Create Group
                             </button>
                         </div>
-                    )}
-                    {editGroupId && (
-                        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center">
-                            <div className="bg-teal-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                                <h2 className="text-xl font-semibold mb-4 text-white">Edit Group Name</h2>
-                                <input
-                                    type="text"
-                                    value={editGroupName}
-                                    onChange={(e) => setEditGroupName(e.target.value)}
-                                    placeholder="Enter new group name..."
-                                    className="w-full p-2 mb-2 rounded-lg bg-teal-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-400"
-                                    aria-label="Edit group name"
-                                />
-                                <div className="flex gap-2 justify-end">
-                                    <button
-                                        onClick={() => {
-                                            setEditGroupId(null);
-                                            setEditGroupName('');
+                        {error && <p className="text-[var(--accent-secondary)] mb-4">{error}</p>}
+                        {chatMode === 'group' && (
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Group Chats</h2>
+                                <div className="flex flex-col gap-2 mb-4">
+                                    <select
+                                        value={selectedGroupId || ''}
+                                        onChange={(e) => {
+                                            setSelectedGroupId(Number(e.target.value) || null);
+                                            setMessages([]);
                                         }}
-                                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                                        aria-label="Cancel edit"
+                                        className="form-input w-full sm:w-64"
+                                        disabled={groups.length === 0}
                                     >
-                                        Cancel
-                                    </button>
+                                        <option value="">All Groups</option>
+                                        {groups.map((g) => (
+                                            <option key={g.id} value={g.id}>
+                                                {g.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto mb-4">
+                                    {messages.length > 0 ? (
+                                        messages.map((msg) => (
+                                            <div
+                                                key={msg.id || msg.tempId}
+                                                className={`p-2 my-1 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'}`}
+                                            >
+                                                <span className="font-medium text-[var(--text-primary)]">
+                                                    {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
+                                                </span>
+                                                <span className="text-[var(--text-secondary)]"> {msg.content}</span>
+                                                <span className="text-sm text-[var(--text-secondary)] block">{msg.timestamp}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-[var(--text-secondary)]">No messages found.</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type a message..."
+                                        className="form-input flex-1"
+                                        aria-label="Message input"
+                                    />
                                     <button
-                                        onClick={handleEditGroup}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                        aria-label="Save group"
+                                        onClick={handleSendMessage}
+                                        className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        aria-label="Send message"
                                     >
-                                        Save
+                                        Send
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {chatMode === 'private' && (
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Private Chat</h2>
+                                <div className="flex flex-col gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        value={privateSearchQuery}
+                                        onChange={(e) => setPrivateSearchQuery(e.target.value)}
+                                        placeholder="Search users..."
+                                        className="form-input w-full sm:w-64"
+                                        aria-label="Search users"
+                                    />
+                                    <select
+                                        value={selectedUserId || ''}
+                                        onChange={(e) => {
+                                            const userId = e.target.value ? Number(e.target.value) : null;
+                                            setSelectedUserId(userId);
+                                            setMessages([]);
+                                            console.log('Selected user:', userId);
+                                        }}
+                                        className="form-input w-full sm:w-64"
+                                        disabled={users.length === 0}
+                                    >
+                                        <option value="">Select a user</option>
+                                        {users.map((u) => (
+                                            <option key={u.id} value={u.id}>
+                                                {u.firstName} {u.lastName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto mb-4">
+                                    {messages.length > 0 ? (
+                                        messages.map((msg) => (
+                                            <div
+                                                key={msg.id || msg.tempId}
+                                                className={`p-2 my-1 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'}`}
+                                            >
+                                                <span className="font-medium text-[var(--text-primary)]">
+                                                    {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
+                                                </span>
+                                                <span className="text-[var(--text-secondary)]"> {msg.content}</span>
+                                                <span className="text-sm text-[var(--text-secondary)] block">{msg.timestamp}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-[var(--text-secondary)]">No messages yet.</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type a message..."
+                                        className="form-input flex-1"
+                                        aria-label="Type a message"
+                                        disabled={!selectedUserId}
+                                    />
+                                    <button
+                                        onClick={handleSendMessage}
+                                        className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        disabled={!selectedUserId}
+                                        aria-label="Send message"
+                                    >
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {chatMode === 'createGroup' && (
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Manage Groups</h2>
+                                <div className="flex flex-col">
+                                    <div className="max-h-48 overflow-y-auto mt-2">
+                                        {groups.map((g) => (
+                                            <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
+                                                <span className="text-[var(--text-primary)]">{g.name}</span>
+                                                {user && g.creatorId === user.id && (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditGroupId(g.id);
+                                                                setEditGroupName(g.name);
+                                                            }}
+                                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                                            aria-label={`Edit group ${g.name}`}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteGroup(g.id)}
+                                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                                            aria-label={`Delete group ${g.name}`}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)]">Create New Group</h3>
+                                <div className="flex flex-col gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        value={groupName}
+                                        onChange={(e) => setGroupName(e.target.value)}
+                                        placeholder="Enter group name..."
+                                        className="form-input w-full sm:w-64"
+                                        aria-label="Group name"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={createGroupSearchQuery}
+                                        onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
+                                        placeholder="Search users..."
+                                        className="form-input w-full sm:w-64"
+                                        aria-label="Search users"
+                                    />
+                                    {createGroupSearchQuery && (
+                                        <div className="max-h-48 overflow-y-auto">
+                                            {users.map((u) => (
+                                                <div
+                                                    key={u.id}
+                                                    className="flex items-center p-2 border-b border-[var(--border-color)]"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedMemberIds.includes(u.id)}
+                                                        onChange={() => toggleMember(u.id)}
+                                                        className="mr-4"
+                                                        aria-label={`Select ${u.firstName} ${u.lastName}`}
+                                                    />
+                                                    <span className="text-[var(--text-primary)]">{u.firstName} {u.lastName}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={handleCreateGroup}
+                                    className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                    aria-label="Create group"
+                                >
+                                    Create Group
+                                </button>
+                            </div>
+                        )}
+                        {editGroupId && (
+                            <div className="fixed inset-0 bg-[var(--bg-primary)] bg-opacity-75 flex items-center justify-center">
+                                <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg w-full max-w-md">
+                                    <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">Edit Group Name</h2>
+                                    <input
+                                        type="text"
+                                        value={editGroupName}
+                                        onChange={(e) => setEditGroupName(e.target.value)}
+                                        placeholder="Enter new group name"
+                                        className="form-input w-full mb-4"
+                                        aria-label="Edit group name"
+                                    />
+                                    <div className="flex justify-end gap-4">
+                                        <button
+                                            onClick={() => {
+                                                setEditGroupId(null);
+                                                setEditGroupName('');
+                                            }}
+                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                            aria-label="Cancel edit"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleEditGroup}
+                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                            aria-label="Save changes"
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -829,8 +1009,8 @@ Chatroom.propTypes = {
     notifications: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.number.isRequired,
-            content: PropTypes.string.isRequired,
-            createdAt: PropTypes.string.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
         })
     ).isRequired,

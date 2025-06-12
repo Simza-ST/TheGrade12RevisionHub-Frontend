@@ -32,7 +32,7 @@ const SubjectForm = ({ subjects, selectedSubject, onSubjectSelect, onSubmit, dar
         </div>
         <button
             type="submit"
-            className="btn-primary"
+            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
         >
             Add Subject
         </button>

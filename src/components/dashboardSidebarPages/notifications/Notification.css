@@ -3,67 +3,13 @@ body {
     font-family: 'Arial', sans-serif;
 }
 
-.flex {
-    display: flex;
-}
-
-.min-h-screen {
-    min-height: 100vh;
-}
-
-.bg-gradient-to-br {
-    background: linear-gradient(to bottom right, #014d4d, #4a5568, #742a2a);
-}
-
-.bg-teal-800,
-.bg-teal-900 {
-    background-color: #2d3748;
-}
-
-.bg-opacity-90 {
-    background-color: rgba(45, 55, 72, 0.9);
-}
-
-.backdrop-blur-md {
-    backdrop-filter: blur(10px);
-}
-
-.p-6 {
-    padding: 1.5rem;
-}
-
-.rounded-2xl {
-    border-radius: 1rem;
-}
-
-.shadow-2xl {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.ml-16 {
-    margin-left: 4rem;
-}
-
-.ml-64 {
-    margin-left: 16rem;
-}
-
-.transition-all {
-    transition-property: all;
-    transition-duration: 300ms;
-}
-
-.duration-300 {
-    transition-duration: 300ms;
-}
-
 .notification-list {
     max-width: 600px;
     margin: 0 auto;
 }
 
 .notification {
-    background: #e6fffb;
+    background: var(--bg-secondary);
     padding: 1rem;
     margin: 0.5rem 0;
     border-radius: 0.5rem;
@@ -72,13 +18,5 @@ body {
 }
 
 .notification.read {
-    background: #d1fae5;
-}
-
-.text-red-400 {
-    color: #f87171;
-}
-
-.mb-4 {
-    margin-bottom: 1rem;
+    background: var(--bg-tertiary);
 }

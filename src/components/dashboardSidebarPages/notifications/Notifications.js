@@ -18,6 +18,11 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const [filterType, setFilterType] = useState('all');
     const [user, setUser] = useState(null);
 
+    // Set theme attribute for light/dark mode
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
+
     // Fetch user details
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -245,46 +250,262 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     }
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900">
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <div
-                className={`
-          flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-          ${isCollapsed ? 'ml-16' : 'ml-64'}
-        `}
-            >
-                <NotificationHeader
+        <div className="full">
+            <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
+                        /* Prevent transitions and animations globally */
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
+                        /* Full wrapper */
+                        .full {
+                            width: 100%;
+                            min-height: 100vh;
+                            position: relative;
+                            z-index: 10;
+                        }
+                        /* Base styles */
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
+                        .bg-[var(--bg-secondary)] {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        }
+                        .bg-[var(--bg-tertiary)] {
+                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        }
+                        .bg-[var(--accent-primary)] {
+                            background-color: var(--accent-primary, #007bff);
+                        }
+                        .bg-[var(--accent-secondary)] {
+                            background-color: var(--accent-secondary, #dc3545);
+                        }
+                        .text-[var(--text-primary)] {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        }
+                        .text-[var(--text-secondary)] {
+                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                        }
+                        .text-white {
+                            color: #ffffff;
+                        }
+                        /* Hover states */
+                        .hover\\:bg-[var(--hover-tertiary)]:hover {
+                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                        }
+                        .hover\\:bg-[var(--hover-primary)]:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .hover\\:text-[var(--hover-secondary)]:hover {
+                            color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
+                        }
+                        /* Layout styles */
+                        .flex {
+                            display: flex;
+                        }
+                        .min-h-screen {
+                            min-height: 100vh;
+                        }
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
+                        }
+                        .justify-between {
+                            justify-content: space-between;
+                        }
+                        .items-center {
+                            align-items: center;
+                        }
+                        .flex-1 {
+                            flex: 1;
+                        }
+                        .gap-4 {
+                            gap: 16px;
+                        }
+                        .p-6 {
+                            padding: 24px;
+                        }
+                        .sm\\:p-8 {
+                            padding: 32px;
+                        }
+                        .rounded-2xl {
+                            border-radius: 16px;
+                        }
+                        .rounded-lg {
+                            border-radius: 8px;
+                        }
+                        .rounded-md {
+                            border-radius: 6px;
+                        }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
+                        .shadow-[var(--shadow)] {
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        /* Typography */
+                        .text-3xl {
+                            font-size: 24px;
+                        }
+                        .text-xl {
+                            font-size: 18px;
+                        }
+                        .text-lg {
+                            font-size: 16px;
+                        }
+                        .text-sm {
+                            font-size: 12px;
+                        }
+                        .text-xs {
+                            font-size: 10px;
+                        }
+                        .font-bold {
+                            font-weight: 700;
+                        }
+                        .font-semibold {
+                            font-weight: 600;
+                        }
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        /* Form elements */
+                        .form-label {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-weight: 600;
+                            margin-bottom: 8px;
+                            display: block;
+                        }
+                        .form-input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 14px;
+                        }
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        /* Button styles */
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        /* Grid layout */
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        /* Notification badge */
+                        .-top-2 {
+                            top: -8px;
+                        }
+                        .-right-2 {
+                            right: -8px;
+                        }
+                        .h-5 {
+                            height: 20px;
+                        }
+                        .w-5 {
+                            width: 20px;
+                        }
+                        /* Custom section background */
+                        .notification-section {
+                            background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
+                        }
+                        /* Sidebar margins */
+                        .ml-16 {
+                            margin-left: 64px;
+                        }
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        /* Responsive adjustments */
+                        @media (min-width: 640px) {
+                            .sm\\:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                            .sm\\:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        /* Underline */
+                        .underline {
+                            text-decoration: underline;
+                        }
+                    `}
+                </style>
+                <Sidebar
                     user={user}
-                    unreadNotifications={unreadNotifications}
+                    onLogout={handleLogout}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
-                    setDarkMode={setDarkMode}
                 />
-                <div className={`bg-teal-${darkMode ? '900' : '800'} bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl`}>
-                    <NotificationControls
-                        filterType={filterType}
-                        setFilterType={setFilterType}
-                        markAllAsRead={markAllAsRead}
-                        deleteAllNotifications={deleteAllNotifications}
+                <div
+                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
+                >
+                    <NotificationHeader
+                        user={user}
                         unreadNotifications={unreadNotifications}
-                        totalNotifications={totalNotifications}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
                     />
-                    {error && <p className="text-red-400 mb-4">{error}</p>}
-                    <NotificationStats
-                        totalNotifications={totalNotifications}
-                        unreadNotifications={unreadNotifications}
-                        readNotifications={readNotifications}
-                    />
-                    <NotificationList
-                        filteredNotifications={filteredNotifications}
-                        markAsRead={markAsRead}
-                        deleteNotification={deleteNotification}
-                    />
+                    <div className="notification-section">
+                        <NotificationControls
+                            filterType={filterType}
+                            setFilterType={setFilterType}
+                            markAllAsRead={markAllAsRead}
+                            deleteAllNotifications={deleteAllNotifications}
+                            unreadNotifications={unreadNotifications}
+                            totalNotifications={totalNotifications}
+                        />
+                        {error && <p className="text-[var(--accent-secondary)] mb-4">{error}</p>}
+                        <NotificationStats
+                            totalNotifications={totalNotifications}
+                            unreadNotifications={unreadNotifications}
+                            readNotifications={readNotifications}
+                        />
+                        <NotificationList
+                            filteredNotifications={filteredNotifications}
+                            markAsRead={markAsRead}
+                            deleteNotification={deleteNotification}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

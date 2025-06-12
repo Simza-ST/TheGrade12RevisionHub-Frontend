@@ -30,7 +30,7 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                                 <button
                                     onClick={() => onViewPdf(paper.id)}
                                     disabled={pdfLoading}
-                                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label={`View ${paper.title}`}
                                 >
                                     {pdfLoading ? 'Loading...' : 'View'}
@@ -40,7 +40,7 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                                 <button
                                     onClick={() => onDownloadPdf(paper.id, paper.title)}
                                     disabled={pdfLoading}
-                                    className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label={`Download ${paper.title}`}
                                 >
                                     {pdfLoading ? 'Loading...' : 'Download'}

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 
 const NotificationList = ({ filteredNotifications, markAsRead, deleteNotification }) => {
-    // Safely format date
     const formatDate = (dateString) => {
         if (!dateString || typeof dateString !== 'string') {
             return 'Unknown Date';
@@ -17,7 +16,7 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
             hour: '2-digit',
             minute: '2-digit',
             hour12: true,
-        }); // e.g., "Jun 1, 2025, 9:30 PM"
+        });
     };
 
     return (
@@ -26,34 +25,32 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
                 filteredNotifications.map((notification) => (
                     <li
                         key={notification.id}
-                        className={`p-2 rounded flex justify-between items-center ${
-                            notification.read ? 'bg-gray-800' : 'bg-teal-600'
-                        }`}
+                        className={`p-2 rounded flex justify-between items-center notification ${notification.read ? 'read' : ''}`}
                     >
                         <div className="flex items-center gap-2">
-              <span
-                  className={`text-sm font-medium ${
-                      notification.type === 'info'
-                          ? 'text-blue-400'
-                          : notification.type === 'warning'
-                              ? 'text-yellow-400'
-                              : notification.type === 'error'
-                                  ? 'text-red-500'
-                                  : 'text-gray-400'
-                  }`}
-              >
-                [{notification.type ? notification.type.toUpperCase() : 'UNKNOWN'}]
-              </span>
-                            <span className="text-white">{notification.message}</span>
+                            <span
+                                className={`text-sm font-medium ${
+                                    notification.type === 'info'
+                                        ? 'text-[var(--accent-primary)]'
+                                        : notification.type === 'warning'
+                                            ? 'text-yellow-400'
+                                            : notification.type === 'error'
+                                                ? 'text-[var(--accent-secondary)]'
+                                                : 'text-[var(--text-secondary)]'
+                                }`}
+                            >
+                                [{notification.type ? notification.type.toUpperCase() : 'UNKNOWN'}]
+                            </span>
+                            <span className="text-[var(--text-primary)]">{notification.message}</span>
                         </div>
                         <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400">
-                {formatDate(notification.createdAt)}
-              </span>
+                            <span className="text-sm text-[var(--text-secondary)]">
+                                {formatDate(notification.createdAt)}
+                            </span>
                             {!notification.read && (
                                 <button
                                     onClick={() => markAsRead(notification.id)}
-                                    className="text-sm text-blue-400 hover:underline"
+                                    className="text-sm text-[var(--accent-primary)] hover:underline"
                                     aria-label={`Mark notification ${notification.message} as read`}
                                 >
                                     Mark as Read
@@ -61,7 +58,7 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
                             )}
                             <button
                                 onClick={() => deleteNotification(notification.id)}
-                                className="text-sm text-red-400 hover:text-red-300 transition"
+                                className="text-sm text-[var(--accent-secondary)] hover:text-[var(--hover-secondary)]"
                                 aria-label={`Delete notification ${notification.message}`}
                             >
                                 Delete
@@ -70,7 +67,7 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
                     </li>
                 ))
             ) : (
-                <p className="text-gray-300">No notifications available.</p>
+                <p className="text-[var(--text-secondary)]">No notifications available.</p>
             )}
         </ul>
     );
@@ -81,7 +78,7 @@ NotificationList.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             message: PropTypes.string.isRequired,
-            createdAt: PropTypes.string.isRequired, // Changed from 'date' to 'createdAt'
+            createdAt: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
             type: PropTypes.oneOf(['info', 'warning', 'error', undefined]),
         })
