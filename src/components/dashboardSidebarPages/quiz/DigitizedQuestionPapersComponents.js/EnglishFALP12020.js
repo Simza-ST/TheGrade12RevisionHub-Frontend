@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 function normalizeAnswer(answer) {
     return answer.toLowerCase().trim().replace(/[.,!?]/g, '');
@@ -86,6 +88,25 @@ const Question = ({ id, question, type, options, correctAnswers, marks, onAnswer
     );
 };
 
+Question.propTypes = {
+    id: PropTypes.string.isRequired,
+    question: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(['radio', 'text', 'textarea']).isRequired,
+    options: PropTypes.arrayOf(
+        PropTypes.shape({
+            value: PropTypes.string,
+            text: PropTypes.string,
+        })
+    ),
+    correctAnswers: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string),
+    ]).isRequired,
+    marks: PropTypes.number.isRequired,
+    onAnswerChange: PropTypes.func.isRequired,
+    answerStatus: PropTypes.bool.isRequired,
+};
+
 const SummaryQuestion = ({ onAnswerChange, answerStatus }) => {
     const [answers, setAnswers] = useState(Array(7).fill(''));
     const [wordCount, setWordCount] = useState(0);
@@ -153,7 +174,12 @@ const SummaryQuestion = ({ onAnswerChange, answerStatus }) => {
     );
 };
 
-const EnglishFALP12020 = () => {
+SummaryQuestion.propTypes = {
+    onAnswerChange: PropTypes.func.isRequired,
+    answerStatus: PropTypes.bool.isRequired,
+};
+
+const EnglishFALP12020 = ({ darkMode = false, setDarkMode = () => {}, notifications = [] }) => {
     const [totalScore, setTotalScore] = useState(0);
     const [answers, setAnswers] = useState({});
     const [answerStatus, setAnswerStatus] = useState(false);
@@ -170,6 +196,8 @@ const EnglishFALP12020 = () => {
         setTotalScore(score);
         setAnswerStatus(true);
     };
+
+    const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
         <div className="flex min-h-screen bg-[var(--bg-primary)]">
@@ -247,13 +275,13 @@ const EnglishFALP12020 = () => {
                         background-color: var(--bg-secondary, #fff);
                     }
                     .backdrop-blur-sm {
-                        backdrop-filter: none;
+                        backdrop-filter: blur(5px);
                     }
                     .shadow-[var(--shadow)] {
                         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                     }
                     .rounded-2xl {
-                        border-radius: 8px;
+                        border-radius: 16px;
                     }
                     .p-6 {
                         padding: 24px;
@@ -303,6 +331,12 @@ const EnglishFALP12020 = () => {
                     .justify-center {
                         justify-content: center;
                     }
+                    .justify-between {
+                        justify-content: space-between;
+                    }
+                    .gap-4 {
+                        gap: 16px;
+                    }
                     .list-decimal {
                         list-style-type: decimal;
                     }
@@ -318,14 +352,79 @@ const EnglishFALP12020 = () => {
                     .accent-[var(--accent-primary)] {
                         accent-color: var(--accent-primary, #007bff);
                     }
+                    .relative {
+                        position: relative;
+                    }
+                    .absolute {
+                        position: absolute;
+                    }
+                    .-top-2 {
+                        top: -8px;
+                    }
+                    .-right-2 {
+                        right: -8px;
+                    }
+                    .bg-[var(--accent-secondary)] {
+                        background-color: var(--accent-secondary, #ff6b6b);
+                    }
+                    .text-[var(--text-white)] {
+                        color: var(--text-white, #fff);
+                    }
+                    .text-xs {
+                        font-size: 10px;
+                    }
+                    .rounded-full {
+                        border-radius: 9999px;
+                    }
+                    .h-5 {
+                        height: 20px;
+                    }
+                    .w-5 {
+                        width: 20px;
+                    }
+                    .hover\\:bg-[var(--hover-tertiary)]:hover {
+                        background-color: var(--hover-tertiary, #e0e0e0);
+                    }
+                    .transition-colors {
+                        transition: background-color 0.2s ease;
+                    }
+                    .duration-200 {
+                        transition-duration: 200ms;
+                    }
                 `}
             </style>
             <div className="flex-1 min-w-0 p-6 sm:p-8">
-                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6">
-                    <h1 className="text-3xl font-bold text-[var(--text-primary)]">English First Additional Language P1 - November 2020</h1>
-                    <p className="text-sm mt-1 text-[var(--text-secondary)]"><strong>Total Marks:</strong> 80 | Time: 2 hours</p>
+                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-semibold text-[var(--text-primary)]">English First Additional Language P1 - November 2020</h1>
+                        <p className="text-sm mt-1 text-[var(--text-secondary)]"><strong>Total Marks:</strong> 80 | Time: 2 hours</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <Link
+                            to="/notifications"
+                            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                            aria-label={`View notifications (${notificationCount} unread)`}
+                        >
+                            🔔
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-[var(--text-white)] text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {notificationCount}
+                                </span>
+                            )}
+                        </Link>
+                        <button
+                            onClick={() => {
+                                setDarkMode(!darkMode);
+                                document.documentElement.setAttribute('data-theme', darkMode ? 'light' : 'dark');
+                            }}
+                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                            aria-label="Toggle dark mode"
+                        >
+                            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                        </button>
+                    </div>
                 </div>
-                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm] p-6 rounded-2xl shadow-[var(--shadow)]">
+                <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)]">
                     <p className="mb-6 text-[var(--text-secondary)]">Instructions: Answer all questions. For multiple-choice questions, select one option. For open-ended questions, provide detailed responses. Click "Mark Answers" to see your score and correct answers.</p>
 
                     <div className="service-card mb-10">
@@ -457,7 +556,7 @@ const EnglishFALP12020 = () => {
                             />
                             <Question
                                 id="1.7.2"
-                                question="Explain what is meant by clock-watching."
+                                question="Explain what is meant by 'clock-watching'."
                                 type="textarea"
                                 correctAnswers="A (high) regard for punctuality. / The strict adherence to time (is respected/revered in the workplace.)"
                                 marks={2}
@@ -892,6 +991,25 @@ const EnglishFALP12020 = () => {
             </div>
         </div>
     );
+};
+
+EnglishFALP12020.propTypes = {
+    darkMode: PropTypes.bool,
+    setDarkMode: PropTypes.func,
+    notifications: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+            read: PropTypes.bool.isRequired,
+        })
+    ),
+};
+
+EnglishFALP12020.defaultProps = {
+    darkMode: false,
+    setDarkMode: () => {},
+    notifications: [],
 };
 
 export default EnglishFALP12020;

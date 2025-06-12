@@ -230,10 +230,10 @@ const App = () => {
     );
 };
 
-function QuestionPaperView() {
+function QuestionPaperView({ darkMode, setDarkMode, notifications, ...rest }) {
     const { id } = useParams();
     if (id === '1') {
-        return <EnglishFALP12020 />;
+        return <EnglishFALP12020 darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} />;
     }
     return <div>Paper not found</div>;
 }
