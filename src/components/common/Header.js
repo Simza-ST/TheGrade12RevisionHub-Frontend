@@ -15,41 +15,30 @@ const Header = ({ user, notifications, isCollapsed, darkMode, setDarkMode , tabD
                 ${isCollapsed ? 'ml-16' : 'ml-64'}
             `}
         >
-            <div className={`${darkMode ? 'bg-gray-900' : 'bg-gradient-to-r from-teal-600 to-red-600'}
-            text-white p-6 rounded-2xl shadow-2xl mb-2 flex justify-between items-center`}>
-                <div className="flex items-center space-x-4">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold">{tabDescription}</h1>
-                        <p className="text-sm mt-1 text-gray-300">
-                            {userMessage}, {displayName}!
-                        </p>
-                        {user.title && (
-                            <p className="text-xs text-gray-400">{user.title}</p>
-                        )}
-                        {(user.email && !user.firstName && !user.lastName) && (
-                            <p className="text-xs text-gray-400">{user.email}</p>
-                        )}
-                    </div>
+            <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-md  flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold text-[var(--text-primary)]">{tabDescription}</h1>
+                    <p className="text-sm mt-1 text-[var(--text-secondary)]">{userMessage}, {displayName}!</p>
                 </div>
-                <div className="flex gap-2 sm:gap-4">
+                <div className="flex gap-4">
                     <Link
                         to="/notifications"
-                        className="relative px-3 py-2 sm:px-4 sm:py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600 transition-colors duration-200"
+                        className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                         aria-label={`View notifications (${notificationCount} unread)`}
                     >
                         🔔
                         {notificationCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {notificationCount}
-                            </span>
+                            <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {notificationCount}
+                                    </span>
                         )}
                     </Link>
                     <button
                         onClick={() => setDarkMode(!darkMode)}
-                        className="px-3 py-2 sm:px-4 sm:py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-600 transition-colors duration-200 text-sm sm:text-base"
+                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                         aria-label="Toggle dark mode"
                     >
-                        {darkMode ? '☀️ Light' : '🌙 Dark'}
+                        {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
                     </button>
                 </div>
             </div>

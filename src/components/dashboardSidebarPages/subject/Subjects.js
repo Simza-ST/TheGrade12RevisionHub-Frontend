@@ -5,19 +5,15 @@ import Sidebar from '../../common/Sidebar';
 import SubjectForm from './SubjectForm';
 import SubjectCard from './SubjectCard';
 import MessageBanner from '../../MessageBanner';
+import Header from "../../common/Header";
 
-const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
+const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications ,setNotifications}) => {
     const navigate = useNavigate();
     const [subjects, setSubjects] = useState([]);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [isAdding, setIsAdding] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-    const [user] = useState({
-        name: 'Bianca Doe',
-        title: 'CS Honor Student',
-        profilePicture: null,
-    });
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
 
     useEffect(() => {
@@ -373,38 +369,22 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
+                <div className="flex-1">
+                    <Header
+                        user={user}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        tabDescription="Your Subjects"
+                        userMessage="Manage your subjects"
+                    />
                 <main
-                    className={`flex-1 p-6 sm:p-8 max-w-5xl mx-auto w-full ${
+                    className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 mx-auto  ${
                         isCollapsed ? 'sm:ml-16' : 'sm:ml-64'
                     }`}
                 >
-                    <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-md mb-6 flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Your Subjects</h1>
-                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Manage your courses, {user.name}!</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <Link
-                                to="/notifications"
-                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label={`View notifications (${notificationCount} unread)`}
-                            >
-                                🔔
-                                {notificationCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                        {notificationCount}
-                                    </span>
-                                )}
-                            </Link>
-                            <button
-                                onClick={() => setDarkMode(!darkMode)}
-                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label="Toggle dark mode"
-                            >
-                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                            </button>
-                        </div>
-                    </div>
                     <section className="section-card">
                         <header className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Subjects</h2>
@@ -440,6 +420,7 @@ const Subjects = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifica
                         )}
                     </section>
                 </main>
+            </div>
             </div>
         </div>
     );

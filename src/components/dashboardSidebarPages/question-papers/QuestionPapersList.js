@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Sidebar from '../../common/Sidebar';
 import FilterSection from './FilterSection';
 import PapersList from './PapersList';
 import PDFModal from './PDFModal';
 import { useQuestionPapers } from '../../../hooks/useQuestionPapers';
+import Header from "../../common/Header";
 
-const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
+const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();
     const {
         questionPapers,
@@ -28,8 +29,6 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
         downloadPdf,
     } = useQuestionPapers();
 
-    const user = { name: 'Student', title: 'CS Student', profilePicture: null };
-    const notificationCount = notifications.filter((n) => !n.read).length;
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -310,34 +309,18 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
+                <div className="flex-1">
+                    <Header
+                        user={user}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        tabDescription="Question Papers"
+                        userMessage="Explore past papers"
+                    />
                 <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Question Papers</h1>
-                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Explore past papers, {user.name}!</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <Link
-                                to="/notifications"
-                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label={`View notifications (${notificationCount} unread)`}
-                            >
-                                🔔
-                                {notificationCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                        {notificationCount}
-                                    </span>
-                                )}
-                            </Link>
-                            <button
-                                onClick={() => setDarkMode(!darkMode)}
-                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label="Toggle dark mode"
-                            >
-                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                            </button>
-                        </div>
-                    </div>
                     <div className="quiz-section">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Past Papers</h2>
@@ -397,6 +380,7 @@ const QuestionPaperList = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode,
                         onDownloadPdf={downloadPdf}
                     />
                 </div>
+            </div>
             </div>
         </div>
     );

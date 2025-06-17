@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
+import Header from "../../common/Header";
 
-const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -11,11 +12,7 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
     const [error, setError] = useState('');
     const [filterSubject, setFilterSubject] = useState('');
     const [sortBy, setSortBy] = useState('dueDate');
-    const [user] = useState({
-        name: 'Bianca Doe',
-        title: 'CS Honor Student',
-        profilePicture: null,
-    });
+
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
@@ -372,36 +369,20 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
+                <div className="flex-1">
+                    <Header
+                        user={user}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        tabDescription="Quizzes"
+                        userMessage="Test your knowledge"
+                    />
                 <div
                     className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
                 >
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Quizzes</h1>
-                            <p className="text-sm mt-1 text-[var(--text-secondary)]">Test your knowledge, {user.name}!</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <Link
-                                to="/notifications"
-                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label={`View notifications (${notificationCount} unread)`}
-                            >
-                                🔔
-                                {notificationCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                        {notificationCount}
-                                    </span>
-                                )}
-                            </Link>
-                            <button
-                                onClick={() => setDarkMode(!darkMode)}
-                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label="Toggle dark mode"
-                            >
-                                {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                            </button>
-                        </div>
-                    </div>
                     <div className="quiz-section">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Quizzes</h2>
@@ -494,6 +475,7 @@ const Quizzes = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notificat
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

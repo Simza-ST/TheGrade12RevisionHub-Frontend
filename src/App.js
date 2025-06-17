@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams, useNavigate } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/welcomePages/Navbar';
 import Home from './components/welcomePages/Home';
@@ -36,9 +36,90 @@ const PublicLayout = () => (
     </div>
 );
 
-const ProtectedRoute = ({ isAuthenticated, children }) => {
-    return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+function ProtectedRoute({ children }) {
+    const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = localStorage.getItem('jwt');
+            console.log('JWT Token:', token || 'No token found');
+            if (!token) {
+                setIsAuthenticated(false);
+                setError('No authentication token found');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:6262/api/user/profile/getUserDetails', {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                console.log('User Details Response Status:', response.status);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('User Details Error:', errorData);
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                }
+
+                const { data } = await response.json();
+                console.log('User Data:', data);
+                setUser({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                    email: data.email || '',
+                    title: data.title || 'Grade 12 Learner',
+                    profilePicture: data.profilePicture || null,
+                });
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error('Auth Check Failed:', error.message);
+                setError(`Authentication failed: ${error.message}`);
+                localStorage.removeItem('jwt');
+                setIsAuthenticated(false);
+            }
+        };
+
+        checkAuth();
+    }, []);
+
+    if (isAuthenticated === null) {
+        return (
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
+                <div
+                    className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400"
+                    role="status"
+                    aria-label="Checking authentication..."
+                ></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex min-h-screen bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 justify-center items-center">
+                <div className="p-6 bg-red-600 text-white rounded-lg">
+                    <p>{error}</p>
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="mt-4 px-4 py-2 bg-red-700 hover:bg-red-800 rounded"
+                        aria-label="Return to login"
+                    >
+                        Go to Login
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return isAuthenticated ? React.cloneElement(children, { user ,setUser}) : <Navigate to="/login" replace />;
+}
 
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -114,7 +195,7 @@ const App = () => {
                     <Route
                         path="/dashboard"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <Dashboard {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -122,7 +203,7 @@ const App = () => {
                     <Route
                         path="/subjects"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <Subjects {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -130,7 +211,7 @@ const App = () => {
                     <Route
                         path="/quizzes"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <Quizzes {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -138,7 +219,7 @@ const App = () => {
                     <Route
                         path="/question-papers"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <QuestionPapersList {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -146,7 +227,7 @@ const App = () => {
                     <Route
                         path="/question-papers/list"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <QuestionPapersList {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -154,7 +235,7 @@ const App = () => {
                     <Route
                         path="/question-papers/:id"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <QuestionPaperDetails {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -162,7 +243,7 @@ const App = () => {
                     <Route
                         path="/resources"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <Resources {...commonProps} />
                             </ProtectedRoute>
                         }
@@ -194,7 +275,7 @@ const App = () => {
                     <Route
                         path="/chatroom"
                         element={
-                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <ProtectedRoute >
                                 <Chatroom {...commonProps} />
                             </ProtectedRoute>
                         }

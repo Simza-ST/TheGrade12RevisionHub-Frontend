@@ -7,6 +7,9 @@ const UserProfile = ({ user, onLogout }) => {
     if (!user) {
         return null;
     }
+    const displayName = user.firstName || user.lastName
+        ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+        : user.email || 'User';
 
     return (
         <div className="flex items-center space-x-4 p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-lg">
@@ -17,22 +20,15 @@ const UserProfile = ({ user, onLogout }) => {
             />
             <div className="flex-1">
                 <h2 className="text-base font-bold text-[var(--text-primary)]">
-                    {user.name || 'Unknown User'}
+                    {displayName || 'Unknown User'}
                 </h2>
-                <p className="text-sm font-medium text-[var(--text-secondary)] mt-1">
+                <p className="text-sm font-medium text-[var(--text-secondary)] ">
                     {user.email || 'No Email'}
                 </p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                <p className="text-xs text-[var(--text-secondary)]">
                     {user.title || 'No Role'}
                 </p>
             </div>
-            <button
-                onClick={onLogout}
-                className="p-2 bg-[var(--hover-tertiary)] hover:bg-red-600 text-[var(--text-primary)] rounded-lg"
-                aria-label="Logout"
-            >
-                🚪
-            </button>
         </div>
     );
 };
