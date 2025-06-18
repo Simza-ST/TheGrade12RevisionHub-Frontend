@@ -5,6 +5,8 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
+import { FiSend, FiTrash2, FiUser } from 'react-icons/fi';
+import GroupUsersModal from './GroupUsersModal';
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -26,13 +28,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const stompClientRef = useRef(null);
     const [editGroupId, setEditGroupId] = useState(null);
     const [editGroupName, setEditGroupName] = useState('');
+    const [groupUsers, setGroupUsers] = useState([]);
 
-    // Set theme attribute for light/dark mode
+    const isAdmin = (groupId) => {
+        const group = groups.find((g) => g.id === groupId);
+        return group && user && group.creatorId === user.id;
+    };
+
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
 
-    // Fetch user details
     useEffect(() => {
         const fetchUserDetails = async () => {
             setLoading(true);
@@ -52,7 +58,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         email: data.email,
                         name: `${data.firstName} ${data.lastName}`,
                         title: data.role,
-                        profilePicture: data.profilePicture ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(data.profilePicture)))}` : null,
+                        profilePicture: data.profilePicture
+                            ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(data.profilePicture)))}`
+                            : null,
                     });
                 } else {
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
@@ -68,37 +76,38 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         fetchUserDetails();
     }, [navigate]);
 
-    // Fetch users
-    const fetchUsers = useCallback(async (query = '', type = 'private') => {
-        try {
-            const token = localStorage.getItem('jwt');
-            const url = query.trim()
-                ? `http://localhost:6262/api/chat/users/search?query=${encodeURIComponent(query)}`
-                : 'http://localhost:6262/api/chat/users';
-            const response = await fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const userList = data.map(u => ({
-                    ...u,
-                    id: Number(u.id),
-                }));
-                setUsers(userList);
-                console.log(`Fetched users for ${type}:`, userList);
-            } else {
-                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    const fetchUsers = useCallback(
+        async (query = '', type = 'private') => {
+            try {
+                const token = localStorage.getItem('jwt');
+                const url = query.trim()
+                    ? `http://localhost:6262/api/chat/users/search?query=${encodeURIComponent(query)}`
+                    : 'http://localhost:6262/api/chat/users';
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const userList = data.map((u) => ({
+                        ...u,
+                        id: Number(u.id),
+                    }));
+                    setUsers(userList);
+                    console.log(`Fetched users for ${type}:`, userList);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+            } catch (error) {
+                console.error('Fetch users error:', error);
+                setError('Failed to fetch users: ' + error.message);
             }
-        } catch (error) {
-            console.error('Fetch users error:', error);
-            setError('Failed to fetch users: ' + error.message);
-        }
-    }, []);
+        },
+        []
+    );
 
-    // Debounced search for private and create group
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             if (user) {
@@ -117,7 +126,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         return () => clearTimeout(delayDebounceFn);
     }, [createGroupSearchQuery, user, fetchUsers]);
 
-    // Fetch groups
     useEffect(() => {
         const fetchGroups = async () => {
             if (!user) return;
@@ -132,11 +140,13 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Fetched groups:', data);
-                    setGroups(data.map(g => ({
-                        ...g,
-                        id: Number(g.id),
-                        creatorId: Number(g.creatorId),
-                    })));
+                    setGroups(
+                        data.map((g) => ({
+                            ...g,
+                            id: Number(g.id),
+                            creatorId: Number(g.creatorId),
+                        }))
+                    );
                 } else {
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
                 }
@@ -148,7 +158,32 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         fetchGroups();
     }, [user]);
 
-    // Fetch messages
+    const fetchGroupUsers = async (groupId) => {
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}/users`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setGroupUsers(
+                    data.map((u) => ({
+                        ...u,
+                        id: Number(u.id),
+                    }))
+                );
+            } else {
+                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            }
+        } catch (error) {
+            console.error('Fetch group users error:', error);
+            setError('Failed to fetch group users: ' + error.message);
+        }
+    };
+
     useEffect(() => {
         const fetchMessages = async () => {
             if (!user) return;
@@ -174,13 +209,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setMessages(data.map(msg => ({
-                        ...msg,
-                        senderId: Number(msg.senderId),
-                        recipientId: msg.recipientId ? Number(msg.recipientId) : null,
-                        groupId: msg.groupId ? Number(msg.groupId) : null,
-                        timestamp: formatDate(msg.createdAt),
-                    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+                    setMessages(
+                        data
+                            .map((msg) => ({
+                                ...msg,
+                                senderId: Number(msg.senderId),
+                                recipientId: msg.recipientId ? Number(msg.recipientId) : null,
+                                groupId: msg.groupId ? Number(msg.groupId) : null,
+                                timestamp: formatDate(msg.createdAt),
+                            }))
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    );
                 } else {
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
                 }
@@ -194,7 +233,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         fetchMessages();
     }, [user, chatMode, selectedUserId, selectedGroupId]);
 
-    // Date formatting with time zone and adjustment
     const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
         if (!dateString || typeof dateString !== 'string') {
             return 'Unknown Date';
@@ -203,7 +241,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         if (isNaN(date.getTime())) {
             return 'Invalid Date';
         }
-        const adjustedDate = new Date(date.getTime() - (2 * 60 * 60 * 1000));
+        const adjustedDate = new Date(date.getTime() - 2 * 60 * 60 * 1000);
         return adjustedDate.toLocaleString('en-US', {
             timeZone,
             month: 'short',
@@ -214,11 +252,10 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         });
     };
 
-    // Memoize updateMessagesWithServerResponse
     const updateMessagesWithServerResponse = useCallback((data) => {
         setMessages((prev) => {
-            const existingIndex = prev.findIndex((msg) =>
-                msg.tempId && msg.content === data.content && msg.senderId === Number(data.senderId)
+            const existingIndex = prev.findIndex(
+                (msg) => msg.tempId && msg.content === data.content && msg.senderId === Number(data.senderId)
             );
             if (existingIndex !== -1) {
                 const updatedMessages = [...prev];
@@ -246,9 +283,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             }
             return prev.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         });
-    }, []); // Empty dependency array since it doesn't depend on props or state
+    }, []);
 
-    // WebSocket setup with updateMessagesWithServerResponse in dependency array
+    const updateGroupUsersWithServerResponse = useCallback((data) => {
+        setGroupUsers(
+            data.users.map((u) => ({
+                ...u,
+                id: Number(u.id),
+            }))
+        );
+    }, []);
+
     useEffect(() => {
         if (!user || stompClientRef.current) return;
 
@@ -272,12 +317,19 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     }
                 });
 
-                groups.forEach(group => {
+                groups.forEach((group) => {
                     client.subscribe(`/topic/group/${group.id}`, (message) => {
                         console.log(`Received group message for group ${group.id}:`, message.body);
                         if (chatMode === 'group' && selectedGroupId === group.id) {
                             const data = JSON.parse(message.body);
                             updateMessagesWithServerResponse(data);
+                        }
+                    });
+                    client.subscribe(`/topic/group/${group.id}/users`, (message) => {
+                        console.log(`Received group users update for group ${group.id}:`, message.body);
+                        if (editGroupId === group.id) {
+                            const data = JSON.parse(message.body);
+                            updateGroupUsersWithServerResponse(data);
                         }
                     });
                 });
@@ -315,7 +367,75 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                 stompClientRef.current = null;
             }
         };
-    }, [user, groups, chatMode, selectedUserId, selectedGroupId, updateMessagesWithServerResponse]);
+    }, [
+        user,
+        groups,
+        chatMode,
+        selectedUserId,
+        selectedGroupId,
+        editGroupId,
+        updateMessagesWithServerResponse,
+        updateGroupUsersWithServerResponse,
+    ]);
+
+    const handleAddUser = async (userId) => {
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/chat/group/${editGroupId}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ userId: Number(userId) }),
+            });
+            if (response.ok) {
+                const userToAdd = users.find((u) => u.id === Number(userId));
+                if (userToAdd) {
+                    setGroupUsers([...groupUsers, userToAdd]);
+                }
+                setError(null);
+                if (stompClient && stompClient.connected) {
+                    stompClient.publish({
+                        destination: `/app/group/${editGroupId}/users`,
+                        body: JSON.stringify({ users: [...groupUsers, userToAdd] }),
+                    });
+                }
+            } else {
+                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            }
+        } catch (error) {
+            console.error('Add user error:', error);
+            setError('Failed to add user: ' + error.message);
+        }
+    };
+
+    const handleRemoveUser = async (userId) => {
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/chat/group/${editGroupId}/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                setGroupUsers(groupUsers.filter((u) => u.id !== userId));
+                setError(null);
+                if (stompClient && stompClient.connected) {
+                    stompClient.publish({
+                        destination: `/app/group/${editGroupId}/users`,
+                        body: JSON.stringify({ users: groupUsers.filter((u) => u.id !== userId) }),
+                    });
+                }
+            } else {
+                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            }
+        } catch (error) {
+            console.error('Remove user error:', error);
+            setError('Failed to remove user: ' + error.message);
+        }
+    };
 
     const handleSendMessage = () => {
         if (!newMessage.trim()) {
@@ -346,7 +466,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         };
         try {
             stompClient.publish({
-                destination: chatMode === 'private' ? '/app/chat/private' : selectedGroupId ? `/app/chat/group/${selectedGroupId}` : '/app/chat/group',
+                destination:
+                    chatMode === 'private' ? '/app/chat/private' : selectedGroupId ? `/app/chat/group/${selectedGroupId}` : '/app/chat/group',
                 body: JSON.stringify(message),
             });
             setMessages((prev) => [
@@ -423,9 +544,10 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             });
             if (response.ok) {
                 const data = await response.json();
-                setGroups(groups.map(g => g.id === editGroupId ? { ...g, name: data.name } : g));
+                setGroups(groups.map((g) => (g.id === editGroupId ? { ...g, name: data.name } : g)));
                 setEditGroupId(null);
                 setEditGroupName('');
+                setGroupUsers([]);
                 setError(null);
             } else {
                 throw new Error(`HTTP ${response.status}: ${await response.text()}`);
@@ -443,11 +565,11 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
             if (response.ok) {
-                setGroups(groups.filter(g => g.id !== groupId));
+                setGroups(groups.filter((g) => g.id !== groupId));
                 if (selectedGroupId === groupId) {
                     setSelectedGroupId(null);
                     setMessages([]);
@@ -463,10 +585,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     };
 
     const toggleMember = (userId) => {
-        setSelectedMemberIds(prev =>
-            prev.includes(userId)
-                ? prev.filter(id => id !== userId)
-                : [...prev, userId]
+        setSelectedMemberIds((prev) =>
+            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
         );
     };
 
@@ -490,191 +610,191 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
-                        }
-                        .full {
-                            width: 100%;
-                            min-height: 100vh;
-                            position: relative;
-                            z-index: 10;
-                        }
-                        .bg-[var(--bg-primary)] {
-                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
-                        }
-                        .bg-[var(--bg-secondary)] {
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                        }
-                        .bg-[var(--bg-tertiary)] {
-                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
-                        }
-                        .bg-[var(--accent-primary)] {
-                            background-color: var(--accent-primary, #007bff);
-                        }
-                        .bg-[var(--accent-secondary)] {
-                            background-color: var(--accent-secondary, #dc3545);
-                        }
-                        .text-[var(--text-primary)] {
-                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                        }
-                        .text-[var(--text-secondary)] {
-                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
-                        }
-                        .hover\\:bg-[var(--hover-tertiary)]:hover {
-                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
-                        }
-                        .hover\\:bg-[var(--hover-primary)]:hover {
-                            background-color: var(--hover-primary, #0056b3);
-                        }
-                        .flex {
-                            display: flex;
-                        }
-                        .min-h-screen {
-                            min-height: 100vh;
-                        }
-                        .min-w-0 {
-                            min-width: 0;
-                        }
-                        .justify-center {
-                            justify-content: center;
-                        }
-                        .justify-between {
-                            justify-content: space-between;
-                        }
-                        .items-center {
-                            align-items: center;
-                        }
-                        .flex-1 {
-                            flex: 1;
-                        }
-                        .gap-4 {
-                            gap: 16px;
-                        }
-                        .p-6 {
-                            padding: 24px;
-                        }
-                        .sm\\:p-8 {
-                            padding: 32px;
-                        }
-                        .rounded-2xl {
-                            border-radius: 16px;
-                        }
-                        .rounded-lg {
-                            border-radius: 8px;
-                        }
-                        .mb-4 {
-                            margin-bottom: 16px;
-                        }
-                        .mb-6 {
-                            margin-bottom: 24px;
-                        }
-                        .mt-1 {
-                            margin-top: 4px;
-                        }
-                        .mt-4 {
-                            margin-top: 16px;
-                        }
-                        .shadow-[var(--shadow)] {
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                        }
-                        .text-3xl {
-                            font-size: 24px;
-                        }
-                        .text-xl {
-                            font-size: 18px;
-                        }
-                        .text-lg {
-                            font-size: 16px;
-                        }
-                        .text-sm {
-                            font-size: 12px;
-                        }
-                        .text-xs {
-                            font-size: 10px;
-                        }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .font-medium {
-                            font-weight: 500;
-                        }
-                        .form-input {
-                            width: 100%;
-                            padding: 8px;
-                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                            border-radius: 4px;
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 14px;
-                        }
-                        .form-input:focus {
-                            border-color: var(--accent-primary, #007bff);
-                            outline: none;
-                        }
-                        .btn-primary {
-                            background-color: var(--accent-primary, #007bff);
-                            color: #ffffff;
-                            padding: 8px 16px;
-                            border-radius: 4px;
-                            border: none;
-                            cursor: pointer;
-                        }
-                        .btn-primary:hover {
-                            background-color: var(--hover-primary, #0056b3);
-                        }
-                        .grid {
-                            display: grid;
-                            grid-template-columns: 1fr;
-                            gap: 16px;
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                        .-top-2 {
-                            top: -8px;
-                        }
-                        .-right-2 {
-                            right: -8px;
-                        }
-                        .h-5 {
-                            height: 20px;
-                        }
-                        .w-5 {
-                            width: 20px;
-                        }
-                        .chat-section {
-                            background: ${darkMode
+            * {
+              transition: none !important;
+              animation: none !important;
+              opacity: 1 !important;
+            }
+            .full {
+              width: 100%;
+              min-height: 100vh;
+              position: relative;
+              z-index: 10;
+            }
+            .bg-[var(--bg-primary)] {
+              background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+            }
+            .bg-[var(--bg-secondary)] {
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+            }
+            .bg-[var(--bg-tertiary)] {
+              background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+            }
+            .bg-[var(--accent-primary)] {
+              background-color: var(--accent-primary, #007bff);
+            }
+            .bg-[var(--accent-secondary)] {
+              background-color: var(--accent-secondary, #dc3545);
+            }
+            .text-[var(--text-primary)] {
+              color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+            }
+            .text-[var(--text-secondary)] {
+              color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+            }
+            .hover\\:bg-[var(--hover-tertiary)]:hover {
+              background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+            }
+            .hover\\:bg-[var(--hover-primary)]:hover {
+              background-color: var(--hover-primary, #0056b3);
+            }
+            .flex {
+              display: flex;
+            }
+            .min-h-screen {
+              min-height: 100vh;
+            }
+            .min-w-0 {
+              min-width: 0;
+            }
+            .justify-center {
+              justify-content: center;
+            }
+            .justify-between {
+              justify-content: space-between;
+            }
+            .items-center {
+              align-items: center;
+            }
+            .flex-1 {
+              flex: 1;
+            }
+            .gap-4 {
+              gap: 16px;
+            }
+            .p-6 {
+              padding: 24px;
+            }
+            .sm\\:p-8 {
+              padding: 32px;
+            }
+            .rounded-2xl {
+              border-radius: 16px;
+            }
+            .rounded-lg {
+              border-radius: 8px;
+            }
+            .mb-4 {
+              margin-bottom: 16px;
+            }
+            .mb-6 {
+              margin-bottom: 24px;
+            }
+            .mt-1 {
+              margin-top: 4px;
+            }
+            .mt-4 {
+              margin-top: 16px;
+            }
+            .shadow-[var(--shadow)] {
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-3xl {
+              font-size: 24px;
+            }
+            .text-xl {
+              font-size: 18px;
+            }
+            .text-lg {
+              font-size: 16px;
+            }
+            .text-sm {
+              font-size: 12px;
+            }
+            .text-xs {
+              font-size: 10px;
+            }
+            .font-bold {
+              font-weight: 700;
+            }
+            .font-semibold {
+              font-weight: 600;
+            }
+            .font-medium {
+              font-weight: 500;
+            }
+            .form-input {
+              width: 100%;
+              padding: 8px;
+              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+              border-radius: 4px;
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+              color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+              font-size: 14px;
+            }
+            .form-input:focus {
+              border-color: var(--accent-primary, #007bff);
+              outline: none;
+            }
+            .btn-primary {
+              background-color: var(--accent-primary, #007bff);
+              color: #ffffff;
+              padding: 8px 16px;
+              border-radius: 4px;
+              border: none;
+              cursor: pointer;
+            }
+            .btn-primary:hover {
+              background-color: var(--hover-primary, #0056b3);
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 16px;
+            }
+            .sm\\:grid-cols-3 {
+              grid-template-columns: repeat(3, 1fr);
+            }
+            .-top-2 {
+              top: -8px;
+            }
+            .-right-2 {
+              right: -8px;
+            }
+            .h-5 {
+              height: 20px;
+            }
+            .w-5 {
+              width: 20px;
+            }
+            .chat-section {
+              background: ${darkMode
                         ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
                         : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                            padding: 32px;
-                            border-radius: 16px;
-                        }
-                        .ml-16 {
-                            margin-left: 64px;
-                        }
-                        .ml-64 {
-                            margin-left: 256px;
-                        }
-                        @media (min-width: 640px) {
-                            .sm\\:grid-cols-3 {
-                                grid-template-columns: repeat(3, 1fr);
-                            }
-                            .sm\\:p-8 {
-                                padding: 32px;
-                            }
-                        }
-                        .underline {
-                            text-decoration: underline;
-                        }
-                    `}
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+              padding: 32px;
+              border-radius: 16px;
+            }
+            .ml-16 {
+              margin-left: 64px;
+            }
+            .ml-64 {
+              margin-left: 256px;
+            }
+            @media (min-width: 640px) {
+              .sm\\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+              }
+              .sm\\:p-8 {
+                padding: 32px;
+              }
+            }
+            .underline {
+              text-decoration: underline;
+            }
+          `}
                 </style>
                 <Sidebar
                     user={user}
@@ -683,10 +803,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
-                <div
-                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
-                >
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
+                <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-bold text-[var(--text-primary)]">Chatroom</h1>
                             <p className="text-sm mt-1 text-[var(--text-secondary)]">Connect with peers, {user.name}!</p>
@@ -700,13 +818,13 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 🔔
                                 {notificationCount > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                        {notificationCount}
-                                    </span>
+                    {notificationCount}
+                  </span>
                                 )}
                             </Link>
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
-                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                 aria-label="Toggle dark mode"
                             >
                                 {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
@@ -714,7 +832,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         </div>
                     </div>
                     <div className="chat-section">
-                        <div className="flex gap-4 mb-4">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
                             <button
                                 onClick={() => {
                                     setChatMode('group');
@@ -722,8 +840,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setPrivateSearchQuery('');
                                     setMessages([]);
                                 }}
-
-                                className={`px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? '' : 'px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]'}`}
+                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
+                                    chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''
+                                }`}
                             >
                                 Group Chats
                             </button>
@@ -734,7 +853,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setPrivateSearchQuery('');
                                     setMessages([]);
                                 }}
-                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
+                                    chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''
+                                }`}
                             >
                                 Private Chat
                             </button>
@@ -746,15 +867,18 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setCreateGroupSearchQuery('');
                                     setMessages([]);
                                 }}
-                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
+                                    chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''
+                                }`}
                             >
-                                Create Group
+                                Manage Groups
                             </button>
                         </div>
+
                         {error && <p className="text-[var(--accent-secondary)] mb-4">{error}</p>}
                         {chatMode === 'group' && (
                             <div>
-                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Group Chats</h2>
+                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Group Chats:</h2>
                                 <div className="flex flex-col gap-2 mb-4">
                                     <select
                                         value={selectedGroupId || ''}
@@ -762,10 +886,10 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                             setSelectedGroupId(Number(e.target.value) || null);
                                             setMessages([]);
                                         }}
-                                        className="form-input w-full sm:w-64"
+                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
                                         disabled={groups.length === 0}
                                     >
-                                        <option value="">All Groups</option>
+                                        <option value="">Main Group Chat</option>
                                         {groups.map((g) => (
                                             <option key={g.id} value={g.id}>
                                                 {g.name}
@@ -773,18 +897,25 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         ))}
                                     </select>
                                 </div>
-                                <div className="max-h-96 overflow-y-auto mb-4">
+                                <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto mb-4">
                                     {messages.length > 0 ? (
                                         messages.map((msg) => (
                                             <div
                                                 key={msg.id || msg.tempId}
-                                                className={`p-2 my-1 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'}`}
+                                                className={`p-2 sm:p-3 my-1 border-b border-[var(--border-color)] ${
+                                                    msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'
+                                                } rounded-lg`}
                                             >
-                                                <span className="font-medium text-[var(--text-primary)]">
-                                                    {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
-                                                </span>
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {msg.senderId === user.id
+                              ? 'You'
+                              : `${users.find((u) => u.id === msg.senderId)?.firstName || ''} ${
+                              users.find((u) => u.id === msg.senderId)?.lastName || ''
+                          }` || `User ${msg.senderId}`}
+                            :
+                        </span>
                                                 <span className="text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <span className="text-sm text-[var(--text-secondary)] block">{msg.timestamp}</span>
+                                                <span className="text-xs sm:text-sm text-[var(--text-secondary)] block mt-1">{msg.timestamp}</span>
                                             </div>
                                         ))
                                     ) : (
@@ -797,29 +928,30 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Type a message..."
-                                        className="form-input flex-1"
+                                        className="form-input flex-1 text-sm sm:text-base"
                                         aria-label="Message input"
                                     />
                                     <button
                                         onClick={handleSendMessage}
-                                        className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] sm:min-h-[44px]"
+                                        disabled={chatMode === 'private' && !selectedUserId}
                                         aria-label="Send message"
                                     >
-                                        Send
+                                        <FiSend className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
                                 </div>
                             </div>
                         )}
                         {chatMode === 'private' && (
                             <div>
-                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Private Chat</h2>
+                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Private Chat:</h2>
                                 <div className="flex flex-col gap-2 mb-4">
                                     <input
                                         type="text"
                                         value={privateSearchQuery}
                                         onChange={(e) => setPrivateSearchQuery(e.target.value)}
                                         placeholder="Search users..."
-                                        className="form-input w-full sm:w-64"
+                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
                                         aria-label="Search users"
                                     />
                                     <select
@@ -830,7 +962,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                             setMessages([]);
                                             console.log('Selected user:', userId);
                                         }}
-                                        className="form-input w-full sm:w-64"
+                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
                                         disabled={users.length === 0}
                                     >
                                         <option value="">Select a user</option>
@@ -841,18 +973,25 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         ))}
                                     </select>
                                 </div>
-                                <div className="max-h-96 overflow-y-auto mb-4">
+                                <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto mb-4">
                                     {messages.length > 0 ? (
                                         messages.map((msg) => (
                                             <div
                                                 key={msg.id || msg.tempId}
-                                                className={`p-2 my-1 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'}`}
+                                                className={`p-2 sm:p-3 my-1 border-b border-[var(--border-color)] ${
+                                                    msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'
+                                                } rounded-lg`}
                                             >
-                                                <span className="font-medium text-[var(--text-primary)]">
-                                                    {msg.senderId === user.id ? 'You' : users.find(u => u.id === msg.senderId)?.firstName + ' ' + users.find(u => u.id === msg.senderId)?.lastName || msg.senderId}:
-                                                </span>
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {msg.senderId === user.id
+                              ? 'You'
+                              : `${users.find((u) => u.id === msg.senderId)?.firstName || ''} ${
+                              users.find((u) => u.id === msg.senderId)?.lastName || ''
+                          }` || `User ${msg.senderId}`}
+                            :
+                        </span>
                                                 <span className="text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <span className="text-sm text-[var(--text-secondary)] block">{msg.timestamp}</span>
+                                                <span className="text-xs sm:text-sm text-[var(--text-secondary)] block mt-1">{msg.timestamp}</span>
                                             </div>
                                         ))
                                     ) : (
@@ -865,47 +1004,52 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Type a message..."
-                                        className="form-input flex-1"
+                                        className="form-input flex-1 text-sm sm:text-base"
                                         aria-label="Type a message"
                                         disabled={!selectedUserId}
                                     />
                                     <button
                                         onClick={handleSendMessage}
-                                        className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] sm:min-h-[44px]"
                                         disabled={!selectedUserId}
                                         aria-label="Send message"
                                     >
-                                        Send
+                                        <FiSend className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
                                 </div>
                             </div>
                         )}
                         {chatMode === 'createGroup' && (
                             <div>
-                                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Manage Groups</h2>
+                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Manage Groups:</h2>
                                 <div className="flex flex-col">
-                                    <div className="max-h-48 overflow-y-auto mt-2">
+                                    <div className="max-h-48 sm:max-h-64 overflow-y-auto mt-2">
                                         {groups.map((g) => (
-                                            <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
-                                                <span className="text-[var(--text-primary)]">{g.name}</span>
+                                            <div key={g.id} className="flex items-center justify-between p-2 sm:p-3 bg-[var(--bg-tertiary)] rounded-lg mb-2">
+                        <span className="text-[var(--text-primary)] text-sm sm:text-base truncate max-w-[150px] sm:max-w-[200px]">
+                          {g.name}
+                        </span>
                                                 {user && g.creatorId === user.id && (
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => {
                                                                 setEditGroupId(g.id);
                                                                 setEditGroupName(g.name);
+                                                                fetchGroupUsers(g.id);
                                                             }}
-                                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                                            aria-label={`Edit group ${g.name}`}
+                                                            className="px-2 sm:px-3 py-1 sm:py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px] min-h-[36px] sm:min-h-[40px]"
+                                                            aria-label={`Manage users in group ${g.name}`}
                                                         >
-                                                            Edit
+                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteGroup(g.id)}
-                                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                                            className="px-2 sm:px-3 py-1 sm:py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[36px] min-h-[36px] sm:min-h-[40px]"
                                                             aria-label={`Delete group ${g.name}`}
                                                         >
-                                                            Delete
+                                                            <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                                                         </button>
                                                     </div>
                                                 )}
@@ -913,14 +1057,14 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         ))}
                                     </div>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)]">Create New Group</h3>
+                                <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)] mt-4">Create New Group</h3>
                                 <div className="flex flex-col gap-2 mb-4">
                                     <input
                                         type="text"
                                         value={groupName}
                                         onChange={(e) => setGroupName(e.target.value)}
                                         placeholder="Enter group name..."
-                                        className="form-input w-full sm:w-64"
+                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
                                         aria-label="Group name"
                                     />
                                     <input
@@ -928,16 +1072,13 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={createGroupSearchQuery}
                                         onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
                                         placeholder="Search users..."
-                                        className="form-input w-full sm:w-64"
+                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
                                         aria-label="Search users"
                                     />
                                     {createGroupSearchQuery && (
                                         <div className="max-h-48 overflow-y-auto">
                                             {users.map((u) => (
-                                                <div
-                                                    key={u.id}
-                                                    className="flex items-center p-2 border-b border-[var(--border-color)]"
-                                                >
+                                                <div key={u.id} className="flex items-center p-2 border-b border-[var(--border-color)]">
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedMemberIds.includes(u.id)}
@@ -945,7 +1086,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                         className="mr-4"
                                                         aria-label={`Select ${u.firstName} ${u.lastName}`}
                                                     />
-                                                    <span className="text-[var(--text-primary)]">{u.firstName} {u.lastName}</span>
+                                                    <span className="text-[var(--text-primary)] text-sm sm:text-base">
+                            {u.firstName} {u.lastName}
+                          </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -953,47 +1096,25 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 </div>
                                 <button
                                     onClick={handleCreateGroup}
-                                    className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                    className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] text-sm sm:text-base"
                                     aria-label="Create group"
                                 >
                                     Create Group
                                 </button>
                             </div>
                         )}
-                        {editGroupId && (
-                            <div className="fixed inset-0 bg-[var(--bg-primary)] bg-opacity-75 flex items-center justify-center">
-                                <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-lg w-full max-w-md">
-                                    <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">Edit Group Name</h2>
-                                    <input
-                                        type="text"
-                                        value={editGroupName}
-                                        onChange={(e) => setEditGroupName(e.target.value)}
-                                        placeholder="Enter new group name"
-                                        className="form-input w-full mb-4"
-                                        aria-label="Edit group name"
-                                    />
-                                    <div className="flex justify-end gap-4">
-                                        <button
-                                            onClick={() => {
-                                                setEditGroupId(null);
-                                                setEditGroupName('');
-                                            }}
-                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            aria-label="Cancel edit"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleEditGroup}
-                                            className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            aria-label="Save changes"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        <GroupUsersModal
+                            editGroupId={editGroupId}
+                            editGroupName={editGroupName}
+                            setEditGroupName={setEditGroupName}
+                            setEditGroupId={setEditGroupId}
+                            handleEditGroup={handleEditGroup}
+                            groupUsers={groupUsers}
+                            handleRemoveUser={handleRemoveUser}
+                            availableUsers={users}
+                            handleAddUser={handleAddUser}
+                            isAdmin={editGroupId ? isAdmin(editGroupId) : false}
+                        />
                     </div>
                 </div>
             </div>
