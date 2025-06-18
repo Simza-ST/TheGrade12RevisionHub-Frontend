@@ -124,12 +124,7 @@ const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         <div className="full">
             <style>
                 {`
-                    /* Prevent transitions and animations globally for performance */
-                    * {
-                        transition: none !important;
-                        animation: none !important;
-                        opacity: 1 !important;
-                    }
+                    
                     /* Full wrapper */
                     .full {
                         width: 100%;
@@ -249,29 +244,7 @@ const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     .shadow-lg {
                         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                     }
-                    /* Typography with professional sizing */
-                    .text-3xl {
-                        font-size: 28px;
-                        line-height: 36px;
-                    }
-                    .text-xl {
-                        font-size: 20px;
-                        line-height: 28px;
-                    }
-                    .text-sm {
-                        font-size: 14px;
-                        line-height: 20px;
-                    }
-                    .text-xs {
-                        font-size: 12px;
-                        line-height: 16px;
-                    }
-                    .font-bold {
-                        font-weight: 700;
-                    }
-                    .font-semibold {
-                        font-weight: 600;
-                    }
+                    
                     /* Grid layout with consistent gaps */
                     .grid {
                         display: grid;
@@ -327,7 +300,6 @@ const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     /* Form styles */
                     .form-label {
                         display: block;
-                        font-size: 14px;
                         font-weight: 500;
                         color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
                         margin-bottom: 8px;
@@ -335,7 +307,6 @@ const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     .form-input {
                         width: 100%;
                         padding: 10px 12px;
-                        font-size: 14px;
                         border: 1px solid var(--border-color, ${darkMode ? '#4b5563' : '#d1d5db'});
                         border-radius: 6px;
                         background-color: var(--bg-secondary, ${darkMode ? '#374151' : '#ffffff'});
@@ -348,7 +319,6 @@ const Subjects = ({ user,isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     }
                     .btn-primary {
                         padding: 10px 16px;
-                        font-size: 14px;
                         font-weight: 600;
                         background-color: var(--accent-primary, #2563eb);
                         color: #ffffff;

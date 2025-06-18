@@ -111,19 +111,12 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         );
     }
 
-    const notificationCount = notifications.filter(n => !n.read).length;
-
     return (
         <div className="full">
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        /* Prevent transitions and animations globally */
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
-                        }
+                        
                         /* Full wrapper */
                         .full {
                             width: 100%;
@@ -221,31 +214,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .shadow-[var(--shadow)] {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
-                        /* Typography */
-                        .text-3xl {
-                            font-size: 24px;
-                        }
-                        .text-xl {
-                            font-size: 18px;
-                        }
-                        .text-lg {
-                            font-size: 16px;
-                        }
-                        .text-sm {
-                            font-size: 12px;
-                        }
-                        .text-xs {
-                            font-size: 10px;
-                        }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .font-medium {
-                            font-weight: 500;
-                        }
+                        
                         /* Form elements */
                         .form-label {
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
@@ -381,7 +350,8 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         userMessage="Test your knowledge"
                     />
                 <div
-                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
+                    className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 mx-auto
+                     ${isCollapsed ? 'ml-16' : 'ml-64'}`}
                 >
                     <div className="quiz-section">
                         <div className="flex justify-between items-center mb-4">

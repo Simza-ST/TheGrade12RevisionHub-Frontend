@@ -211,31 +211,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                         .shadow-[var(--shadow)] {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
-                        /* Typography */
-                        .text-3xl {
-                            font-size: 24px;
-                        }
-                        .text-xl {
-                            font-size: 18px;
-                        }
-                        .text-lg {
-                            font-size: 16px;
-                        }
-                        .text-sm {
-                            font-size: 12px;
-                        }
-                        .text-xs {
-                            font-size: 10px;
-                        }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .font-medium {
-                            font-weight: 500;
-                        }
+                        
                         /* Form elements */
                         .form-label {
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
