@@ -134,16 +134,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
                 setSchedule([...schedule, newSchedule]);
             }
 
-            setRecentActivity((prev) => [
-                {
-                    id: `${prev.length + 1}`,
-                    description: formData.scheduleId
-                        ? `Updated schedule for ${formData.subject}`
-                        : `Created schedule for ${formData.subject}`,
-                    date: new Date().toISOString(),
-                },
-                ...prev,
-            ]);
+
 
             setEditingSchedule(null);
             setShowForm(false);
@@ -189,14 +180,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
             console.log(`Deleted schedule ID: ${scheduleId}`);
             const deletedSchedule = schedule.find((item) => item.id === scheduleId);
             setSchedule(schedule.filter((item) => item.id !== scheduleId));
-            setRecentActivity((prev) => [
-                {
-                    id: `${prev.length + 1}`,
-                    description: `Deleted schedule for ${deletedSchedule.course}`,
-                    date: new Date().toISOString(),
-                },
-                ...prev,
-            ]);
+
         } catch (error) {
             console.error('Error deleting schedule:', error);
             setOperationError('Failed to delete schedule. Please try again.');
@@ -282,32 +266,31 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
 
     return (
         <div
-            className={`
-        p-4 sm:p-6 rounded-2xl shadow-2xl
-        ${darkMode ? 'bg-gray-800' : 'bg-teal-800 bg-opacity-90 backdrop-blur-md'}
-      `}
+            className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl"
             aria-label="Schedule component"
         >
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-white">Schedule</h2>
+                <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Schedule</h2>
                 <button
                     onClick={() => setShowForm(true)}
                     disabled={operationLoading}
                     className={`
-            px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg
-            ${operationLoading ? 'opacity-50 cursor-not-allowed' : 'hover:from-teal-700 hover:to-red-700'}
-          `}
-                    aria-label="Add new schedule"
+          px-4 py-2 rounded-lg text-[var(--text-primary)] bg-[var(--accent-primary)]
+          hover:bg-[var(--hover-primary)]
+          ${operationLoading ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
                 >
                     Add Schedule
                 </button>
             </div>
+
+            {/* Error messages */}
             {error && (
-                <div className="mb-4 p-3 bg-red-600 text-white rounded-lg flex justify-between items-center" role="alert">
+                <div className="mb-4 p-3 bg-[var(--accent-secondary)] text-[var(--text-primary)] rounded-lg flex justify-between items-center" role="alert">
                     <span>{error}</span>
                     <button
                         onClick={handleRetry}
-                        className="px-3 py-1 bg-red-700 hover:bg-red-800 rounded"
+                        className="px-3 py-1 bg-[var(--accent-secondary)] hover:bg-[var(--hover-secondary)] rounded"
                         aria-label="Retry loading schedules"
                     >
                         Retry
@@ -315,17 +298,19 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
                 </div>
             )}
             {operationError && (
-                <div className="mb-4 p-3 bg-red-600 text-white rounded-lg flex justify-between items-center" role="alert">
+                <div className="mb-4 p-3 bg-[var(--accent-secondary)] text-[var(--text-primary)] rounded-lg flex justify-between items-center" role="alert">
                     <span>{operationError}</span>
                     <button
                         onClick={handleOperationRetry}
-                        className="px-3 py-1 bg-red-700 hover:bg-red-800 rounded"
+                        className="px-3 py-1 bg-[var(--accent-secondary)] hover:bg-[var(--hover-secondary)] rounded"
                         aria-label="Retry operation"
                     >
                         Retry
                     </button>
                 </div>
             )}
+
+            {/* Schedule Form */}
             {showForm && (
                 <ScheduleForm
                     onSubmit={handleCreateOrUpdateSchedule}
@@ -334,22 +319,31 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
                     darkMode={darkMode}
                 />
             )}
+
+            {/* Day Buttons & View Toggle */}
             <div className="flex justify-between items-center mb-4 flex-col sm:flex-row gap-2">
                 <div className="flex flex-wrap gap-2">
                     {days.map((day) => (
                         <button
                             key={day}
                             className={`
-                px-3 py-1 rounded text-sm
-                ${selectedDay === day
-                                ? 'bg-gradient-to-r from-teal-600 to-red-600 text-white'
-                                : darkMode
-                                    ? 'bg-gray-600 hover:bg-gray-500'
-                                    : 'bg-teal-700 hover:bg-teal-600'
+              px-3 py-1 rounded text-sm
+              ${
+                                selectedDay === day
+                                    ? 'bg-[var(--accent-primary)] text-[var(--text-primary)]'
+                                    : 'bg-[var(--bg-tertiary)] hover:bg-[var(--hover-primary)] text-[var(--text-primary)]'
                             }
-              `}
+            `}
                             onClick={() => setSelectedDay(day)}
-                            aria-label={`Select ${day === 'M' ? 'Monday' : day === 'T' ? 'Tuesday' : day === 'W' ? 'Wednesday' : day === 'Th' ? 'Thursday' : day === 'F' ? 'Friday' : day === 'S' ? 'Saturday' : 'Sunday'}`}
+                            aria-label={`Select ${{
+                                M: 'Monday',
+                                T: 'Tuesday',
+                                W: 'Wednesday',
+                                Th: 'Thursday',
+                                F: 'Friday',
+                                S: 'Saturday',
+                                Su: 'Sunday',
+                            }[day]}`}
                         >
                             {day}
                         </button>
@@ -357,58 +351,59 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
                 </div>
                 <button
                     onClick={() => setViewMode(viewMode === 'list' ? 'calendar' : 'list')}
-                    className={`
-            px-4 py-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg
-            hover:from-teal-700 hover:to-red-700
-          `}
+                    className="
+          px-4 py-2 rounded-lg text-[var(--text-primary)]
+          bg-[var(--accent-primary)] hover:bg-[var(--hover-primary)]
+        "
                     aria-label={`Switch to ${viewMode === 'list' ? 'calendar' : 'list'} view`}
                 >
                     {viewMode === 'list' ? 'Calendar View' : 'List View'}
                 </button>
             </div>
+
+            {/* Schedule List */}
             {viewMode === 'list' ? (
                 <div className="space-y-2">
-                    {schedule
-                        .filter((item) => item.day === selectedDay)
-                        .map((item) => (
-                            <div
-                                key={item.id}
-                                className={`
-                  flex items-center justify-between p-3 rounded transition
-                  ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-teal-700 hover:bg-teal-600'}
-                `}
-                            >
-                                <span className="font-medium text-white">{item.course}</span>
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-gray-300 text-sm">{item.time}</span>
-                                    <button
-                                        onClick={() => handleEditSchedule(item)}
-                                        className="text-teal-400 hover:text-teal-300"
-                                        aria-label={`Edit ${item.course} schedule`}
-                                        disabled={operationLoading}
-                                    >
-                                        ✏️
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteSchedule(item.id)}
-                                        className="text-red-400 hover:text-red-300"
-                                        aria-label={`Delete ${item.course} schedule`}
-                                        disabled={operationLoading}
-                                    >
-                                        🗑️
-                                    </button>
-                                </div>
+                    {schedule.filter((item) => item.day === selectedDay).map((item) => (
+                        <div
+                            key={item.id}
+                            className="
+              flex items-center justify-between p-3 rounded transition
+              bg-[var(--bg-primary)] hover:bg-[var(--hover-primary)]
+            "
+                        >
+                            <span className="font-medium text-[var(--text-primary)]">{item.course}</span>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-[var(--text-secondary)] text-sm">{item.time}</span>
+                                <button
+                                    onClick={() => handleEditSchedule(item)}
+                                    className="text-[var(--accent-primary)] hover:text-[var(--hover-primary)]"
+                                    aria-label={`Edit ${item.course} schedule`}
+                                    disabled={operationLoading}
+                                >
+                                    ✏️
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteSchedule(item.id)}
+                                    className="text-[var(--accent-secondary)] hover:text-[var(--hover-secondary)]"
+                                    aria-label={`Delete ${item.course} schedule`}
+                                    disabled={operationLoading}
+                                >
+                                    🗑️
+                                </button>
                             </div>
-                        ))}
+                        </div>
+                    ))}
                     {schedule.filter((item) => item.day === selectedDay).length === 0 && (
-                        <p className="text-gray-300">No schedule for this day.</p>
+                        <p className="text-[var(--text-secondary)]">No schedule for this day.</p>
                     )}
                 </div>
             ) : (
-                <div className="text-gray-300">Calendar view coming soon!</div>
+                <div className="text-[var(--text-secondary)]">Calendar view coming soon!</div>
             )}
         </div>
     );
+
 };
 
 Schedule.propTypes = {
