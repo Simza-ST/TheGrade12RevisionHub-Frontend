@@ -7,7 +7,6 @@ import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
 import { FiSend, FiTrash2, FiUser } from 'react-icons/fi';
 import GroupUsersModal from './GroupUsersModal';
-import Header from "../../common/Header";
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();

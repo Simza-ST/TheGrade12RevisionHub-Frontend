@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import SubjectForm from './SubjectForm';
@@ -118,7 +118,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
         navigate('/login');
     };
 
-    const notificationCount = notifications.filter((n) => !n.read).length;
+    //const notificationCount = notifications.filter((n) => !n.read).length;
 
     return (
         <div className="full">

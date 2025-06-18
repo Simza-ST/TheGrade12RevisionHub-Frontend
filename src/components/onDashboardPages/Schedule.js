@@ -178,7 +178,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
             }
 
             console.log(`Deleted schedule ID: ${scheduleId}`);
-            const deletedSchedule = schedule.find((item) => item.id === scheduleId);
+            //const deletedSchedule = schedule.find((item) => item.id === scheduleId);
             setSchedule(schedule.filter((item) => item.id !== scheduleId));
 
         } catch (error) {
