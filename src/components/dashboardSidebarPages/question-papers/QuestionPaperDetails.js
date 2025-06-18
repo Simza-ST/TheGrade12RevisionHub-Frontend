@@ -44,11 +44,6 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
-                        }
                         .full {
                             width: 100%;
                             min-height: 100vh;
@@ -154,19 +149,24 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
                         .text-3xl {
-                            font-size: 24px;
+                            font-size: 1.875rem;
+                            line-height: 2.25rem;
                         }
                         .text-xl {
-                            font-size: 18px;
+                            font-size: 1.25rem;
+                            line-height: 1.75rem;
                         }
                         .text-lg {
-                            font-size: 16px;
+                            font-size: 1.125rem;
+                            line-height: 1.75rem;
                         }
                         .text-sm {
-                            font-size: 12px;
+                            font-size: 0.875rem;
+                            line-height: 1.25rem;
                         }
                         .text-xs {
-                            font-size: 10px;
+                            font-size: 0.75rem;
+                            line-height: 1rem;
                         }
                         .font-bold {
                             font-weight: 700;
@@ -190,7 +190,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                             border-radius: 4px;
                             background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 14px;
+                            font-size: 0.875rem;
                         }
                         .form-input:focus {
                             border-color: var(--accent-primary, #007bff);
@@ -253,7 +253,7 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
                             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
                         }
                         .animate-spin {
-                            animation: spin 1s linear infinite !important;
+                            animation: spin 1s linear infinite;
                         }
                         @keyframes spin {
                             0% { transform: rotate(0deg); }
@@ -384,6 +384,9 @@ const QuestionPaperDetails = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMo
 };
 
 QuestionPaperDetails.propTypes = {
+    user: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+    }).isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,

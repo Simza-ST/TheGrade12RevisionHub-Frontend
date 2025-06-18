@@ -7,6 +7,7 @@ import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
 import { FiSend, FiTrash2, FiUser } from 'react-icons/fi';
 import GroupUsersModal from './GroupUsersModal';
+import Header from "../../common/Header";
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -317,7 +318,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     }
                 });
 
-                groups.forEach((group) => {
+                groups.forEach(group => {
                     client.subscribe(`/topic/group/${group.id}`, (message) => {
                         console.log(`Received group message for group ${group.id}:`, message.body);
                         if (chatMode === 'group' && selectedGroupId === group.id) {
@@ -334,7 +335,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     });
                 });
 
-                client.subscribe(`/user/${user.email}/queue/message`, (message) => {
+                client.subscribe(`/user/${user.id}/queue/message`, (message) => {
                     console.log('Received private message:', message.body);
                     if (chatMode === 'private' && selectedUserId) {
                         const data = JSON.parse(message.body);
@@ -362,7 +363,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
 
         return () => {
             if (stompClientRef.current) {
-                stompClientRef.current.deactivate();
+                client.deactivate();
                 console.log('WebSocket disconnected');
                 stompClientRef.current = null;
             }
@@ -590,6 +591,12 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         );
     };
 
+    const getSenderName = (senderId) => {
+        if (senderId === user.id) return 'You';
+        const sender = users.find((u) => u.id === senderId);
+        return sender ? `${sender.firstName} ${sender.lastName}` : `User ${senderId}`;
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
@@ -610,191 +617,194 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-            * {
-              transition: none !important;
-              animation: none !important;
-              opacity: 1 !important;
-            }
-            .full {
-              width: 100%;
-              min-height: 100vh;
-              position: relative;
-              z-index: 10;
-            }
-            .bg-[var(--bg-primary)] {
-              background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
-            }
-            .bg-[var(--bg-secondary)] {
-              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-            }
-            .bg-[var(--bg-tertiary)] {
-              background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
-            }
-            .bg-[var(--accent-primary)] {
-              background-color: var(--accent-primary, #007bff);
-            }
-            .bg-[var(--accent-secondary)] {
-              background-color: var(--accent-secondary, #dc3545);
-            }
-            .text-[var(--text-primary)] {
-              color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-            }
-            .text-[var(--text-secondary)] {
-              color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
-            }
-            .hover\\:bg-[var(--hover-tertiary)]:hover {
-              background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
-            }
-            .hover\\:bg-[var(--hover-primary)]:hover {
-              background-color: var(--hover-primary, #0056b3);
-            }
-            .flex {
-              display: flex;
-            }
-            .min-h-screen {
-              min-height: 100vh;
-            }
-            .min-w-0 {
-              min-width: 0;
-            }
-            .justify-center {
-              justify-content: center;
-            }
-            .justify-between {
-              justify-content: space-between;
-            }
-            .items-center {
-              align-items: center;
-            }
-            .flex-1 {
-              flex: 1;
-            }
-            .gap-4 {
-              gap: 16px;
-            }
-            .p-6 {
-              padding: 24px;
-            }
-            .sm\\:p-8 {
-              padding: 32px;
-            }
-            .rounded-2xl {
-              border-radius: 16px;
-            }
-            .rounded-lg {
-              border-radius: 8px;
-            }
-            .mb-4 {
-              margin-bottom: 16px;
-            }
-            .mb-6 {
-              margin-bottom: 24px;
-            }
-            .mt-1 {
-              margin-top: 4px;
-            }
-            .mt-4 {
-              margin-top: 16px;
-            }
-            .shadow-[var(--shadow)] {
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
-            .text-3xl {
-              font-size: 24px;
-            }
-            .text-xl {
-              font-size: 18px;
-            }
-            .text-lg {
-              font-size: 16px;
-            }
-            .text-sm {
-              font-size: 12px;
-            }
-            .text-xs {
-              font-size: 10px;
-            }
-            .font-bold {
-              font-weight: 700;
-            }
-            .font-semibold {
-              font-weight: 600;
-            }
-            .font-medium {
-              font-weight: 500;
-            }
-            .form-input {
-              width: 100%;
-              padding: 8px;
-              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-              border-radius: 4px;
-              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-              color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-              font-size: 14px;
-            }
-            .form-input:focus {
-              border-color: var(--accent-primary, #007bff);
-              outline: none;
-            }
-            .btn-primary {
-              background-color: var(--accent-primary, #007bff);
-              color: #ffffff;
-              padding: 8px 16px;
-              border-radius: 4px;
-              border: none;
-              cursor: pointer;
-            }
-            .btn-primary:hover {
-              background-color: var(--hover-primary, #0056b3);
-            }
-            .grid {
-              display: grid;
-              grid-template-columns: 1fr;
-              gap: 16px;
-            }
-            .sm\\:grid-cols-3 {
-              grid-template-columns: repeat(3, 1fr);
-            }
-            .-top-2 {
-              top: -8px;
-            }
-            .-right-2 {
-              right: -8px;
-            }
-            .h-5 {
-              height: 20px;
-            }
-            .w-5 {
-              width: 20px;
-            }
-            .chat-section {
-              background: ${darkMode
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
+                        .full {
+                            width: 100%;
+                            min-height: 100vh;
+                            position: relative;
+                            z-index: 10;
+                        }
+                        .bg-[var(--bg-primary)] {
+                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        }
+                        .bg-[var(--bg-secondary)] {
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        }
+                        .bg-[var(--bg-tertiary)] {
+                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        }
+                        .bg-[var(--accent-primary)] {
+                            background-color: var(--accent-primary, #007bff);
+                        }
+                        .bg-[var(--accent-secondary)] {
+                            background-color: var(--accent-secondary, #dc3545);
+                        }
+                        .text-[var(--text-primary)] {
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        }
+                        .text-[var(--text-secondary)] {
+                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                        }
+                        .hover:bg-[var(--hover-tertiary)]:hover {
+                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                        }
+                        .hover:bg-[var(--hover-primary)]:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .flex {
+                            display: flex;
+                        }
+                        .min-h-screen {
+                            min-height: 100vh;
+                        }
+                        .min-w-0 {
+                            min-width: 0;
+                        }
+                        .justify-center {
+                            justify-content: center;
+                        }
+                        .justify-between {
+                            justify-content: space-between;
+                        }
+                        .items-center {
+                            align-items: center;
+                        }
+                        .flex-1 {
+                            flex: 1;
+                        }
+                        .gap-4 {
+                            gap: 16px;
+                        }
+                        .p-6 {
+                            padding: 24px;
+                        }
+                        .sm:p-8 {
+                            padding: 32px;
+                        }
+                        .rounded-2xl {
+                            border-radius: 16px;
+                        }
+                        .rounded-lg {
+                            border-radius: 8px;
+                        }
+                        .mb-4 {
+                            margin-bottom: 16px;
+                        }
+                        .mb-6 {
+                            margin-bottom: 24px;
+                        }
+                        .mt-1 {
+                            margin-top: 4px;
+                        }
+                        .mt-4 {
+                            margin-top: 16px;
+                        }
+                        .shadow-[var(--shadow)] {
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+                        .text-3xl {
+                            font-size: 1.875rem;
+                        }
+                        .text-xl {
+                            font-size: 1.25rem;
+                        }
+                        .text-lg {
+                            font-size: 1.125rem;
+                        }
+                        .text-base {
+                            font-size: 1rem;
+                        }
+                        .text-sm {
+                            font-size: 0.875rem;
+                        }
+                        .text-xs {
+                            font-size: 0.75rem;
+                        }
+                        .font-bold {
+                            font-weight: 700;
+                        }
+                        .font-semibold {
+                            font-weight: 600;
+                        }
+                        .font-medium {
+                            font-weight: 500;
+                        }
+                        .form-input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            border-radius: 4px;
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                            font-size: 0.875rem;
+                        }
+                        .form-input:focus {
+                            border-color: var(--accent-primary, #007bff);
+                            outline: none;
+                        }
+                        .btn-primary {
+                            background-color: var(--accent-primary, #007bff);
+                            color: #ffffff;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            border: none;
+                            cursor: pointer;
+                        }
+                        .btn-primary:hover {
+                            background-color: var(--hover-primary, #0056b3);
+                        }
+                        .grid {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+                        .sm:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .-top-2 {
+                            top: -8px;
+                        }
+                        .-right-2 {
+                            right: -8px;
+                        }
+                        .h-5 {
+                            height: 20px;
+                        }
+                        .w-5 {
+                            width: 20px;
+                        }
+                        .chat-section {
+                            background: ${darkMode
                         ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
                         : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
-              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-              padding: 32px;
-              border-radius: 16px;
-            }
-            .ml-16 {
-              margin-left: 64px;
-            }
-            .ml-64 {
-              margin-left: 256px;
-            }
-            @media (min-width: 640px) {
-              .sm\\:grid-cols-3 {
-                grid-template-columns: repeat(3, 1fr);
-              }
-              .sm\\:p-8 {
-                padding: 32px;
-              }
-            }
-            .underline {
-              text-decoration: underline;
-            }
-          `}
+                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                            padding: 32px;
+                            border-radius: 16px;
+                        }
+                        .ml-16 {
+                            margin-left: 64px;
+                        }
+                        .ml-64 {
+                            margin-left: 256px;
+                        }
+                        @media (min-width: 640px) {
+                            .sm:grid-cols-3 {
+                                grid-template-columns: repeat(3, 1fr);
+                            }
+                            .sm:p-8 {
+                                padding: 32px;
+                            }
+                        }
+                        .underline {
+                            text-decoration: underline;
+                        }
+                    `}
                 </style>
                 <Sidebar
                     user={user}
@@ -803,6 +813,16 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
+                {/*<Header*/}
+                {/*    user={user}*/}
+                {/*    notifications={notifications}*/}
+                {/*    setNotifications={setNotifications}*/}
+                {/*    isCollapsed={isCollapsed}*/}
+                {/*    darkMode={darkMode}*/}
+                {/*    setDarkMode={setDarkMode}*/}
+                {/*    tabDescription="Your Subjects"*/}
+                {/*    userMessage="Manage your subjects"*/}
+                {/*/>*/}
                 <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                     <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
@@ -812,19 +832,19 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         <div className="flex gap-4">
                             <Link
                                 to="/notifications"
-                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] text-base"
                                 aria-label={`View notifications (${notificationCount} unread)`}
                             >
                                 🔔
                                 {notificationCount > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {notificationCount}
-                  </span>
+                                        {notificationCount}
+                                    </span>
                                 )}
                             </Link>
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
-                                className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] text-base"
                                 aria-label="Toggle dark mode"
                             >
                                 {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
@@ -832,7 +852,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                         </div>
                     </div>
                     <div className="chat-section">
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
+                        <div className="flex flex-col sm:flex-row gap-2 mb-4">
                             <button
                                 onClick={() => {
                                     setChatMode('group');
@@ -840,9 +860,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setPrivateSearchQuery('');
                                     setMessages([]);
                                 }}
-                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
-                                    chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''
-                                }`}
+                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
                             >
                                 Group Chats
                             </button>
@@ -853,9 +871,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setPrivateSearchQuery('');
                                     setMessages([]);
                                 }}
-                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
-                                    chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''
-                                }`}
+                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
                             >
                                 Private Chat
                             </button>
@@ -867,18 +883,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                     setCreateGroupSearchQuery('');
                                     setMessages([]);
                                 }}
-                                className={`px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${
-                                    chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''
-                                }`}
+                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
                             >
                                 Manage Groups
                             </button>
                         </div>
 
-                        {error && <p className="text-[var(--accent-secondary)] mb-4">{error}</p>}
+                        {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
+
                         {chatMode === 'group' && (
                             <div>
-                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Group Chats:</h2>
+                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Group Chats:</h2>
                                 <div className="flex flex-col gap-2 mb-4">
                                     <select
                                         value={selectedGroupId || ''}
@@ -886,7 +901,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                             setSelectedGroupId(Number(e.target.value) || null);
                                             setMessages([]);
                                         }}
-                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
+                                        className="form-input w-full text-base"
                                         disabled={groups.length === 0}
                                     >
                                         <option value="">Main Group Chat</option>
@@ -897,29 +912,22 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         ))}
                                     </select>
                                 </div>
-                                <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto mb-4">
+                                <div className="max-h-[50vh] overflow-y-auto mb-4">
                                     {messages.length > 0 ? (
                                         messages.map((msg) => (
                                             <div
                                                 key={msg.id || msg.tempId}
-                                                className={`p-2 sm:p-3 my-1 border-b border-[var(--border-color)] ${
-                                                    msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'
-                                                } rounded-lg`}
+                                                className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
                                             >
-                        <span className="font-medium text-[var(--text-primary)]">
-                          {msg.senderId === user.id
-                              ? 'You'
-                              : `${users.find((u) => u.id === msg.senderId)?.firstName || ''} ${
-                              users.find((u) => u.id === msg.senderId)?.lastName || ''
-                          }` || `User ${msg.senderId}`}
-                            :
-                        </span>
-                                                <span className="text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <span className="text-xs sm:text-sm text-[var(--text-secondary)] block mt-1">{msg.timestamp}</span>
+                                                <span className="font-medium text-base text-[var(--text-primary)]">
+                                                    {getSenderName(msg.senderId)}:
+                                                </span>
+                                                <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-[var(--text-secondary)]">No messages found.</p>
+                                        <p className="text-sm text-[var(--text-secondary)]">No messages found.</p>
                                     )}
                                 </div>
                                 <div className="flex gap-2">
@@ -928,30 +936,29 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Type a message..."
-                                        className="form-input flex-1 text-sm sm:text-base"
+                                        className="form-input flex-1"
                                         aria-label="Message input"
                                     />
                                     <button
                                         onClick={handleSendMessage}
-                                        className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] sm:min-h-[44px]"
-                                        disabled={chatMode === 'private' && !selectedUserId}
+                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px]"
                                         aria-label="Send message"
                                     >
-                                        <FiSend className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        <FiSend className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
                         )}
                         {chatMode === 'private' && (
                             <div>
-                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Private Chat:</h2>
+                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Private Chat:</h2>
                                 <div className="flex flex-col gap-2 mb-4">
                                     <input
                                         type="text"
                                         value={privateSearchQuery}
                                         onChange={(e) => setPrivateSearchQuery(e.target.value)}
                                         placeholder="Search users..."
-                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
+                                        className="form-input w-full text-base"
                                         aria-label="Search users"
                                     />
                                     <select
@@ -962,7 +969,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                             setMessages([]);
                                             console.log('Selected user:', userId);
                                         }}
-                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
+                                        className="form-input w-full text-base"
                                         disabled={users.length === 0}
                                     >
                                         <option value="">Select a user</option>
@@ -973,29 +980,22 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         ))}
                                     </select>
                                 </div>
-                                <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto mb-4">
+                                <div className="max-h-[50vh] overflow-y-auto mb-4">
                                     {messages.length > 0 ? (
                                         messages.map((msg) => (
                                             <div
                                                 key={msg.id || msg.tempId}
-                                                className={`p-2 sm:p-3 my-1 border-b border-[var(--border-color)] ${
-                                                    msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'
-                                                } rounded-lg`}
+                                                className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
                                             >
-                        <span className="font-medium text-[var(--text-primary)]">
-                          {msg.senderId === user.id
-                              ? 'You'
-                              : `${users.find((u) => u.id === msg.senderId)?.firstName || ''} ${
-                              users.find((u) => u.id === msg.senderId)?.lastName || ''
-                          }` || `User ${msg.senderId}`}
-                            :
-                        </span>
-                                                <span className="text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <span className="text-xs sm:text-sm text-[var(--text-secondary)] block mt-1">{msg.timestamp}</span>
+                                                <span className="font-medium text-base text-[var(--text-primary)]">
+                                                    {getSenderName(msg.senderId)}:
+                                                </span>
+                                                <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-[var(--text-secondary)]">No messages yet.</p>
+                                        <p className="text-sm text-[var(--text-secondary)]">No messages yet.</p>
                                     )}
                                 </div>
                                 <div className="flex gap-2">
@@ -1004,31 +1004,31 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Type a message..."
-                                        className="form-input flex-1 text-sm sm:text-base"
+                                        className="form-input flex-1"
                                         aria-label="Type a message"
                                         disabled={!selectedUserId}
                                     />
                                     <button
                                         onClick={handleSendMessage}
-                                        className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] min-h-[40px] sm:min-h-[44px]"
+                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={!selectedUserId}
                                         aria-label="Send message"
                                     >
-                                        <FiSend className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        <FiSend className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
                         )}
                         {chatMode === 'createGroup' && (
                             <div>
-                                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[var(--text-primary)]">Manage Groups:</h2>
+                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Manage Groups:</h2>
                                 <div className="flex flex-col">
-                                    <div className="max-h-48 sm:max-h-64 overflow-y-auto mt-2">
+                                    <div className="max-h-48 overflow-y-auto mt-2">
                                         {groups.map((g) => (
-                                            <div key={g.id} className="flex items-center justify-between p-2 sm:p-3 bg-[var(--bg-tertiary)] rounded-lg mb-2">
-                        <span className="text-[var(--text-primary)] text-sm sm:text-base truncate max-w-[150px] sm:max-w-[200px]">
-                          {g.name}
-                        </span>
+                                            <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
+                                                <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
+                                                    {g.name}
+                                                </span>
                                                 {user && g.creatorId === user.id && (
                                                     <div className="flex gap-2">
                                                         <button
@@ -1037,19 +1037,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                                 setEditGroupName(g.name);
                                                                 fetchGroupUsers(g.id);
                                                             }}
-                                                            className="px-2 sm:px-3 py-1 sm:py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px] min-h-[36px] sm:min-h-[40px]"
+                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
                                                             aria-label={`Manage users in group ${g.name}`}
                                                         >
-                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
-                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
-                                                            <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
+                                                            <FiUser className="w-4 h-4" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteGroup(g.id)}
-                                                            className="px-2 sm:px-3 py-1 sm:py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[36px] min-h-[36px] sm:min-h-[40px]"
+                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
                                                             aria-label={`Delete group ${g.name}`}
                                                         >
-                                                            <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+                                                            <FiTrash2 className="w-4 h-4 text-red-600" />
                                                         </button>
                                                     </div>
                                                 )}
@@ -1064,7 +1062,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={groupName}
                                         onChange={(e) => setGroupName(e.target.value)}
                                         placeholder="Enter group name..."
-                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
+                                        className="form-input w-full text-base"
                                         aria-label="Group name"
                                     />
                                     <input
@@ -1072,7 +1070,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         value={createGroupSearchQuery}
                                         onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
                                         placeholder="Search users..."
-                                        className="form-input w-full sm:w-64 text-sm sm:text-base"
+                                        className="form-input w-full text-base"
                                         aria-label="Search users"
                                     />
                                     {createGroupSearchQuery && (
@@ -1086,9 +1084,9 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                         className="mr-4"
                                                         aria-label={`Select ${u.firstName} ${u.lastName}`}
                                                     />
-                                                    <span className="text-[var(--text-primary)] text-sm sm:text-base">
-                            {u.firstName} {u.lastName}
-                          </span>
+                                                    <span className="text-base text-[var(--text-primary)]">
+                                                        {u.firstName} {u.lastName}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -1096,25 +1094,27 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 </div>
                                 <button
                                     onClick={handleCreateGroup}
-                                    className="px-3 py-2 sm:px-4 sm:py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] text-sm sm:text-base"
+                                    className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label="Create group"
                                 >
                                     Create Group
                                 </button>
                             </div>
                         )}
-                        <GroupUsersModal
-                            editGroupId={editGroupId}
-                            editGroupName={editGroupName}
-                            setEditGroupName={setEditGroupName}
-                            setEditGroupId={setEditGroupId}
-                            handleEditGroup={handleEditGroup}
-                            groupUsers={groupUsers}
-                            handleRemoveUser={handleRemoveUser}
-                            availableUsers={users}
-                            handleAddUser={handleAddUser}
-                            isAdmin={editGroupId ? isAdmin(editGroupId) : false}
-                        />
+                        {editGroupId && (
+                            <GroupUsersModal
+                                editGroupId={editGroupId}
+                                editGroupName={editGroupName}
+                                setEditGroupName={setEditGroupName}
+                                setEditGroupId={setEditGroupId}
+                                handleEditGroup={handleEditGroup}
+                                groupUsers={groupUsers}
+                                handleRemoveUser={handleRemoveUser}
+                                availableUsers={users}
+                                handleAddUser={handleAddUser}
+                                isAdmin={isAdmin(editGroupId)}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

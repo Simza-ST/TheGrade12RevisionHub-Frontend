@@ -1,12 +1,9 @@
 import PropTypes from 'prop-types';
 import { useNavigate, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Sidebar from '../../common/Sidebar';
 import FilterSection from './FilterSection';
 import PapersList from './PapersList';
 import PDFModal from './PDFModal';
-import ErrorDialog from './ErrorDialog';
-import LoadingSpinner from './LoadingSpinner';
 import { useQuestionPapers } from '../../../hooks/useQuestionPapers';
 
 const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
@@ -72,11 +69,6 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
-                        }
                         .full {
                             width: 100%;
                             min-height: 100vh;
@@ -170,20 +162,28 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         .shadow-[var(--shadow)] {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
+                        .shadow-2xl {
+                            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                        }
                         .text-3xl {
-                            font-size: 24px;
+                            font-size: 1.875rem;
+                            line-height: 2.25rem;
                         }
                         .text-xl {
-                            font-size: 18px;
+                            font-size: 1.25rem;
+                            line-height: 1.75rem;
                         }
                         .text-lg {
-                            font-size: 16px;
+                            font-size: 1.125rem;
+                            line-height: 1.75rem;
                         }
                         .text-sm {
-                            font-size: 12px;
+                            font-size: 0.875rem;
+                            line-height: 1.25rem;
                         }
                         .text-xs {
-                            font-size: 10px;
+                            font-size: 0.75rem;
+                            line-height: 1rem;
                         }
                         .font-bold {
                             font-weight: 700;
@@ -207,7 +207,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                             border-radius: 4px;
                             background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 14px;
+                            font-size: 0.875rem;
                         }
                         .form-input:focus {
                             border-color: var(--accent-primary, #007bff);
@@ -270,7 +270,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
                         }
                         .animate-spin {
-                            animation: spin 1s linear infinite !important;
+                            animation: spin 1s linear infinite;
                         }
                         @keyframes spin {
                             0% { transform: rotate(0deg); }
@@ -317,14 +317,14 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     darkMode={darkMode}
                 />
                 <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
+                    <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6 flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-bold text-[var(--text-primary)]">Question Papers</h1>
                             <p className="text-sm mt-1 text-[var(--text-secondary)]">Explore past papers, {user.name}!</p>
                         </div>
                         <div className="flex gap-4">
-                            <Link
-                                to="/notifications"
+                            <a
+                                href="/notifications"
                                 className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                 aria-label={`View notifications (${notificationCount} unread)`}
                             >
@@ -334,7 +334,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                                         {notificationCount}
                                     </span>
                                 )}
-                            </Link>
+                            </a>
                             <button
                                 onClick={() => setDarkMode(!darkMode)}
                                 className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"

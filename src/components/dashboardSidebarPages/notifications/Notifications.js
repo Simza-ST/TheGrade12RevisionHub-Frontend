@@ -243,7 +243,11 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const readNotifications = notifications.filter((n) => n.read).length;
     const filteredNotifications = filterType === 'all'
         ? notifications
-        : notifications.filter((n) => n.type.toLowerCase() === filterType);
+        : filterType === 'read'
+            ? notifications.filter((n) => n.read)
+            : filterType === 'unread'
+                ? notifications.filter((n) => !n.read)
+                : notifications.filter((n) => n.type.toLowerCase() === filterType);
 
     if (loading || !user) {
         return <LoadingSpinner />;
@@ -359,19 +363,24 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         }
                         /* Typography */
                         .text-3xl {
-                            font-size: 24px;
+                            font-size: 1.875rem;
+                            line-height: 2.25rem;
                         }
                         .text-xl {
-                            font-size: 18px;
+                            font-size: 1.25rem;
+                            line-height: 1.75rem;
                         }
                         .text-lg {
-                            font-size: 16px;
+                            font-size: 1.125rem;
+                            line-height: 1.75rem;
                         }
                         .text-sm {
-                            font-size: 12px;
+                            font-size: 0.875rem;
+                            line-height: 1.25rem;
                         }
                         .text-xs {
-                            font-size: 10px;
+                            font-size: 0.75rem;
+                            line-height: 1rem;
                         }
                         .font-bold {
                             font-weight: 700;
@@ -396,7 +405,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             border-radius: 4px;
                             background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 14px;
+                            font-size: 0.875rem;
+                            line-height: 1.25rem;
                         }
                         .form-input:focus {
                             border-color: var(--accent-primary, #007bff);
@@ -494,7 +504,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             unreadNotifications={unreadNotifications}
                             totalNotifications={totalNotifications}
                         />
-                        {error && <p className="text-[var(--accent-secondary)] mb-4">{error}</p>}
+                        {error && <p className="text-lg text-[var(--accent-secondary)] mb-4">{error}</p>}
                         <NotificationStats
                             totalNotifications={totalNotifications}
                             unreadNotifications={unreadNotifications}

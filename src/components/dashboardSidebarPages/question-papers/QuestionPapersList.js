@@ -6,7 +6,7 @@ import FilterSection from './FilterSection';
 import PapersList from './PapersList';
 import PDFModal from './PDFModal';
 import { useQuestionPapers } from '../../../hooks/useQuestionPapers';
-import Header from "../../common/Header";
+import Header from '../../common/Header';
 
 const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();
@@ -28,7 +28,6 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
         viewPdf,
         downloadPdf,
     } = useQuestionPapers();
-
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -65,11 +64,6 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
-                        }
                         .full {
                             width: 100%;
                             min-height: 100vh;
@@ -164,19 +158,24 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
                         .text-3xl {
-                            font-size: 24px;
+                            font-size: 1.875rem;
+                            line-height: 2.25rem;
                         }
                         .text-xl {
-                            font-size: 18px;
+                            font-size: 1.25rem;
+                            line-height: 1.75rem;
                         }
                         .text-lg {
-                            font-size: 16px;
+                            font-size: 1.125rem;
+                            line-height: 1.75rem;
                         }
                         .text-sm {
-                            font-size: 12px;
+                            font-size: 0.875rem;
+                            line-height: 1.25rem;
                         }
                         .text-xs {
-                            font-size: 10px;
+                            font-size: 0.75rem;
+                            line-height: 1rem;
                         }
                         .font-bold {
                             font-weight: 700;
@@ -200,7 +199,7 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
                             border-radius: 4px;
                             background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 14px;
+                            font-size: 0.875rem;
                         }
                         .form-input:focus {
                             border-color: var(--accent-primary, #007bff);
@@ -263,7 +262,7 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
                             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
                         }
                         .animate-spin {
-                            animation: spin 1s linear infinite !important;
+                            animation: spin 1s linear infinite;
                         }
                         @keyframes spin {
                             0% { transform: rotate(0deg); }
@@ -320,73 +319,77 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
                         tabDescription="Question Papers"
                         userMessage="Explore past papers"
                     />
-                <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <div className="quiz-section">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Past Papers</h2>
-                        </div>
-                        {error && (
-                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
-                                {error}
-                                <button
-                                    onClick={resetError}
-                                    className="ml-2 text-white underline hover:text-[var(--hover-secondary)]"
-                                >
-                                    Retry
-                                </button>
+                    <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                        <div className="quiz-section">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Past Papers</h2>
                             </div>
-                        )}
-                        <div className="mb-6">
-                            <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                Filter by subject and year to find exam papers and boost your prep!
-                            </p>
-                            <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
-                                <strong>NB:</strong> Past papers can improve your score by up to 20%.
-                            </p>
-                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
-                            <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
-                                <li>Filter by subject and year to narrow down papers.</li>
-                                <li>Preview papers using the <strong>View</strong> button.</li>
-                                <li>Save papers offline with the <strong>Download</strong> button.</li>
-                                <li>Check paper details for more information.</li>
-                            </ul>
-                        </div>
-                        <FilterSection
-                            subjects={subjects}
-                            selectedSubject={selectedSubject}
-                            onSubjectChange={handleSubjectChange}
-                            years={years}
-                            selectedYear={selectedYear}
-                            onYearChange={handleYearChange}
-                            darkMode={darkMode}
-                        />
-                        <div className="mt-6">
-                            <PapersList
-                                papers={questionPapers}
+                            {error && (
+                                <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
+                                    {error}
+                                    <button
+                                        onClick={resetError}
+                                        className="ml-2 text-white underline hover:text-[var(--hover-secondary)]"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            )}
+                            <div className="mb-6">
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Filter by subject and year to find exam papers and boost your prep!
+                                </p>
+                                <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                    <strong>NB:</strong> Past papers can improve your score by up to 20%.
+                                </p>
+                                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                                <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                    <li>Filter by subject and year to narrow down papers.</li>
+                                    <li>Preview papers using the <strong>View</strong> button.</li>
+                                    <li>Save papers offline with the <strong>Download</strong> button.</li>
+                                    <li>Check paper details for more information.</li>
+                                </ul>
+                            </div>
+                            <FilterSection
+                                subjects={subjects}
                                 selectedSubject={selectedSubject}
+                                onSubjectChange={handleSubjectChange}
+                                years={years}
                                 selectedYear={selectedYear}
-                                pdfLoading={pdfLoading}
-                                onViewPdf={viewPdf}
-                                onDownloadPdf={downloadPdf}
+                                onYearChange={handleYearChange}
+                                darkMode={darkMode}
                             />
+                            <div className="mt-6">
+                                <PapersList
+                                    papers={questionPapers}
+                                    selectedSubject={selectedSubject}
+                                    selectedYear={selectedYear}
+                                    pdfLoading={pdfLoading}
+                                    onViewPdf={viewPdf}
+                                    onDownloadPdf={downloadPdf}
+                                />
+                            </div>
                         </div>
+                        <PDFModal
+                            showModal={showModal}
+                            onClose={() => setShowModal(false)}
+                            pdfUrl={pdfUrl}
+                            currentPaper={currentPaper}
+                            pdfLoading={pdfLoading}
+                            onDownloadPdf={downloadPdf}
+                        />
                     </div>
-                    <PDFModal
-                        showModal={showModal}
-                        onClose={() => setShowModal(false)}
-                        pdfUrl={pdfUrl}
-                        currentPaper={currentPaper}
-                        pdfLoading={pdfLoading}
-                        onDownloadPdf={downloadPdf}
-                    />
                 </div>
-            </div>
             </div>
         </div>
     );
 };
 
 QuestionPaperList.propTypes = {
+    user: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+    }).isRequired,
+    setNotifications: PropTypes.func.isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
@@ -397,7 +400,7 @@ QuestionPaperList.propTypes = {
             message: PropTypes.string.isRequired,
             date: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
-        }),
+        })
     ),
 };
 

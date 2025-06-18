@@ -81,17 +81,6 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                     .hover\\:shadow-lg:hover {
                         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
                     }
-                    .btn-primary {
-                        background-color: var(--accent-primary, #007bff);
-                        color: #ffffff;
-                        padding: 8px 16px;
-                        border-radius: 4px;
-                        border: none;
-                        cursor: pointer;
-                    }
-                    .btn-primary:hover {
-                        background-color: var(--hover-primary, #0056b3);
-                    }
                     .text-[var(--text-primary)] {
                         color: var(--text-primary);
                     }
@@ -102,10 +91,12 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                         color: var(--accent-primary, #007bff);
                     }
                     .text-lg {
-                        font-size: 16px;
+                        font-size: 1.125rem;
+                        line-height: 1.75rem;
                     }
                     .text-sm {
-                        font-size: 12px;
+                        font-size: 0.875rem;
+                        line-height: 1.25rem;
                     }
                     .font-medium {
                         font-weight: 500;
