@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,6 +12,11 @@ import {
 } from 'chart.js';
 import Sidebar from '../../common/Sidebar';
 import Header from "../../common/Header";
+import PerformanceTable from './performanceTable';
+import SummaryTable from './SummaryTable';
+import BarChart from './BarChart';
+import Notes from './Notes';
+import './PerformanceCSS.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -20,7 +24,6 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -102,34 +105,31 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                     tabDescription="Performance"
                     userMessage="Track your progress"
                 />
-            <div
-                className={`
-          flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-          ${isCollapsed ? 'ml-16' : 'ml-64'}
-        `}
-            >
-                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6">
-                    <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Performance Chart</h2>
-                    <Bar data={chartData} options={chartOptions} />
+                <div
+                    className={`
+            flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+            ${isCollapsed ? 'ml-16' : 'ml-64'}
+          `}
+                >
+                    <div className="performance-dashboard bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
+                        <h1 className="text-2xl font-bold mb-4">Performance Dashboard</h1>
+                        <p className="mb-6 text-[var(--text-secondary)]">
+                            This dashboard tracks learner performance across multiple subjects and activities, including time spent and
+                            difficulty level, for comparison.
+                        </p>
+
+                        <h2 className="text-xl font-semibold mb-4">Performance Data</h2>
+                        <PerformanceTable />
+
+                        <h2 className="text-xl font-semibold mb-4 mt-6">Summary of Learners per Subject</h2>
+                        <SummaryTable />
+
+                        <h2 className="text-xl font-semibold mb-4 mt-6">Average Scores by Learner and Subject</h2>
+                        <BarChart />
+
+                        <Notes />
+                    </div>
                 </div>
-                <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-                    <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Course Details</h2>
-                    <ul className="space-y-2">
-                        {courses.length > 0 ? (
-                            courses.map((course) => (
-                                <li key={course.name} className="p-2 bg-[var(--bg-secondary)] rounded flex justify-between">
-                  <span className="text-[var(--text-primary)]">
-                    {course.name} (Progress: {course.progress}%)
-                  </span>
-                                    <span className="text-[var(--accent-primary)]">Grade: {course.grade}</span>
-                                </li>
-                            ))
-                        ) : (
-                            <p className="text-[var(--text-secondary)]">No performance data available.</p>
-                        )}
-                    </ul>
-                </div>
-            </div>
             </div>
         </div>
     );
