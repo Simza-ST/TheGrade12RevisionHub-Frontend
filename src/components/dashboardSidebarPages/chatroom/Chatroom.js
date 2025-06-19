@@ -5,8 +5,9 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
-import { FiSend, FiTrash2, FiUser } from 'react-icons/fi';
+import {FiEye, FiSend, FiTrash2, FiUser} from 'react-icons/fi';
 import GroupUsersModal from './GroupUsersModal';
+import ConfirmationModal from './ConfirmationModal';
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -29,6 +30,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const [editGroupId, setEditGroupId] = useState(null);
     const [editGroupName, setEditGroupName] = useState('');
     const [groupUsers, setGroupUsers] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [groupToDelete, setGroupToDelete] = useState(null);
 
     const isAdmin = (groupId) => {
         const group = groups.find((g) => g.id === groupId);
@@ -565,7 +568,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     };
 
     const handleDeleteGroup = async (groupId) => {
-        if (!window.confirm('Are you sure you want to delete this group?')) return;
+
         try {
             const token = localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}`, {
@@ -588,6 +591,21 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             console.error('Delete group error:', error);
             setError('Failed to delete group: ' + error.message);
         }
+    };
+    const openDeleteModal = (groupId) => {
+        setGroupToDelete(groupId);
+        setIsModalOpen(true);
+    };
+    const confirmDelete = async () => {
+        if (groupToDelete){
+            await handleDeleteGroup(groupToDelete);
+            setIsModalOpen(false);
+            setGroupToDelete(null);
+        }
+    };
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setGroupToDelete(null);
     };
 
     const toggleMember = (userId) => {
@@ -1034,12 +1052,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                         className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
                                                         aria-label={`View users in group ${g.name}`}
                                                     >
-                                                        <FiUser className="w-4 h-4" />
+                                                        {/*<FiUser className="w-4 h-4" />*/}
+                                                        {user && g.creatorId === user.id ? (
+                                                            <FiUser className = "w-4 h-4" />
+                                                        ) : (
+                                                            <FiEye className = "w-4 h-4" />
+                                                            )}
 
                                                     </button>
                                                     {user && g.creatorId === user.id && (
                                                         <button
-                                                            onClick={() => handleDeleteGroup(g.id)}
+                                                            onClick={() => openDeleteModal(g.id)}
                                                             className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
                                                             aria-label={`Delete group ${g.name}`}
                                                         >
@@ -1112,6 +1135,14 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 currentUserId={user.id}
                             />
                         )}
+                        <ConfirmationModal
+                            isOpen={isModalOpen}
+                            onClose={closeModal}
+                            onConfirm={confirmDelete}
+                            title="Confirm Group Deletion"
+                            message="Are you sure you want to delete this group? This action cannot be undone."
+                        />
+
                     </div>
                 </div>
             </div>
