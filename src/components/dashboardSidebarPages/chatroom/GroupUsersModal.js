@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FiTrash2, FiUser } from 'react-icons/fi';
 import PropTypes from 'prop-types';
+import { Tooltip } from 'react-tooltip';
 
 const GroupUsersModal = ({
                              editGroupId,
@@ -13,6 +14,7 @@ const GroupUsersModal = ({
                              availableUsers,
                              handleAddUser,
                              isAdmin,
+                             currentUserId,
                          }) => {
     const [selectedUserId, setSelectedUserId] = useState('');
 
@@ -86,9 +88,12 @@ const GroupUsersModal = ({
                                 className="px-3 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] min-w-[40px] min-h-[40px] sm:min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={!selectedUserId}
                                 aria-label="Add selected user"
+                                data-tooltip-id="add-tooltip"
+                                data-tooltip-content="Add"
                             >
                                 <FiUser className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
+                            <Tooltip id="add-tooltip" place="top" />
                         </div>
                     </div>
                 )}
@@ -106,10 +111,15 @@ const GroupUsersModal = ({
                                     <div className="flex items-center space-x-2">
                                         <FiUser className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-primary)]" />
                                         <span className="text-sm sm:text-base text-[var(--text-primary)] truncate max-w-[150px] sm:max-w-[200px]">
-                      {user.firstName} {user.lastName}
-                    </span>
+                                            {user.firstName} {user.lastName}
+                                            {user.isAdmin && (
+                                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hover-tertiary)] text-[var(--text-primary)]">
+                                                    Admin
+                                                </span>
+                                            )}
+                                        </span>
                                     </div>
-                                    {isAdmin && (
+                                    {isAdmin && user.id !== currentUserId && (
                                         <button
                                             onClick={() => handleRemoveUser(user.id)}
                                             className="p-1 sm:p-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] min-w-[36px] min-h-[36px] flex items-center justify-center"
@@ -166,6 +176,7 @@ GroupUsersModal.propTypes = {
             id: PropTypes.number.isRequired,
             firstName: PropTypes.string,
             lastName: PropTypes.string,
+            isAdmin: PropTypes.bool, // For admin indication
         })
     ).isRequired,
     handleRemoveUser: PropTypes.func.isRequired,
@@ -178,6 +189,7 @@ GroupUsersModal.propTypes = {
     ).isRequired,
     handleAddUser: PropTypes.func.isRequired,
     isAdmin: PropTypes.bool.isRequired,
+    currentUserId: PropTypes.number.isRequired, // For self-deletion prevention
 };
 
 export default GroupUsersModal;

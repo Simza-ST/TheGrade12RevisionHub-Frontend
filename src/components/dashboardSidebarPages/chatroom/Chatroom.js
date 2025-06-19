@@ -5,8 +5,9 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
-import { FiSend, FiTrash2, FiUser } from 'react-icons/fi';
+import {FiEye, FiSend, FiTrash2, FiUser} from 'react-icons/fi';
 import GroupUsersModal from './GroupUsersModal';
+import ConfirmationModal from './ConfirmationModal';
 
 const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, notifications }) => {
     const navigate = useNavigate();
@@ -29,6 +30,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     const [editGroupId, setEditGroupId] = useState(null);
     const [editGroupName, setEditGroupName] = useState('');
     const [groupUsers, setGroupUsers] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [groupToDelete, setGroupToDelete] = useState(null);
 
     const isAdmin = (groupId) => {
         const group = groups.find((g) => g.id === groupId);
@@ -169,10 +172,12 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             });
             if (response.ok) {
                 const data = await response.json();
+                const group = groups.find((g) => g.id === groupId);
                 setGroupUsers(
                     data.map((u) => ({
                         ...u,
                         id: Number(u.id),
+                        isAdmin: group && Number(u.id) === group.creatorId,
                     }))
                 );
             } else {
@@ -392,7 +397,11 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             if (response.ok) {
                 const userToAdd = users.find((u) => u.id === Number(userId));
                 if (userToAdd) {
-                    setGroupUsers([...groupUsers, userToAdd]);
+                    const group = groups.find((g) => g.id === editGroupId);
+                    setGroupUsers([...groupUsers, {
+                        ...userToAdd,
+                        isAdmin: group && Number(userToAdd.id) === group.creatorId,
+                    }]);
                 }
                 setError(null);
                 if (stompClient && stompClient.connected) {
@@ -559,7 +568,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
     };
 
     const handleDeleteGroup = async (groupId) => {
-        if (!window.confirm('Are you sure you want to delete this group?')) return;
+
         try {
             const token = localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}`, {
@@ -582,6 +591,21 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             console.error('Delete group error:', error);
             setError('Failed to delete group: ' + error.message);
         }
+    };
+    const openDeleteModal = (groupId) => {
+        setGroupToDelete(groupId);
+        setIsModalOpen(true);
+    };
+    const confirmDelete = async () => {
+        if (groupToDelete){
+            await handleDeleteGroup(groupToDelete);
+            setIsModalOpen(false);
+            setGroupToDelete(null);
+        }
+    };
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setGroupToDelete(null);
     };
 
     const toggleMember = (userId) => {
@@ -812,16 +836,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
-                {/*<Header*/}
-                {/*    user={user}*/}
-                {/*    notifications={notifications}*/}
-                {/*    setNotifications={setNotifications}*/}
-                {/*    isCollapsed={isCollapsed}*/}
-                {/*    darkMode={darkMode}*/}
-                {/*    setDarkMode={setDarkMode}*/}
-                {/*    tabDescription="Your Subjects"*/}
-                {/*    userMessage="Manage your subjects"*/}
-                {/*/>*/}
                 <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                     <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
@@ -1028,28 +1042,34 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                 <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
                                                     {g.name}
                                                 </span>
-                                                {user && g.creatorId === user.id && (
-                                                    <div className="flex gap-2">
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditGroupId(g.id);
+                                                            setEditGroupName(g.name);
+                                                            fetchGroupUsers(g.id);
+                                                        }}
+                                                        className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
+                                                        aria-label={`View users in group ${g.name}`}
+                                                    >
+                                                        {/*<FiUser className="w-4 h-4" />*/}
+                                                        {user && g.creatorId === user.id ? (
+                                                            <FiUser className = "w-4 h-4" />
+                                                        ) : (
+                                                            <FiEye className = "w-4 h-4" />
+                                                            )}
+
+                                                    </button>
+                                                    {user && g.creatorId === user.id && (
                                                         <button
-                                                            onClick={() => {
-                                                                setEditGroupId(g.id);
-                                                                setEditGroupName(g.name);
-                                                                fetchGroupUsers(g.id);
-                                                            }}
-                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
-                                                            aria-label={`Manage users in group ${g.name}`}
-                                                        >
-                                                            <FiUser className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteGroup(g.id)}
+                                                            onClick={() => openDeleteModal(g.id)}
                                                             className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
                                                             aria-label={`Delete group ${g.name}`}
                                                         >
                                                             <FiTrash2 className="w-4 h-4 text-red-600" />
                                                         </button>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -1112,8 +1132,17 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 availableUsers={users}
                                 handleAddUser={handleAddUser}
                                 isAdmin={isAdmin(editGroupId)}
+                                currentUserId={user.id}
                             />
                         )}
+                        <ConfirmationModal
+                            isOpen={isModalOpen}
+                            onClose={closeModal}
+                            onConfirm={confirmDelete}
+                            title="Confirm Group Deletion"
+                            message="Are you sure you want to delete this group? This action cannot be undone."
+                        />
+
                     </div>
                 </div>
             </div>

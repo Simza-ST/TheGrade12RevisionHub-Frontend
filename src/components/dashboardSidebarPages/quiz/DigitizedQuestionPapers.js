@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useCallback, useNavigate} from 'react';
-//import { LuseNavigate } from 'react-router-dom';
+import React, {useState, useEffect, useCallback} from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../common/Sidebar';
 import DigitizedQuestionPaperCard from './DigitizedQuestionPaperCard';
 import Header from "../../common/Header";

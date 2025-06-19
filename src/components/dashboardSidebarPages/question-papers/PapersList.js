@@ -58,6 +58,12 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
             )}
             <style>
                 {`
+                /* Prevent transitions and animations globally */
+                        * {
+                            transition: none !important;
+                            animation: none !important;
+                            opacity: 1 !important;
+                        }
                     .grid {
                         display: grid;
                         grid-template-columns: 1fr;
