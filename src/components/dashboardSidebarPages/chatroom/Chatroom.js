@@ -169,10 +169,12 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             });
             if (response.ok) {
                 const data = await response.json();
+                const group = groups.find((g) => g.id === groupId);
                 setGroupUsers(
                     data.map((u) => ({
                         ...u,
                         id: Number(u.id),
+                        isAdmin: group && Number(u.id) === group.creatorId,
                     }))
                 );
             } else {
@@ -392,7 +394,11 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             if (response.ok) {
                 const userToAdd = users.find((u) => u.id === Number(userId));
                 if (userToAdd) {
-                    setGroupUsers([...groupUsers, userToAdd]);
+                    const group = groups.find((g) => g.id === editGroupId);
+                    setGroupUsers([...groupUsers, {
+                        ...userToAdd,
+                        isAdmin: group && Number(userToAdd.id) === group.creatorId,
+                    }]);
                 }
                 setError(null);
                 if (stompClient && stompClient.connected) {
@@ -812,16 +818,6 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
-                {/*<Header*/}
-                {/*    user={user}*/}
-                {/*    notifications={notifications}*/}
-                {/*    setNotifications={setNotifications}*/}
-                {/*    isCollapsed={isCollapsed}*/}
-                {/*    darkMode={darkMode}*/}
-                {/*    setDarkMode={setDarkMode}*/}
-                {/*    tabDescription="Your Subjects"*/}
-                {/*    userMessage="Manage your subjects"*/}
-                {/*/>*/}
                 <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                     <div className="bg-[var(--bg-secondary)] bg-opacity-95 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-[var(--shadow)] mb-6 flex justify-between items-center">
                         <div>
@@ -1028,19 +1024,20 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                 <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
                                                     {g.name}
                                                 </span>
-                                                {user && g.creatorId === user.id && (
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                setEditGroupId(g.id);
-                                                                setEditGroupName(g.name);
-                                                                fetchGroupUsers(g.id);
-                                                            }}
-                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
-                                                            aria-label={`Manage users in group ${g.name}`}
-                                                        >
-                                                            <FiUser className="w-4 h-4" />
-                                                        </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditGroupId(g.id);
+                                                            setEditGroupName(g.name);
+                                                            fetchGroupUsers(g.id);
+                                                        }}
+                                                        className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
+                                                        aria-label={`View users in group ${g.name}`}
+                                                    >
+                                                        <FiUser className="w-4 h-4" />
+
+                                                    </button>
+                                                    {user && g.creatorId === user.id && (
                                                         <button
                                                             onClick={() => handleDeleteGroup(g.id)}
                                                             className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
@@ -1048,8 +1045,8 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                         >
                                                             <FiTrash2 className="w-4 h-4 text-red-600" />
                                                         </button>
-                                                    </div>
-                                                )}
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -1112,6 +1109,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                 availableUsers={users}
                                 handleAddUser={handleAddUser}
                                 isAdmin={isAdmin(editGroupId)}
+                                currentUserId={user.id}
                             />
                         )}
                     </div>
