@@ -238,7 +238,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
         fetchMessages();
     }, [user, chatMode, selectedUserId, selectedGroupId]);
 
-    const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
+    /*const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
         if (!dateString || typeof dateString !== 'string') {
             return 'Unknown Date';
         }
@@ -255,6 +255,29 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
             minute: '2-digit',
             hour12: true,
         });
+    };*/
+    const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
+        if (!dateString || typeof dateString !== 'string') {
+            console.warn('Invalid date string:', dateString);
+            return 'Unknown Date';
+        }
+        // Ensure UTC parsing
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateString);
+            return 'Invalid Date';
+        }
+        // Log raw and formatted values for debugging
+        const formatted = date.toLocaleString('en-US', {
+            timeZone,
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+        console.log(`Raw: ${dateString}, UTC: ${date.toISOString()}, Formatted: ${formatted} (TimeZone: ${timeZone})`);
+        return formatted;
     };
 
     const updateMessagesWithServerResponse = useCallback((data) => {
@@ -1088,7 +1111,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                         type="text"
                                         value={createGroupSearchQuery}
                                         onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
-                                        placeholder="Search users..."
+                                        placeholder="Click SpaceBar to search..."
                                         className="form-input w-full text-base"
                                         aria-label="Search users"
                                     />
