@@ -1,0 +1,48 @@
+/* Notification.css */
+
+/* Custom Scrollbar for Notification List */
+.notification-list {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb; /* Tailwind gray-300 */
+    border-radius: 3px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background-color: #d1d5db; /* Tailwind gray-400 */
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background-color: #f9fafb; /* Tailwind bg-secondary */
+}
+
+.dark .notification-list::-webkit-scrollbar-thumb {
+    background-color: #4b5563; /* Tailwind gray-600 */
+}
+
+.dark .notification-list::-webkit-scrollbar-thumb:hover {
+    background-color: #6b7280; /* Tailwind gray-500 */
+}
+
+.dark .notification-list::-webkit-scrollbar-track {
+    background-color: #374151; /* Tailwind bg-secondary-dark */
+}
+
+/* Gradient Section Background */
+.notification-section {
+    background-image: linear-gradient(to bottom right, #134e4a, #7f1d1d); /* Tailwind app-gradient */
+    background-size: cover;
+}
+
+/* Touch-Friendly Notification Item */
+.notification-item {
+    min-height: 60px; /* Ensures touch-friendly height */
+}

@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types';
 
 const NotificationStats = ({ totalNotifications, unreadNotifications, readNotifications }) => (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <p className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--hover-tertiary)]">
-            Total Notifications: {totalNotifications}
+    <div className="grid mb-4">
+        <p className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-semibold p-2 rounded-lg hover:bg-[var(--hover-tertiary)] text-sm flex items-center justify-center">
+            Total: {totalNotifications}
         </p>
-        <p className="bg-[var(--accent-primary)] text-white font-medium py-2 px-4 rounded-lg hover:bg-[var(--hover-primary)]">
-            Unread Notifications: {unreadNotifications}
+        <p className="bg-[var(--accent-primary)] text-white font-medium p-2 rounded-lg hover:bg-[var(--hover-primary)] text-sm flex items-center justify-center">
+            Unread: {unreadNotifications}
         </p>
-        <p className="bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium py-2 px-4 rounded-lg hover:bg-[var(--hover-tertiary)]">
-            Read Notifications: {readNotifications}
+        <p className="bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium p-2 rounded-lg hover:bg-[var(--hover-tertiary)] text-sm flex items-center justify-center">
+            Read: {readNotifications}
         </p>
     </div>
 );
