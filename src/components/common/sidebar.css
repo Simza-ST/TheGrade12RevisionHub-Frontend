@@ -8,3 +8,45 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
+/* UserProfile styles */
+.user-profile {
+    display: flex;
+    align-items: center;
+    width: 100%; /* Ensure it takes full width of parent */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.user-profile-info {
+    flex: 1; /* Take available space */
+    min-width: 0; /* Prevent flex item from overflowing */
+    overflow: hidden; /* Hide any overflow */
+}
+
+.user-profile-info h2,
+.user-profile-info p {
+    white-space: normal; /* Allow text to wrap */
+    overflow-wrap: break-word; /* Break long words to wrap */
+    word-break: break-word; /* Ensure long words break */
+    display: block; /* Ensure block-level for wrapping */
+    margin: 0; /* Remove default margins for consistent spacing */
+}
+
+/* Ensure text doesn't overflow the container */
+.user-profile-info h2 {
+    font-size: 1rem; /* Match text-base */
+    font-weight: 700; /* Match font-bold */
+    color: var(--text-primary);
+    line-height: 1.2; /* Improve readability */
+}
+
+.user-profile-info p {
+    font-size: 0.875rem; /* Match text-sm */
+    font-weight: 500; /* Match font-medium */
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.user-profile-info p:last-child {
+    font-size: 0.75rem; /* Match text-xs */
+}
