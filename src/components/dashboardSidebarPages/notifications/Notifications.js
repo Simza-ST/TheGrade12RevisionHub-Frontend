@@ -11,59 +11,17 @@ import NotificationStats from './NotificationStats';
 import NotificationList from './NotificationList';
 import './Notification.css';
 
-const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Notifications = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filterType, setFilterType] = useState('all');
-    const [user, setUser] = useState(null);
 
     // Set theme attribute for light/dark mode
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
 
-    // Fetch user details
-    useEffect(() => {
-        const fetchUserDetails = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem('jwt');
-                const response = await fetch('http://localhost:6262/api/users/me', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    const userData = {
-                        id: data.id,
-                        firstName: data.firstName,
-                        lastName: data.lastName,
-                        email: data.email,
-                        role: data.role,
-                        profilePicture: data.profilePicture
-                            ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(data.profilePicture)))}`
-                            : null,
-                    };
-                    setUser(userData);
-                    console.log('Notifications user fetched:', userData);
-                } else {
-                    setError(`Failed to fetch user details: ${response.status} ${response.statusText}`);
-                    console.error('User details response:', await response.text());
-                    navigate('/login');
-                }
-            } catch (error) {
-                setError(`Error fetching user details: ${error.message}`);
-                console.error('Error fetching user details:', error);
-                navigate('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUserDetails();
-    }, [navigate]);
 
     // WebSocket setup
     useEffect(() => {
