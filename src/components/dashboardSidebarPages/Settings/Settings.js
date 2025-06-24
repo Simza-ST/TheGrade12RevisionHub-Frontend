@@ -47,8 +47,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const fileInputRef = useRef(null);
 
     useEffect(() => {
+        // Apply theme to document
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
         document.documentElement.style.fontSize = settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : '16px';
+
         const fetchUserData = async () => {
             setLoading(true);
             try {
@@ -81,6 +83,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                         language: 'en',
                         profileVisibility: 'public',
                         dataSharing: false,
+                        theme: darkMode ? 'dark' : 'light',
                     };
                 }
 
@@ -99,7 +102,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     console.warn(`Sessions endpoint unavailable: ${err.message}`);
                 }
 
-                console.log('User:', userData, 'Settings:', userSettings, 'Sessions:', sessionsData); // Debugging
                 setProfile({
                     name: userData.name || userData.fullName || userData.email || '',
                     email: userData.email || '',
@@ -132,7 +134,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             }
         };
         fetchUserData();
-    }, [setDarkMode]);
+    }, [darkMode, setDarkMode]);
 
     const validateProfile = () => {
         if (!profile.name.trim()) return 'Name is required';
@@ -159,11 +161,13 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     };
 
     const handleSettingChange = (key, value) => {
-        setSettings((prev) => ({ ...prev, [key]: value }));
         if (key === 'theme') {
             setDarkMode(value === 'dark');
-        } else if (key === 'fontSize') {
-            document.documentElement.style.fontSize = value === 'small' ? '14px' : value === 'large' ? '18px' : '16px';
+        } else {
+            setSettings((prev) => ({ ...prev, [key]: value }));
+            if (key === 'fontSize') {
+                document.documentElement.style.fontSize = value === 'small' ? '14px' : value === 'large' ? '18px' : '16px';
+            }
         }
     };
 
@@ -307,89 +311,89 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         try {
             const token = localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/users/sessions/${sessionToRevoke}`, {
-    method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-});
-if (!response.ok) throw new Error(await response.text());
-setSessions(sessions.filter(s => s.id !== sessionToRevoke));
-setSuccess('Session revoked successfully');
-setError(null);
-} catch (err) {
-    setError(`Failed to revoke session: ${err.message}`);
-} finally {
-    setLoading(false);
-    setIsRevokeModalOpen(false);
-    setSessionToRevoke(null);
-}
-};
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error(await response.text());
+            setSessions(sessions.filter(s => s.id !== sessionToRevoke));
+            setSuccess('Session revoked successfully');
+            setError(null);
+        } catch (err) {
+            setError(`Failed to revoke session: ${err.message}`);
+        } finally {
+            setLoading(false);
+            setIsRevokeModalOpen(false);
+            setSessionToRevoke(null);
+        }
+    };
 
-const handleClearNotifications = () => {
-    setNotifications([]);
-    setSuccess('Notifications cleared');
-    setError(null);
-};
+    const handleClearNotifications = () => {
+        setNotifications([]);
+        setSuccess('Notifications cleared');
+        setError(null);
+    };
 
-const handleDeleteAccount = async () => {
-    setLoading(true);
-    try {
-        const token = localStorage.getItem('jwt');
-        const response = await fetch('http://localhost:6262/api/users/me', {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error(await response.text());
+    const handleDeleteAccount = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch('http://localhost:6262/api/users/me', {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error(await response.text());
+            localStorage.removeItem('jwt');
+            navigate('/login');
+        } catch (err) {
+            setError(`Failed to delete account: ${err.message}`);
+        } finally {
+            setLoading(false);
+            setIsDeleteModalOpen(false);
+        }
+    };
+
+    const handleDataExport = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('jwt');
+            const response = await fetch('http://localhost:6262/api/users/data/export', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error(await response.text());
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `user-data-${new Date().toISOString()}.zip`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            setSuccess('Data export initiated');
+            setError(null);
+        } catch (err) {
+            setError(`Failed to export data: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
-    } catch (err) {
-        setError(`Failed to delete account: ${err.message}`);
-    } finally {
-        setLoading(false);
-        setIsDeleteModalOpen(false);
+    };
+
+    if (loading && !profile.name) {
+        return (
+            <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+            </div>
+        );
     }
-};
 
-const handleDataExport = async () => {
-    setLoading(true);
-    try {
-        const token = localStorage.getItem('jwt');
-        const response = await fetch('http://localhost:6262/api/users/data/export', {
-            headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error(await response.text());
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `user-data-${new Date().toISOString()}.zip`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        setSuccess('Data export initiated');
-        setError(null);
-    } catch (err) {
-        setError(`Failed to export data: ${err.message}`);
-    } finally {
-        setLoading(false);
-    }
-};
-
-const handleLogout = () => {
-    localStorage.removeItem('jwt');
-    navigate('/login');
-};
-
-if (loading && !profile.name) {
     return (
-        <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
-        </div>
-    );
-}
-
-return (
-    <div className="full">
-        <div className="flex min-h-screen bg-[var(--bg-primary)]">
-            <style>
-                {`
+        <div className="full">
+            <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
                         * {
                             box-sizing: border-box;
                             transition: background-color 0.2s ease, color 0.2s ease;
@@ -615,576 +619,576 @@ return (
                             }
                         }
                     `}
-            </style>
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <div className="flex-1">
-                <Header
+                </style>
+                <Sidebar
                     user={user}
-                    notifications={notifications}
-                    setNotifications={setNotifications}
+                    onLogout={handleLogout}
                     isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
-                    setDarkMode={setDarkMode}
-                    tabDescription="Settings"
-                    userMessage="Manage your account and preferences"
                 />
-                <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <div className="bg-[var(--bg-secondary)] rounded-xl p-6 shadow-xl">
-                        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Settings</h1>
-                        {error && (
-                            <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg text-sm flex items-center">
-                                <span>{error}</span>
-                            </div>
-                        )}
-                        {success && (
-                            <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg text-sm flex items-center">
-                                <span>{success}</span>
-                            </div>
-                        )}
-                        <div className="tabs">
-                            {[
-                                { id: 'profile', name: 'Profile' },
-                                { id: 'security', name: 'Security' },
-                                { id: 'notifications', name: 'Notifications' },
-                                { id: 'appearance', name: 'Appearance' },
-                                { id: 'privacy', name: 'Privacy' },
-                                { id: 'advanced', name: 'Advanced' },
-                            ].map((tab) => (
-                                <div
-                                    key={tab.id}
-                                    className={`tab ${activeTab === tab.id ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    role="tab"
-                                    aria-selected={activeTab === tab.id}
-                                >
-                                    {tab.name}
+                <div className="flex-1">
+                    <Header
+                        user={user}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        tabDescription="Settings"
+                        userMessage="Manage your account and preferences"
+                    />
+                    <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                        <div className="bg-[var(--bg-secondary)] rounded-xl p-6 shadow-xl">
+                            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Settings</h1>
+                            {error && (
+                                <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg text-sm flex items-center">
+                                    <span>{error}</span>
                                 </div>
-                            ))}
-                        </div>
-
-                        {activeTab === 'profile' && (
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-semibold text-[var(--text-primary)]">Profile Information</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Full Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={profile.name}
-                                            onChange={handleProfileChange}
-                                            className="form-input"
-                                            placeholder="Enter your name"
-                                            aria-label="Full Name"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Email Address
-                                        </label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={profile.email}
-                                            onChange={handleProfileChange}
-                                            className="form-input"
-                                            placeholder="Enter your email"
-                                            aria-label="Email Address"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Role
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={profile.title}
-                                            disabled
-                                            className="form-input bg-[var(--bg-tertiary)]"
-                                            readOnly
-                                            aria-label="Role"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Account Created
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
-                                            disabled
-                                            className="form-input bg-[var(--bg-tertiary)]"
-                                            readOnly
-                                            aria-label="Account Creation Date"
-                                        />
-                                    </div>
+                            )}
+                            {success && (
+                                <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg text-sm flex items-center">
+                                    <span>{success}</span>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                        Profile Photo
-                                    </label>
-                                    <div className="flex items-center gap-6">
-                                        {profile.profilePicture && (
-                                            <img
-                                                src={profile.profilePicture}
-                                                alt="Profile Photo"
-                                                className="w-20 h-20 rounded-full object-cover border border-[var(--border)]"
-                                            />
-                                        )}
-                                        <div className="flex flex-col gap-3">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                ref={fileInputRef}
-                                                onChange={handleProfilePictureChange}
-                                                className="hidden"
-                                                aria-label="Upload Profile Photo"
-                                            />
-                                            <button
-                                                onClick={() => fileInputRef.current.click()}
-                                                className="btn-secondary flex items-center gap-2"
-                                                aria-label="Upload Photo"
-                                            >
-                                                <PlusIcon className="w-4 h-4" />
-                                                Upload Photo
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleSaveProfile}
-                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                    aria-label="Save Profile"
-                                    disabled={loading}
-                                >
-                                    <PencilIcon className="w-4 h-4" />
-                                    Save Profile
-                                </button>
-                            </div>
-                        )}
-
-                        {activeTab === 'security' && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Change Password</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Current Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="currentPassword"
-                                                value={password.currentPassword}
-                                                onChange={handlePasswordChange}
-                                                className="form-input"
-                                                placeholder="Enter current password"
-                                                aria-label="Current Password"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                New Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="newPassword"
-                                                value={password.newPassword}
-                                                onChange={handlePasswordChange}
-                                                className="form-input"
-                                                placeholder="New password"
-                                                aria-label="New Password"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Confirm Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="confirmPassword"
-                                                value={password.confirmPassword}
-                                                onChange={handlePasswordChange}
-                                                className="form-input"
-                                                placeholder="Confirm new password"
-                                                aria-label="Confirm Password"
-                                            />
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={handleChangePassword}
-                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                        aria-label="Change Password"
-                                        disabled={loading}
+                            )}
+                            <div className="tabs">
+                                {[
+                                    { id: 'profile', name: 'Profile' },
+                                    { id: 'security', name: 'Security' },
+                                    { id: 'notifications', name: 'Notifications' },
+                                    { id: 'appearance', name: 'Appearance' },
+                                    { id: 'privacy', name: 'Privacy' },
+                                    { id: 'advanced', name: 'Advanced' },
+                                ].map((tab) => (
+                                    <div
+                                        key={tab.id}
+                                        className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        role="tab"
+                                        aria-selected={activeTab === tab.id}
                                     >
-                                        <PencilIcon className="w-4 h-4" />
-                                        Change Password
-                                    </button>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Two-Factor Authentication</h3>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                                <span className="text-base font-medium">
-                                                    2FA: {twoFactor.enabled ? 'Enabled' : 'Disabled'}
-                                                </span>
-                                            <span className="tooltip">
-                                                    <InformationCircleIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-                                                    <span className="tooltip-text">Enhances account security</span>
-                                                </span>
-                                        </div>
-                                        {!twoFactor.enabled && (
-                                            <button
-                                                onClick={handleSetup2FA}
-                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                                aria-label="Enable 2FA"
-                                                disabled={loading}
-                                            >
-                                                <PlusIcon className="w-4 h-4" />
-                                                Enable 2FA
-                                            </button>
-                                        )}
+                                        {tab.name}
                                     </div>
-                                    {twoFactor.qrCode && (
-                                        <div className="space-y-4">
-                                            <img
-                                                src={twoFactor.qrCode}
-                                                alt="2FA QR Code"
-                                                className="w-40 h-40"
+                                ))}
+                            </div>
+
+                            {activeTab === 'profile' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Profile Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={profile.name}
+                                                onChange={handleProfileChange}
+                                                className="form-input"
+                                                placeholder="Enter your name"
+                                                aria-label="Full Name"
                                             />
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    Enter 6-digit Code
-                                                </label>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={profile.email}
+                                                onChange={handleProfileChange}
+                                                className="form-input"
+                                                placeholder="Enter your email"
+                                                aria-label="Email Address"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Role
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={profile.title}
+                                                disabled
+                                                className="form-input bg-[var(--bg-tertiary)]"
+                                                readOnly
+                                                aria-label="Role"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Account Created
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
+                                                disabled
+                                                className="form-input bg-[var(--bg-tertiary)]"
+                                                readOnly
+                                                aria-label="Account Creation Date"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                            Profile Photo
+                                        </label>
+                                        <div className="flex items-center gap-6">
+                                            {profile.profilePicture && (
+                                                <img
+                                                    src={profile.profilePicture}
+                                                    alt="Profile Photo"
+                                                    className="w-20 h-20 rounded-full object-cover border border-[var(--border)]"
+                                                />
+                                            )}
+                                            <div className="flex flex-col gap-3">
                                                 <input
-                                                    type="text"
-                                                    value={twoFactor.code}
-                                                    onChange={(e) => setTwoFactor({ ...twoFactor, code: e.target.value })}
-                                                    className="form-input w-32"
-                                                    placeholder="123456"
-                                                    aria-label="2FA Code"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    ref={fileInputRef}
+                                                    onChange={handleProfilePictureChange}
+                                                    className="hidden"
+                                                    aria-label="Upload Profile Photo"
                                                 />
                                                 <button
-                                                    onClick={handleVerify2FA}
-                                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                                    aria-label="Verify 2FA Code"
-                                                    disabled={loading}
+                                                    onClick={() => fileInputRef.current.click()}
+                                                    className="btn-secondary flex items-center gap-2"
+                                                    aria-label="Upload Photo"
                                                 >
-                                                    Verify Code
+                                                    <PlusIcon className="w-4 h-4" />
+                                                    Upload Photo
                                                 </button>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                    <button
+                                        onClick={handleSaveProfile}
+                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                        aria-label="Save Profile"
+                                        disabled={loading}
+                                    >
+                                        <PencilIcon className="w-4 h-4" />
+                                        Save Profile
+                                    </button>
                                 </div>
+                            )}
 
-                                <div>
-                                    <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Active Sessions</h3>
-                                    <div className="space-y-4">
-                                        {sessions.length > 0 ? (
-                                            sessions.map((s) => (
-                                                <div
-                                                    key={s.id}
-                                                    className="flex items-center justify-between p-4 border rounded-lg border-[var(--border)]"
+                            {activeTab === 'security' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Change Password</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                    Current Password
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    name="currentPassword"
+                                                    value={password.currentPassword}
+                                                    onChange={handlePasswordChange}
+                                                    className="form-input"
+                                                    placeholder="Enter current password"
+                                                    aria-label="Current Password"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                    New Password
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    name="newPassword"
+                                                    value={password.newPassword}
+                                                    onChange={handlePasswordChange}
+                                                    className="form-input"
+                                                    placeholder="New password"
+                                                    aria-label="New Password"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                    Confirm Password
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    name="confirmPassword"
+                                                    value={password.confirmPassword}
+                                                    onChange={handlePasswordChange}
+                                                    className="form-input"
+                                                    placeholder="Confirm new password"
+                                                    aria-label="Confirm Password"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={handleChangePassword}
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            aria-label="Change Password"
+                                            disabled={loading}
+                                        >
+                                            <PencilIcon className="w-4 h-4" />
+                                            Change Password
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Two-Factor Authentication</h3>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base font-medium">
+                                                    2FA: {twoFactor.enabled ? 'Enabled' : 'Disabled'}
+                                                </span>
+                                                <span className="tooltip">
+                                                    <InformationCircleIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+                                                    <span className="tooltip-text">Enhances account security</span>
+                                                </span>
+                                            </div>
+                                            {!twoFactor.enabled && (
+                                                <button
+                                                    onClick={handleSetup2FA}
+                                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                                    aria-label="Enable 2FA"
+                                                    disabled={loading}
                                                 >
-                                                    <div>
-                                                        <p className="text-sm font-medium">{s.device}</p>
-                                                        <p className="text-xs text-[var(--text-secondary)]">
-                                                            Last active: {new Date(s.lastActive).toLocaleString()}
-                                                        </p>
-                                                    </div>
+                                                    <PlusIcon className="w-4 h-4" />
+                                                    Enable 2FA
+                                                </button>
+                                            )}
+                                        </div>
+                                        {twoFactor.qrCode && (
+                                            <div className="space-y-4">
+                                                <img
+                                                    src={twoFactor.qrCode}
+                                                    alt="2FA QR Code"
+                                                    className="w-40 h-40"
+                                                />
+                                                <div>
+                                                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                        Enter 6-digit Code
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={twoFactor.code}
+                                                        onChange={(e) => setTwoFactor({ ...twoFactor, code: e.target.value })}
+                                                        className="form-input w-32"
+                                                        placeholder="123456"
+                                                        aria-label="2FA Code"
+                                                    />
                                                     <button
-                                                        onClick={() => {
-                                                            setSessionToRevoke(s.id);
-                                                            setIsRevokeModalOpen(true);
-                                                        }}
+                                                        onClick={handleVerify2FA}
                                                         className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                                        aria-label={`Revoke session ${s.device}`}
+                                                        aria-label="Verify 2FA Code"
                                                         disabled={loading}
                                                     >
-                                                        <TrashIcon className="w-4 h-4" />
-                                                        Revoke
+                                                        Verify Code
                                                     </button>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-[var(--text-secondary)]">No active sessions found.</p>
+                                            </div>
                                         )}
                                     </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {activeTab === 'notifications' && (
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-semibold text-[var(--text-primary)]">Notification Preferences</h3>
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.emailNotifications}
-                                            onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Email Notifications"
-                                        />
-                                        <div>
-                                            <span className="text-base font-medium">Email Notifications</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">Receive updates via email</p>
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Active Sessions</h3>
+                                        <div className="space-y-4">
+                                            {sessions.length > 0 ? (
+                                                sessions.map((s) => (
+                                                    <div
+                                                        key={s.id}
+                                                        className="flex items-center justify-between p-4 border rounded-lg border-[var(--border)]"
+                                                    >
+                                                        <div>
+                                                            <p className="text-sm font-medium">{s.device}</p>
+                                                            <p className="text-xs text-[var(--text-secondary)]">
+                                                                Last active: {new Date(s.lastActive).toLocaleString()}
+                                                            </p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                setSessionToRevoke(s.id);
+                                                                setIsRevokeModalOpen(true);
+                                                            }}
+                                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                                            aria-label={`Revoke session ${s.device}`}
+                                                            disabled={loading}
+                                                        >
+                                                            <TrashIcon className="w-4 h-4" />
+                                                            Revoke
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-[var(--text-secondary)]">No active sessions found.</p>
+                                            )}
                                         </div>
-                                    </label>
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.pushNotifications}
-                                            onChange={(e) => handleSettingChange('pushNotifications', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Push Notifications"
-                                        />
-                                        <div>
-                                            <span className="text-base font-medium">Push Notifications</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">Receive browser or app notifications</p>
-                                        </div>
-                                    </label>
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.chatNotifications}
-                                            onChange={(e) => handleSettingChange('chatNotifications', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Chat Notifications"
-                                        />
-                                        <div>
-                                            <span className="text-base font-medium">Chat Notifications</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">Alerts for new messages</p>
-                                        </div>
-                                    </label>
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.mentionNotifications}
-                                            onChange={(e) => handleSettingChange('mentionNotifications', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Mention Notifications"
-                                        />
-                                        <div>
-                                            <span className="text-base font-medium">Mention Notifications</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">Alerts when mentioned</p>
-                                        </div>
-                                    </label>
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.notificationSound}
-                                            onChange={(e) => handleSettingChange('notificationSound', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Notification Sound"
-                                        />
-                                        <div>
-                                            <span className="text-base font-medium">Notification Sound</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">Play sound for notifications</p>
-                                        </div>
-                                    </label>
+                                    </div>
                                 </div>
-                                <div className="flex gap-4">
+                            )}
+
+                            {activeTab === 'notifications' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Notification Preferences</h3>
+                                    <div className="space-y-4">
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.emailNotifications}
+                                                onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Email Notifications"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Email Notifications</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">Receive updates via email</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.pushNotifications}
+                                                onChange={(e) => handleSettingChange('pushNotifications', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Push Notifications"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Push Notifications</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">Receive browser or app notifications</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.chatNotifications}
+                                                onChange={(e) => handleSettingChange('chatNotifications', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Chat Notifications"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Chat Notifications</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">Alerts for new messages</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.mentionNotifications}
+                                                onChange={(e) => handleSettingChange('mentionNotifications', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Mention Notifications"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Mention Notifications</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">Alerts when mentioned</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.notificationSound}
+                                                onChange={(e) => handleSettingChange('notificationSound', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Notification Sound"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Notification Sound</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">Play sound for notifications</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={handleSaveSettings}
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            aria-label="Save Notification Settings"
+                                            disabled={loading}
+                                        >
+                                            <PencilIcon className="w-4 h-4" />
+                                            Save Settings
+                                        </button>
+                                        <button
+                                            onClick={handleClearNotifications}
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            aria-label="Clear Notifications"
+                                            disabled={loading}
+                                        >
+                                            <TrashIcon className="w-4 h-4" />
+                                            Clear Notifications
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'appearance' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Appearance Settings</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Theme
+                                            </label>
+                                            <select
+                                                value={darkMode ? 'dark' : 'light'}
+                                                onChange={(e) => handleSettingChange('theme', e.target.value)}
+                                                className="form-input"
+                                                aria-label="Select Theme"
+                                            >
+                                                <option value="light">Light</option>
+                                                <option value="dark">Dark</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Font Size
+                                            </label>
+                                            <select
+                                                value={settings.fontSize}
+                                                onChange={(e) => handleSettingChange('fontSize', e.target.value)}
+                                                className="form-input"
+                                                aria-label="Select Font Size"
+                                            >
+                                                <option value="small">Small</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="large">Large</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Language
+                                            </label>
+                                            <select
+                                                value={settings.language}
+                                                onChange={(e) => handleSettingChange('language', e.target.value)}
+                                                className="form-input"
+                                                aria-label="Select Language"
+                                            >
+                                                <option value="en">English</option>
+                                                <option value="es">Spanish</option>
+                                                <option value="fr">French</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <button
                                         onClick={handleSaveSettings}
                                         className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                        aria-label="Save Notification Settings"
+                                        aria-label="Save Appearance Settings"
                                         disabled={loading}
                                     >
                                         <PencilIcon className="w-4 h-4" />
                                         Save Settings
                                     </button>
+                                </div>
+                            )}
+
+                            {activeTab === 'privacy' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Privacy Settings</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                                                Profile Visibility
+                                            </label>
+                                            <select
+                                                value={settings.profileVisibility}
+                                                onChange={(e) => handleSettingChange('profileVisibility', e.target.value)}
+                                                className="form-input"
+                                                aria-label="Profile Visibility"
+                                            >
+                                                <option value="public">Public</option>
+                                                <option value="friends">Friends Only</option>
+                                                <option value="private">Private</option>
+                                            </select>
+                                        </div>
+                                        <label className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.dataSharing}
+                                                onChange={(e) => handleSettingChange('dataSharing', e.target.checked)}
+                                                className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
+                                                aria-label="Allow Data Sharing"
+                                            />
+                                            <div>
+                                                <span className="text-base font-medium">Allow Data Sharing</span>
+                                                <p className="text-sm text-[var(--text-secondary)]">
+                                                    Share anonymized data for analytics
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </div>
                                     <button
-                                        onClick={handleClearNotifications}
+                                        onClick={handleSaveSettings}
                                         className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                        aria-label="Clear Notifications"
+                                        aria-label="Save Privacy Settings"
                                         disabled={loading}
                                     >
-                                        <TrashIcon className="w-4 h-4" />
-                                        Clear Notifications
+                                        <PencilIcon className="w-4 h-4" />
+                                        Save Settings
                                     </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'appearance' && (
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-semibold text-[var(--text-primary)]">Appearance Settings</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Theme
-                                        </label>
-                                        <select
-                                            value={darkMode ? 'dark' : 'light'}
-                                            onChange={(e) => setDarkMode(e.target.value === 'dark')}
-                                            className="form-input"
-                                            aria-label="Select Theme"
-                                        >
-                                            <option value="light">Light</option>
-                                            <option value="dark">Dark</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Font Size
-                                        </label>
-                                        <select
-                                            value={settings.fontSize}
-                                            onChange={(e) => handleSettingChange('fontSize', e.target.value)}
-                                            className="form-input"
-                                            aria-label="Select Font Size"
-                                        >
-                                            <option value="small">Small</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="large">Large</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Language
-                                        </label>
-                                        <select
-                                            value={settings.language}
-                                            onChange={(e) => handleSettingChange('language', e.target.value)}
-                                            className="form-input"
-                                            aria-label="Select Language"
-                                        >
-                                            <option value="en">English</option>
-                                            <option value="es">Spanish</option>
-                                            <option value="fr">French</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleSaveSettings}
-                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                    aria-label="Save Appearance Settings"
-                                    disabled={loading}
-                                >
-                                    <PencilIcon className="w-4 h-4" />
-                                    Save Settings
-                                </button>
-                            </div>
-                        )}
-
-                        {activeTab === 'privacy' && (
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-semibold text-[var(--text-primary)]">Privacy Settings</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Profile Visibility
-                                        </label>
-                                        <select
-                                            value={settings.profileVisibility}
-                                            onChange={(e) => handleSettingChange('profileVisibility', e.target.value)}
-                                            className="form-input"
-                                            aria-label="Profile Visibility"
-                                        >
-                                            <option value="public">Public</option>
-                                            <option value="friends">Friends Only</option>
-                                            <option value="private">Private</option>
-                                        </select>
-                                    </div>
-                                    <label className="flex items-center gap-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings.dataSharing}
-                                            onChange={(e) => handleSettingChange('dataSharing', e.target.checked)}
-                                            className="h-5 w-5 text-[var(--accent-primary)] rounded focus:ring-[var(--accent-primary)]"
-                                            aria-label="Allow Data Sharing"
-                                        />
+                            {activeTab === 'advanced' && (
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Advanced Settings</h3>
+                                    <div className="space-y-4">
                                         <div>
-                                            <span className="text-base font-medium">Allow Data Sharing</span>
-                                            <p className="text-sm text-[var(--text-secondary)]">
-                                                Share anonymized data for analytics
+                                            <h4 className="text-base font-medium text-[var(--text-primary)] mb-2">
+                                                Data Export
+                                            </h4>
+                                            <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                                Download a copy of your account data
                                             </p>
+                                            <button
+                                                onClick={handleDataExport}
+                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                                aria-label="Export Data"
+                                                disabled={loading}
+                                            >
+                                                <ArrowDownTrayIcon className="w-4 h-4" />
+                                                Export Data
+                                            </button>
                                         </div>
-                                    </label>
-                                </div>
-                                <button
-                                    onClick={handleSaveSettings}
-                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                    aria-label="Save Privacy Settings"
-                                    disabled={loading}
-                                >
-                                    <PencilIcon className="w-4 h-4" />
-                                    Save Settings
-                                </button>
-                            </div>
-                        )}
-
-                        {activeTab === 'advanced' && (
-                            <div className="space-y-6">
-                                <h3 className="text-xl font-semibold text-[var(--text-primary)]">Advanced Settings</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="text-base font-medium text-[var(--text-primary)] mb-2">
-                                            Data Export
-                                        </h4>
-                                        <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                            Download a copy of your account data
-                                        </p>
-                                        <button
-                                            onClick={handleDataExport}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                            aria-label="Export Data"
-                                            disabled={loading}
-                                        >
-                                            <ArrowDownTrayIcon className="w-4 h-4" />
-                                            Export Data
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-base font-medium text-[var(--text-primary)] mb-2">
-                                            Delete Account
-                                        </h4>
-                                        <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                            Permanently delete your account and data
-                                        </p>
-                                        <button
-                                            onClick={() => setIsDeleteModalOpen(true)}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                            aria-label="Delete Account"
-                                            disabled={loading}
-                                        >
-                                            <TrashIcon className="w-4 h-4" />
-                                            Delete Account
-                                        </button>
+                                        <div>
+                                            <h4 className="text-base font-medium text-[var(--text-primary)] mb-2">
+                                                Delete Account
+                                            </h4>
+                                            <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                                Permanently delete your account and data
+                                            </p>
+                                            <button
+                                                onClick={() => setIsDeleteModalOpen(true)}
+                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                                aria-label="Delete Account"
+                                                disabled={loading}
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                                Delete Account
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                </main>
+                            )}
+                        </div>
+                    </main>
+                </div>
             </div>
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteAccount}
+                title="Confirm Account Deletion"
+                message="Are you sure you want to delete your account? This action cannot be undone."
+            />
+            <ConfirmationModal
+                isOpen={isRevokeModalOpen}
+                onClose={() => setIsRevokeModalOpen(false)}
+                onConfirm={handleRevokeSession}
+                title="Revoke Session"
+                message="Are you sure you want to revoke this session?"
+            />
         </div>
-        <ConfirmationModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={handleDeleteAccount}
-            title="Confirm Account Deletion"
-            message="Are you sure you want to delete your account? This action cannot be undone."
-        />
-        <ConfirmationModal
-            isOpen={isRevokeModalOpen}
-            onClose={() => setIsRevokeModalOpen(false)}
-            onConfirm={handleRevokeSession}
-            title="Revoke Session"
-            message="Are you sure you want to revoke this session?"
-        />
-    </div>
-);
+    );
 };
 
 Settings.propTypes = {
