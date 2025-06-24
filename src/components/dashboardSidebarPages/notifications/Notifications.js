@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from '../../common/Sidebar';
+import Header from '../../common/Header';
 import LoadingSpinner from './LoadingSpinner';
-import NotificationHeader from './NotificationHeader';
 import NotificationControls from './NotificationControls';
 import NotificationStats from './NotificationStats';
 import NotificationList from './NotificationList';
@@ -37,12 +37,18 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setUser({
+                    const userData = {
                         id: data.id,
-                        name: `${data.firstName} ${data.lastName}`,
-                        title: data.role,
-                        profilePicture: data.profilePicture || null,
-                    });
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        email: data.email,
+                        role: data.role,
+                        profilePicture: data.profilePicture
+                            ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(data.profilePicture)))}`
+                            : null,
+                    };
+                    setUser(userData);
+                    console.log('Notifications user fetched:', userData);
                 } else {
                     setError(`Failed to fetch user details: ${response.status} ${response.statusText}`);
                     console.error('User details response:', await response.text());
@@ -62,7 +68,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     // WebSocket setup
     useEffect(() => {
         const socket = new SockJS('http://localhost:6262/ws');
-        const stompClient = new Client({
+        const client = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
@@ -72,7 +78,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             },
             onConnect: () => {
                 console.log('Connected to WebSocket');
-                stompClient.subscribe(`/topic/notifications`, (message) => {
+                client.subscribe(`/topic/notifications`, (message) => {
                     const data = JSON.parse(message.body);
                     if (data.message && data.type === 'INFO') {
                         if (data.message === 'All notifications cleared') {
@@ -102,10 +108,10 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             },
         });
 
-        stompClient.activate();
+        client.activate();
 
         return () => {
-            stompClient.deactivate();
+            client.deactivate();
             console.log('Disconnected from WebSocket');
         };
     }, [setNotifications]);
@@ -258,20 +264,17 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
                 <style>
                     {`
-                        /* Prevent transitions and animations globally */
                         * {
                             transition: none !important;
                             animation: none !important;
                             opacity: 1 !important;
                         }
-                        /* Full wrapper */
                         .full {
                             width: 100%;
                             min-height: 100vh;
                             position: relative;
                             z-index: 10;
                         }
-                        /* Base styles */
                         .bg-[var(--bg-primary)] {
                             background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
                         }
@@ -296,7 +299,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .text-white {
                             color: #ffffff;
                         }
-                        /* Hover states */
                         .hover\\:bg-[var(--hover-tertiary)]:hover {
                             background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
                         }
@@ -306,7 +308,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .hover\\:text-[var(--hover-secondary)]:hover {
                             color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
                         }
-                        /* Layout styles */
                         .flex {
                             display: flex;
                         }
@@ -361,7 +362,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .shadow-[var(--shadow)] {
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                         }
-                        /* Typography */
                         .text-3xl {
                             font-size: 1.875rem;
                             line-height: 2.25rem;
@@ -391,7 +391,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .font-medium {
                             font-weight: 500;
                         }
-                        /* Form elements */
                         .form-label {
                             color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
                             font-weight: 600;
@@ -412,7 +411,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             border-color: var(--accent-primary, #007bff);
                             outline: none;
                         }
-                        /* Button styles */
                         .btn-primary {
                             background-color: var(--accent-primary, #007bff);
                             color: #ffffff;
@@ -424,7 +422,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .btn-primary:hover {
                             background-color: var(--hover-primary, #0056b3);
                         }
-                        /* Grid layout */
                         .grid {
                             display: grid;
                             grid-template-columns: 1fr;
@@ -433,7 +430,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .sm\\:grid-cols-3 {
                             grid-template-columns: repeat(3, 1fr);
                         }
-                        /* Notification badge */
                         .-top-2 {
                             top: -8px;
                         }
@@ -446,7 +442,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .w-5 {
                             width: 20px;
                         }
-                        /* Custom section background */
                         .notification-section {
                             background: ${darkMode
                         ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
@@ -457,14 +452,12 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             padding: 32px;
                             border-radius: 16px;
                         }
-                        /* Sidebar margins */
                         .ml-16 {
                             margin-left: 64px;
                         }
                         .ml-64 {
                             margin-left: 256px;
                         }
-                        /* Responsive adjustments */
                         @media (min-width: 640px) {
                             .sm\\:grid-cols-3 {
                                 grid-template-columns: repeat(3, 1fr);
@@ -473,7 +466,6 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                                 padding: 32px;
                             }
                         }
-                        /* Underline */
                         .underline {
                             text-decoration: underline;
                         }
@@ -486,36 +478,42 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
                 />
-                <div
-                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
-                >
-                    <NotificationHeader
+                <div className="flex-1">
+                    <Header
                         user={user}
-                        unreadNotifications={unreadNotifications}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
                         darkMode={darkMode}
                         setDarkMode={setDarkMode}
+                        tabDescription="Notifications"
+                        userMessage="Stay updated"
                     />
-                    <div className="notification-section">
-                        <NotificationControls
-                            filterType={filterType}
-                            setFilterType={setFilterType}
-                            markAllAsRead={markAllAsRead}
-                            deleteAllNotifications={deleteAllNotifications}
-                            unreadNotifications={unreadNotifications}
-                            totalNotifications={totalNotifications}
-                        />
-                        {error && <p className="text-lg text-[var(--accent-secondary)] mb-4">{error}</p>}
-                        <NotificationStats
-                            totalNotifications={totalNotifications}
-                            unreadNotifications={unreadNotifications}
-                            readNotifications={readNotifications}
-                        />
-                        <NotificationList
-                            filteredNotifications={filteredNotifications}
-                            markAsRead={markAsRead}
-                            deleteNotification={deleteNotification}
-                        />
-                    </div>
+                    <main
+                        className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`}
+                    >
+                        <div className="notification-section">
+                            <NotificationControls
+                                filterType={filterType}
+                                setFilterType={setFilterType}
+                                markAllAsRead={markAllAsRead}
+                                deleteAllNotifications={deleteAllNotifications}
+                                unreadNotifications={unreadNotifications}
+                                totalNotifications={totalNotifications}
+                            />
+                            {error && <p className="text-lg text-[var(--accent-secondary)] mb-4">{error}</p>}
+                            <NotificationStats
+                                totalNotifications={totalNotifications}
+                                unreadNotifications={unreadNotifications}
+                                readNotifications={readNotifications}
+                            />
+                            <NotificationList
+                                filteredNotifications={filteredNotifications}
+                                markAsRead={markAsRead}
+                                deleteNotification={deleteNotification}
+                            />
+                        </div>
+                    </main>
                 </div>
             </div>
         </div>
@@ -531,7 +529,7 @@ Notifications.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             message: PropTypes.string.isRequired,
-            createdAt: PropTypes.string.isRequired,
+            createdAt: PropTypes.string,
             read: PropTypes.bool.isRequired,
             type: PropTypes.string,
         })

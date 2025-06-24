@@ -1057,7 +1057,7 @@ const Chatroom = ({ isCollapsed = true, setIsCollapsed, darkMode, setDarkMode, n
                                                             <FiUser className = "w-4 h-4" />
                                                         ) : (
                                                             <FiEye className = "w-4 h-4" />
-                                                            )}
+                                                        )}
 
                                                     </button>
                                                     {user && g.creatorId === user.id && (
