@@ -640,7 +640,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     />
                     <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                         <div className="bg-[var(--bg-secondary)] rounded-xl p-6 shadow-xl">
-                            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Settings</h1>
                             {error && (
                                 <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg text-sm flex items-center">
                                     <span>{error}</span>
