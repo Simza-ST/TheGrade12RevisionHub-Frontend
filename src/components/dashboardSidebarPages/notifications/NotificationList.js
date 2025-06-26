@@ -25,9 +25,9 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
                 filteredNotifications.map((notification) => (
                     <li
                         key={notification.id}
-                        className={`p-2 rounded flex justify-between items-center notification ${notification.read ? 'read' : ''}`}
+                        className={`p-2 rounded flex flex-col notification ${notification.read ? 'read' : ''}`}
                     >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-1">
                             <span
                                 className={`text-sm font-medium ${
                                     notification.type === 'info'
@@ -41,34 +41,55 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
                             >
                                 [{notification.type ? notification.type.toUpperCase() : 'UNKNOWN'}]
                             </span>
-                            <span className="text-[var(--text-primary)]">{notification.message}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-[var(--text-secondary)]">
+                        <div className="text-[var(--text-primary)] mb-1">
+                            {notification.message}
+                        </div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <span className="text-sm text-[var(--text-secondary)] mb-1 sm:mb-0">
                                 {formatDate(notification.createdAt)}
                             </span>
-                            {!notification.read && (
+                            <div className="flex gap-2">
+                                {!notification.read && (
+                                    <button
+                                        onClick={() => markAsRead(notification.id)}
+                                        className="text-sm text-[var(--accent-primary)] hover:underline"
+                                        aria-label={`Mark notification ${notification.message} as read`}
+                                    >
+                                        Mark as Read
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() => markAsRead(notification.id)}
-                                    className="text-sm text-[var(--accent-primary)] hover:underline"
-                                    aria-label={`Mark notification ${notification.message} as read`}
+                                    onClick={() => deleteNotification(notification.id)}
+                                    className="text-sm text-[var(--accent-secondary)] hover:text-[var(--hover-secondary)]"
+                                    aria-label={`Delete notification ${notification.message}`}
                                 >
-                                    Mark as Read
+                                    Delete
                                 </button>
-                            )}
-                            <button
-                                onClick={() => deleteNotification(notification.id)}
-                                className="text-sm text-[var(--accent-secondary)] hover:text-[var(--hover-secondary)]"
-                                aria-label={`Delete notification ${notification.message}`}
-                            >
-                                Delete
-                            </button>
+                            </div>
                         </div>
                     </li>
                 ))
             ) : (
                 <p className="text-[var(--text-secondary)]">No notifications available.</p>
             )}
+            <style>{`
+                .notification {
+                    background-color: var(--bg-tertiary, ${typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#374151' : '#e5e7eb'});
+                }
+                .notification.read {
+                    background-color: var(--bg-secondary, ${typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#1f2937' : '#ffffff'});
+                }
+                @media (max-width: 639px) {
+                    .notification {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                    .notification > div {
+                        width: 100%;
+                    }
+                }
+            `}</style>
         </ul>
     );
 };
