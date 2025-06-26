@@ -44,7 +44,7 @@ UserProfile.propTypes = {
     onLogout: PropTypes.func.isRequired,
 };
 
-const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
+const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger }) => {
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
         { name: 'Subjects', path: '/subjects', icon: '📚' },
@@ -70,6 +70,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
                 {!isCollapsed && (
                     <div className="text-2xl font-semibold text-[var(--text-primary)]">RevisionHub</div>
                 )}
+                {!disableHamburger && (
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     className="p-2 bg-[var(--bg-secondary)] hover:bg-[var(--hover-tertiary)] text-[var(--text-primary)] rounded-2xl shadow-md"
@@ -89,7 +90,8 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode }) => {
                             d="M4 6h16M4 12h16M4 18h16"
                         />
                     </svg>
-                </button>
+                    </button>
+                    )}
             </div>
             <ul className="space-y-2 flex-1 px-2 overflow-auto hide-scrollbar">
                 {navItems.map((item) => (
@@ -134,6 +136,7 @@ Sidebar.propTypes = {
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func,
     darkMode: PropTypes.bool.isRequired,
+    disableHamburger: PropTypes.bool,
 };
 
 export default Sidebar;

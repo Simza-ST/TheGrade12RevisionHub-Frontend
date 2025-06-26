@@ -134,6 +134,10 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                     .icon-btn {
                         display: flex;
                     }
+                    h2 {
+                        font-size: 1rem !important;
+                        line-height: 1.5rem !important;
+                    }
                 }
                 @media (min-width: 640px) {
                     .custom-select {
@@ -147,9 +151,19 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                         font-size: 0.75rem;
                         min-height: 40px;
                     }
+                    h2 {
+                        font-size: 1.25rem !important;
+                        line-height: 1.75rem !important;
+                    }
+                }
+                @media (min-width: 768px) {
+                    h2 {
+                        font-size: 1.5rem !important;
+                        line-height: 2rem !important;
+                    }
                 }
             `}</style>
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] flex-1 min-w-0 truncate">Your Notifications</h2>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-[var(--text-primary)] flex-1 min-w-0 ">Your Notifications</h2>
             <div className="flex items-center gap-1 flex-shrink-0 relative" ref={dropdownRef}>
                 <select
                     className="custom-select text-xs sm:text-sm min-w-[100px] h-[40px]"

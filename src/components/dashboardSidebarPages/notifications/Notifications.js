@@ -16,6 +16,14 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const [error, setError] = useState(null);
     const [filterType, setFilterType] = useState('all');
     const [user, setUser] = useState(null);
+    const [showSidebar, setShowSidebar] = useState(false); // Hidden by default on mobile
+
+    // Sync isCollapsed with showSidebar on mobile
+    useEffect(() => {
+        if (window.innerWidth <= 639) {
+            setIsCollapsed(!showSidebar); // Expand (false) when sidebar is shown, collapse not needed since it hides
+        }
+    }, [showSidebar, setIsCollapsed]);
 
     // Set theme attribute for light/dark mode
     useEffect(() => {
@@ -248,7 +256,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-primary)]">
+            <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
                 <style>{`
                     * {
                         transition: none !important;
@@ -297,8 +305,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     .flex {
                         display: flex;
                     }
-                    .flex-col {
-                        flex-direction: column;
+                    .flex-nowrap {
+                        flex-wrap: nowrap;
                     }
                     .min-h-screen {
                         min-height: 100vh;
@@ -380,6 +388,10 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         font-size: 0.75rem;
                         line-height: 1rem;
                     }
+                    .md\\:text-4xl {
+                        font-size: 2.25rem;
+                        line-height: 2.5rem;
+                    }
                     .font-bold {
                         font-weight: 700;
                     }
@@ -446,6 +458,9 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     .w-5 {
                         width: 20px;
                     }
+                    .h-10 {
+                        height: 2.5rem;
+                    }
                     .notification-section {
                         background: ${darkMode
                     ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
@@ -471,13 +486,39 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     .notification-list::-webkit-scrollbar-track {
                         background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
                     }
-                    .ml-16 {
-                        margin-left: 64px;
+                    .hamburger {
+                        display: none;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: 8px;
+                        position: fixed;
+                        top: 16px;
+                        left: 16px;
+                        z-index: 50;
+                        transition: left 0.3s ease-in-out;
                     }
-                    .ml-64 {
-                        margin-left: 256px;
+                    .sidebar-wrapper {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        height: 100vh;
+                        z-index: 40;
+                        transition: transform 0.3s ease-in-out;
+                    }
+                    .sidebar-hidden {
+                        transform: translateX(-100%);
                     }
                     @media (max-width: 639px) {
+                        .hamburger {
+                            display: block;
+                        }
+                        .sidebar-wrapper {
+                            display: ${showSidebar ? 'block' : 'none'};
+                        }
+                        .hamburger {
+                            left: ${showSidebar ? '198px' : '16px'};
+                        }
                         .ml-16, .ml-64 {
                             margin-left: 0;
                         }
@@ -504,6 +545,18 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .sm\\:p-8 {
                             padding: 16px;
                         }
+                        .notification-header-actions {
+                            flex-wrap: nowrap;
+                            gap: 10px;
+                        }
+                        .notification-header-actions > * {
+                            padding: 1px 4px;
+                            height: 2rem;
+                        }
+                        h1 {
+                            font-size: 1.25rem !important;
+                            line-height: 1.75rem !important;
+                        }
                     }
                     @media (min-width: 640px) {
                         .grid {
@@ -513,20 +566,58 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         .notification-section {
                             padding: 24px;
                         }
+                        .hamburger {
+                            display: none;
+                        }
+                        .sidebar-wrapper {
+                            display: block;
+                        }
+                        .notification-header-actions {
+                            gap: 16px;
+                        }
+                        .notification-header-actions > * {
+                            padding: 4px 16px;
+                            height: 2.5rem;
+                            
+                        }
+                        h1 {
+                            font-size: 1.875rem !important;
+                            line-height: 2.25rem !important;
+                        }
                     }
                     @media (min-width: 768px) {
                         .notification-section {
                             padding: 32px;
                         }
+                        h1 {
+                            font-size: 2.25rem !important;
+                            line-height: 2.5rem !important;
+                        }
+                    }
+                    .notification-header-actions {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
                     }
                 `}</style>
-                <Sidebar
-                    user={user}
-                    onLogout={handleLogout}
-                    isCollapsed={isCollapsed}
-                    setIsCollapsed={setIsCollapsed}
-                    darkMode={darkMode}
-                />
+                <button className="hamburger" onClick={() => {
+                    setShowSidebar(!showSidebar);
+                    if (!showSidebar) setIsCollapsed(false); // Expand to show icons and names when shown
+                }}>
+                    <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <div className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
+                    <Sidebar
+                        user={user}
+                        onLogout={handleLogout}
+                        isCollapsed={isCollapsed}
+                        setIsCollapsed={setIsCollapsed}
+                        darkMode={darkMode}
+                        disableHamburger={showSidebar && window.innerWidth <= 639}
+                    />
+                </div>
                 <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                     <NotificationHeader
                         user={user}
