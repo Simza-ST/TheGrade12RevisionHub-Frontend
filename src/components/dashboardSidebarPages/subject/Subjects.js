@@ -368,40 +368,16 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         userMessage="Manage your subjects"
                     />
                     <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 mx-auto ${isCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`}>
-                        {/*<div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-md mb-6 flex justify-between items-center">*/}
-                        {/*    <div>*/}
-                        {/*        <h1 className="text-3xl font-bold text-[var(--text-primary)]">Your Subjects</h1>*/}
-                        {/*        <p className="text-sm mt-1 text-[var(--text-secondary)]">Manage your courses, {user.name}!</p>*/}
-                        {/*    </div>*/}
-                        {/*    <div className="flex gap-2">*/}
-                        {/*        <button*/}
-                        {/*            onClick={() => setIsAdding(!isAdding)}*/}
-                        {/*            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"*/}
-                        {/*        >*/}
-                        {/*            {isAdding ? 'Cancel' : 'Add New Subject'}*/}
-                        {/*        </button>*/}
-                        {/*        <Link*/}
-                        {/*            to="/notifications"*/}
-                        {/*            className="relative px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"*/}
-                        {/*            aria-label={`View notifications (${notificationCount} unread)`}*/}
-                        {/*        >*/}
-                        {/*            🔔*/}
-                        {/*            {notificationCount > 0 && (*/}
-                        {/*                <span className="absolute -top-2 -right-2 bg-[var(--accent-secondary)] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">*/}
-                        {/*                    {notificationCount}*/}
-                        {/*                </span>*/}
-                        {/*            )}*/}
-                        {/*        </Link>*/}
-                        {/*        <button*/}
-                        {/*            onClick={() => setDarkMode(!darkMode)}*/}
-                        {/*            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"*/}
-                        {/*            aria-label="Toggle dark mode"*/}
-                        {/*        >*/}
-                        {/*            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}*/}
-                        {/*        </button>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
                         <section className="section-card">
+                            <header className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Enrolled Subjects</h2>
+                                <button
+                                    onClick={() => setIsAdding(!isAdding)}
+                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"
+                                >
+                                    {isAdding ? 'Cancel' : 'Add new subject'}
+                                </button>
+                            </header>
                             <MessageBanner message={message.text} type={message.type} />
                             {isAdding && (
                                 <SubjectForm

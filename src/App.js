@@ -71,6 +71,7 @@ function ProtectedRoute({ children }) {
                 const { data } = await response.json();
                 console.log('User Data:', data);
                 setUser({
+                    id: data.userId,
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
                     email: data.email || '',
