@@ -49,7 +49,8 @@ const Login = ({ setIsAuthenticated }) => {
             alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
-            navigate('/dashboard'); // Navigate to dashboard
+            //navigate('/dashboard');
+            navigate('/admin-Dashboard');
         } catch (error) {
             console.error('Fetch error:', error);
             setError(error.message || 'An error occurred during login. Please try again.');
