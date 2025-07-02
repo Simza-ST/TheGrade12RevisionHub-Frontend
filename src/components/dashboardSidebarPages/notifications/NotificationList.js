@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 
 const NotificationList = ({ filteredNotifications, markAsRead, deleteNotification }) => {
+    console.log('Rendered Notifications:', filteredNotifications);
     const formatDate = (dateString) => {
         if (!dateString || typeof dateString !== 'string') {
             return 'Unknown Date';
@@ -19,10 +20,15 @@ const NotificationList = ({ filteredNotifications, markAsRead, deleteNotificatio
         });
     };
 
+    // Sort notifications by createdAt in descending order (newest first)
+    const sortedNotifications = [...filteredNotifications].sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
     return (
         <ul className="space-y-2">
-            {filteredNotifications.length > 0 ? (
-                filteredNotifications.map((notification) => (
+            {sortedNotifications.length > 0 ? (
+                sortedNotifications.map((notification) => (
                     <li
                         key={notification.id}
                         className={`p-2 rounded flex flex-col notification ${notification.read ? 'read' : ''}`}

@@ -10,6 +10,7 @@ import NotificationControls from './NotificationControls';
 import NotificationStats from './NotificationStats';
 import NotificationList from './NotificationList';
 
+
 const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     // Sync isCollapsed with showSidebar on mobile
     useEffect(() => {
         if (window.innerWidth <= 639) {
-            setIsCollapsed(!showSidebar); // Expand (false) when sidebar is shown, collapse not needed since it hides
+            setIsCollapsed(!showSidebar);
         }
     }, [showSidebar, setIsCollapsed]);
 
@@ -35,7 +36,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         const fetchUserDetails = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = window.localStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
                 const response = await fetch('http://localhost:6262/api/users/me', {
                     headers: {
@@ -64,64 +65,75 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         fetchUserDetails();
     }, [navigate]);
 
-    // WebSocket setup
+// WebSocket setup
     useEffect(() => {
-        const socket = new SockJS('http://localhost:6262/ws');
-        const stompClient = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            heartbeatIncoming: 4000,
-            heartbeatOutgoing: 4000,
-            connectHeaders: {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-            },
-            onConnect: () => {
-                console.log('Connected to WebSocket');
-                stompClient.subscribe(`/topic/notifications`, (message) => {
-                    const data = JSON.parse(message.body);
-                    if (data.message && data.type === 'INFO') {
-                        if (data.message === 'All notifications cleared') {
-                            setNotifications([]);
-                        } else if (data.message === 'Notification deleted') {
-                            setNotifications((prev) => prev.filter((n) => n.id !== data.id));
-                        }
-                    } else {
-                        setNotifications((prev) => {
-                            const exists = prev.find((n) => n.id === data.id);
-                            if (exists) {
-                                return prev.map((n) =>
-                                    n.id === data.id ? { ...n, ...data, read: data.isRead !== undefined ? data.isRead : n.read } : n
+        let stompClient = null;
+        const connect = () => {
+            const socket = new SockJS('http://localhost:6262/ws');
+            stompClient = new Client({
+                webSocketFactory: () => socket,
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
+                connectHeaders: {
+                    Authorization: `Bearer ${window.localStorage.getItem('jwt')}`,
+                },
+                onConnect: () => {
+                    console.log('Connected to WebSocket');
+                    if (user) {
+                        stompClient.subscribe(`/topic/notifications/${user.id}`, (message) => {
+                            const data = JSON.parse(message.body);
+                            console.log('WebSocket message:', data);
+                            if (data.message && data.type === 'INFO') {
+                                if (data.message === 'All notifications cleared') {
+                                    setNotifications([]);
+                                } else if (data.message === 'Notification deleted') {
+                                    setNotifications((prev) => prev.filter((n) => n.id !== Number(data.id)));
+                                } else if (data.message === 'All notifications marked as read') {
+                                    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                                }
+                            } else if (data.id && data.isRead !== undefined) {
+                                setNotifications((prev) =>
+                                    prev.map((n) => (n.id === Number(data.id) ? { ...n, read: data.isRead } : n))
                                 );
+                            } else if (data.id) {
+                                setNotifications((prev) => {
+                                    const exists = prev.find((n) => n.id === Number(data.id));
+                                    if (exists) {
+                                        return prev.map((n) =>
+                                            n.id === Number(data.id) ? { ...n, ...data, read: data.isRead || n.read } : n
+                                        );
+                                    }
+                                    return [...prev, { ...data, type: data.type?.toLowerCase() || 'info', read: data.isRead || false }];
+                                });
                             }
-                            return [
-                                ...prev,
-                                { ...data, type: data.type?.toLowerCase() || 'info', read: data.isRead || false },
-                            ];
                         });
                     }
-                });
-            },
-            onStompError: (frame) => {
-                console.error('WebSocket error:', frame);
-                setError('WebSocket connection failed');
-            },
-        });
-
-        stompClient.activate();
+                },
+                onStompError: (frame) => {
+                    console.error('WebSocket error:', frame);
+                    setError('WebSocket connection failed');
+                    setTimeout(connect, 5000);
+                },
+            });
+            stompClient.activate();
+        };
+        connect();
         return () => {
-            stompClient.deactivate();
+            if (stompClient) stompClient.deactivate();
             console.log('Disconnected from WebSocket');
         };
-    }, [setNotifications]);
+    }, [setNotifications, user]);
 
-    // Fetch initial notifications
+// Fetch initial notifications
     useEffect(() => {
+        window.localStorage.removeItem('notifications'); // Clear stale data on mount
         const fetchNotifications = async () => {
             if (!user) return;
             setLoading(true);
             setError(null);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = window.localStorage.getItem('jwt');
                 const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -132,12 +144,24 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
                 }
                 const data = await response.json();
+                console.log('FULL API Response:', data);
                 console.log('Fetched Notifications:', data);
-                const normalizedData = data.map((notification) => ({
-                    ...notification,
-                    type: notification.type?.toLowerCase() || 'info',
-                    read: notification.isRead || false,
-                }));
+                const savedNotifications = window.localStorage.getItem('notifications')
+                    ? JSON.parse(window.localStorage.getItem('notifications'))
+                    : [];
+                console.log("Saved notifications from localstorage:", savedNotifications);
+                const normalizedData = data.map((notification) => {
+                    const saved = savedNotifications.find((n) => n.id === notification.id);
+                    const readValue = notification.hasOwnProperty('read') ? notification.read : (saved?.read || false); // Check 'read' instead of 'isRead'
+                    console.log(`Normalizing ID ${notification.id}: saved.read=${saved?.read}, api.read=${notification.read}, result.read=${readValue}`);
+                    return {
+                        id: notification.id,
+                        message: notification.message,
+                        createdAt: notification.createdAt,
+                        read: readValue,
+                        type: notification.type?.toLowerCase() || 'info',
+                    };
+                });
                 setNotifications(normalizedData);
             } catch (error) {
                 setError(`Error fetching notifications: ${error.message}`);
@@ -147,16 +171,23 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             }
         };
         fetchNotifications();
-    }, [user, setNotifications]);
+    }, [user]);
+
+    useEffect(() => {
+        if (notifications.length > 0 && notifications.every(n => n.id && n.read !== undefined)) {
+            window.localStorage.setItem('notifications', JSON.stringify(notifications));
+            console.log('Saved to localStorage:', notifications);
+        }
+    }, [notifications]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        window.localStorage.removeItem('jwt');
         navigate('/login');
     };
 
     const markAsRead = async (id) => {
         try {
-            const token = localStorage.getItem('jwt');
+            const token = window.localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: {
@@ -165,18 +196,41 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 },
             });
             if (!response.ok) {
-                throw new Error('Failed to mark notification as read');
+                throw new Error(`Failed to mark notification as read: ${response.status} ${await response.text()}`);
             }
             setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: true } : n)));
         } catch (error) {
             setError('Error marking notification as read');
             console.error('Error marking notification as read:', error);
+            try {
+                const token = window.localStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const normalizedData = data.map((notification) => ({
+                        id: notification.id,
+                        message: notification.message,
+                        createdAt: notification.createdAt,
+                        read: notification.read || false, // Use 'read' to match API
+                        type: notification.type?.toLowerCase() || 'info',
+                    }));
+                    setNotifications(normalizedData);
+                }
+            } catch (fetchError) {
+                setError('Error refetching notifications');
+                console.error('Refetch error:', fetchError);
+            }
         }
     };
 
     const markAllAsRead = async () => {
         try {
-            const token = localStorage.getItem('jwt');
+            const token = window.localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/notifications/read/all/${user.id}`, {
                 method: 'PUT',
                 headers: {
@@ -185,18 +239,41 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 },
             });
             if (!response.ok) {
-                throw new Error('Failed to mark all notifications as read');
+                throw new Error(`Failed to mark all notifications as read: ${response.status} ${await response.text()}`);
             }
             setNotifications(notifications.map((n) => ({ ...n, read: true })));
         } catch (error) {
             setError('Error marking all notifications as read');
             console.error('Error marking all notifications as read:', error);
+            try {
+                const token = window.localStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const normalizedData = data.map((notification) => ({
+                        id: notification.id,
+                        message: notification.message,
+                        createdAt: notification.createdAt,
+                        read: notification.read || false, // Use 'read' to match API
+                        type: notification.type?.toLowerCase() || 'info',
+                    }));
+                    setNotifications(normalizedData);
+                }
+            } catch (fetchError) {
+                setError('Error refetching notifications');
+                console.error('Refetch error:', fetchError);
+            }
         }
     };
 
     const deleteNotification = async (id) => {
         try {
-            const token = localStorage.getItem('jwt');
+            const token = window.localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/notifications/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -215,9 +292,9 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     };
 
     const deleteAllNotifications = async () => {
-        if (!window.confirm('Are you sure you want to delete all notifications?')) return;
+
         try {
-            const token = localStorage.getItem('jwt');
+            const token = window.localStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/notifications/all/${user.id}`, {
                 method: 'DELETE',
                 headers: {
@@ -238,13 +315,14 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const totalNotifications = notifications.length;
     const unreadNotifications = notifications.filter((n) => !n.read).length;
     const readNotifications = notifications.filter((n) => n.read).length;
+
     const filteredNotifications = filterType === 'all'
         ? notifications
         : filterType === 'read'
             ? notifications.filter((n) => n.read)
             : filterType === 'unread'
                 ? notifications.filter((n) => !n.read)
-                : notifications.filter((n) => n.type.toLowerCase() === filterType);
+                : notifications.filter((n) => n.type === filterType);
 
     if (loading || !user) {
         return (
@@ -547,7 +625,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         }
                         .notification-header-actions {
                             flex-wrap: nowrap;
-                            gap: 10px;
+                            gap: 8px;
                         }
                         .notification-header-actions > * {
                             padding: 1px 4px;
@@ -573,12 +651,11 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                             display: block;
                         }
                         .notification-header-actions {
-                            gap: 16px;
+                            gap: 20px;
                         }
                         .notification-header-actions > * {
                             padding: 4px 16px;
                             height: 2.5rem;
-                            
                         }
                         h1 {
                             font-size: 1.875rem !important;
@@ -602,7 +679,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 `}</style>
                 <button className="hamburger" onClick={() => {
                     setShowSidebar(!showSidebar);
-                    if (!showSidebar) setIsCollapsed(false); // Expand to show icons and names when shown
+                    if (!showSidebar) setIsCollapsed(false);
                 }}>
                     <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>

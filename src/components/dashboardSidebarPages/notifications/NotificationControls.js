@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { FiChevronDown } from 'react-icons/fi';
 import { useState, useEffect, useRef } from 'react';
+import ConfirmationModal from '../chatroom/ConfirmationModal';
 
 const NotificationControls = ({ filterType, setFilterType, markAllAsRead, deleteAllNotifications, unreadNotifications, totalNotifications }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -37,6 +38,22 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
             document.removeEventListener('click', handleClickOutside);
         };
     }, [isDropdownOpen]);
+
+    // State for modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleDeleteAllClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmDeleteAll = () => {
+        deleteAllNotifications();
+        setIsModalOpen(false);
+    };
+
+    const handleCancelDeleteAll = () => {
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="flex justify-between items-center mb-4 gap-2">
@@ -206,7 +223,7 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                     Mark All
                 </button>
                 <button
-                    onClick={deleteAllNotifications}
+                    onClick={handleDeleteAllClick}
                     className="custom-btn delete-btn min-w-[60px] whitespace-nowrap"
                     disabled={totalNotifications === 0}
                     aria-label="Delete all notifications"
@@ -214,6 +231,13 @@ const NotificationControls = ({ filterType, setFilterType, markAllAsRead, delete
                     Delete All
                 </button>
             </div>
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                onClose={handleCancelDeleteAll}
+                onConfirm={handleConfirmDeleteAll}
+                title="Confirm Delete All"
+                message="Are you sure you want to delete all notifications? This action cannot be undone."
+            />
         </div>
     );
 };
