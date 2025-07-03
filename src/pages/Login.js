@@ -50,7 +50,13 @@ const Login = ({ setIsAuthenticated }) => {
             form.reset();
             setError('');
             //navigate('/dashboard');
-            navigate('/admin-Dashboard');
+            //navigate('/admin-Dashboard');
+            if (email === "boitumelomatome2@gmail.com") {
+                navigate('/admin-Dashboard');
+            }
+            else {
+                navigate('/dashboard');
+            }
         } catch (error) {
             console.error('Fetch error:', error);
             setError(error.message || 'An error occurred during login. Please try again.');
