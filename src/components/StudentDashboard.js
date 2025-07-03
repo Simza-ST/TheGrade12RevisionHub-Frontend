@@ -203,7 +203,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                         isCollapsed={isCollapsed}
                         darkMode={darkMode}
                         setDarkMode={setDarkMode}
-                        tabDescription="StudentDashboard"
+                        tabDescription="Student Dashboard"
                         userMessage="Welcome"
                     />
                 <div
