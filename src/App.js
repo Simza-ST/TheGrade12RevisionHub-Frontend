@@ -81,6 +81,7 @@ function ProtectedRoute({ children }) {
                     id: data.userId,
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
+                    phoneNumber: data.phoneNumber || '',
                     email: data.email || '',
                     title: data.title || 'Grade 12 Learner',
                     profilePicture: data.profilePicture || null,

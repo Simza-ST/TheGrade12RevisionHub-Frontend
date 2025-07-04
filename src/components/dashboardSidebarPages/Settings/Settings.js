@@ -5,6 +5,7 @@ import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import ConfirmationModal from './ConfirmationModal';
 import { PencilIcon, TrashIcon, PlusIcon, InformationCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import ProfileTab from "./ProfileTab";
 
 const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
@@ -12,25 +13,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    const [profile, setProfile] = useState({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        email: user?.email || '',
-        phoneNumber: user?.phoneNumber || '',
-        idNumber: user?.idNumber || '',
-        profilePicture: user?.profilePicture || null,
-        createdAt: user?.createdAt || '',
-        title: user?.title || '',
-    });
-    const [editProfile, setEditProfile] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        idNumber: '',
-        profilePicture: null,
-    });
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [password, setPassword] = useState({
         currentPassword: '',
         newPassword: '',
@@ -59,6 +41,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const fileInputRef = useRef(null);
 
     useEffect(() => {
+        // Apply theme to document
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
         document.documentElement.style.fontSize = settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : '16px';
 
@@ -66,41 +49,18 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             setLoading(true);
             try {
                 const token = localStorage.getItem('jwt');
-                console.log('Fetching user data with token:', token);
-                if (!token) {
-                    console.error('No JWT token found, redirecting to login');
-                    setError('Please log in to continue');
-                    navigate('/login');
-                    return;
-                }
+                if (!token) throw new Error('No JWT token found');
 
-                const userResponse = await fetch('http://localhost:6262/api/users/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                console.log('User Response:', { status: userResponse.status, headers: [...userResponse.headers] });
-                if (!userResponse.ok) {
-                    const errorText = await userResponse.text();
-                    throw new Error(`Failed to fetch user data: ${errorText || userResponse.statusText}`);
-                }
-                const userData = await userResponse.json();
-                console.log('User Data:', userData);
 
+                // Fetch settings
                 const settingsResponse = await fetch('http://localhost:6262/api/users/settings', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Authorization': `Bearer ${token}` },
                 });
                 let userSettings = {};
                 if (settingsResponse.ok) {
                     userSettings = await settingsResponse.json();
                 } else {
-                    console.warn('Settings fetch failed, using defaults:', await settingsResponse.text());
+                    console.warn(`Settings fetch failed: ${await settingsResponse.text()}`);
                     userSettings = {
                         emailNotifications: true,
                         pushNotifications: false,
@@ -115,42 +75,21 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     };
                 }
 
+                // Fetch sessions (optional)
                 let sessionsData = [];
                 try {
                     const sessionsResponse = await fetch('http://localhost:6262/api/users/sessions', {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (sessionsResponse.ok) {
                         sessionsData = await sessionsResponse.json();
                     } else {
-                        console.warn('Sessions fetch failed:', await sessionsResponse.text());
+                        console.warn(`Sessions fetch failed: ${await settingsResponse.text()}`);
                     }
                 } catch (err) {
-                    console.warn('Sessions endpoint unavailable:', err.message);
+                    console.warn(`Sessions endpoint unavailable: ${err.message}`);
                 }
 
-                setProfile({
-                    firstName: userData.firstName || '',
-                    lastName: userData.lastName || '',
-                    email: userData.email || '',
-                    phoneNumber: userData.phoneNumber || '',
-                    idNumber: userData.idNumber || '',
-                    profilePicture: userData.profilePicture || null,
-                    createdAt: userData.createdAt || new Date().toISOString(),
-                    title: userData.title || 'User',
-                });
-                setEditProfile({
-                    firstName: userData.firstName || '',
-                    lastName: userData.lastName || '',
-                    email: userData.email || '',
-                    phoneNumber: userData.phoneNumber || '',
-                    idNumber: userData.idNumber || '',
-                    profilePicture: userData.profilePicture || null,
-                });
                 setSettings({
                     emailNotifications: userSettings.emailNotifications ?? true,
                     pushNotifications: userSettings.pushNotifications ?? false,
@@ -162,42 +101,22 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     profileVisibility: userSettings.profileVisibility || 'public',
                     dataSharing: userSettings.dataSharing ?? false,
                 });
-                setTwoFactor({ enabled: userData.twoFactorEnabled || false, qrCode: null, code: '' });
+                setTwoFactor({ ...twoFactor || false });
                 setSessions(sessionsData.map(s => ({
                     id: s.id,
                     device: s.device || 'Unknown Device',
                     lastActive: s.lastActive || new Date().toISOString(),
                 })));
                 setDarkMode(userSettings.theme === 'dark');
-                setUser({
-                    ...user,
-                    firstName: userData.firstName,
-                    lastName: userData.lastName,
-                    email: userData.email,
-                    phoneNumber: userData.phoneNumber,
-                    idNumber: userData.idNumber,
-                    profilePicture: userData.profilePicture,
-                    createdAt: userData.createdAt,
-                    title: userData.title,
-                });
             } catch (err) {
-                console.error('Fetch User Data Error:', err);
                 setError(`Failed to load settings: ${err.message}`);
             } finally {
                 setLoading(false);
             }
         };
         fetchUserData();
-    }, [navigate, darkMode, setDarkMode, setUser]);
+    }, [darkMode, setDarkMode]);
 
-    const validateProfile = () => {
-        if (!editProfile.firstName.trim()) return 'First name is required';
-        if (!editProfile.lastName.trim()) return 'Last name is required';
-        if (!editProfile.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'Invalid email address';
-        if (editProfile.phoneNumber && !/^\+?[\d\s-]{7,}$/.test(editProfile.phoneNumber)) return 'Invalid phone number';
-        if (editProfile.idNumber && !/^[A-Za-z0-9-]{5,}$/.test(editProfile.idNumber)) return 'Invalid ID number';
-        return null;
-    };
 
     const validatePassword = () => {
         if (!password.currentPassword) return 'Current password is required';
@@ -205,11 +124,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             return 'New password must be 8+ characters with uppercase and numbers';
         if (password.newPassword !== password.confirmPassword) return 'Passwords do not match';
         return null;
-    };
-
-    const handleProfileChange = (e) => {
-        const { name, value } = e.target;
-        setEditProfile((prev) => ({ ...prev, [name]: value }));
     };
 
     const handlePasswordChange = (e) => {
@@ -228,120 +142,19 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         }
     };
 
-    const handleProfilePictureChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/') && file.size < 5 * 1024 * 1024) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setEditProfile((prev) => ({ ...prev, profilePicture: reader.result }));
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setError('Please select a valid image under 5MB');
-        }
-    };
-
-    const handleOpenEditModal = () => {
-        setEditProfile({ ...profile });
-        setIsEditModalOpen(true);
-    };
-
-    const handleSaveProfile = async () => {
-        const validationError = validateProfile();
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('jwt');
-            console.log('Saving profile with token:', token);
-            console.log('Profile payload:', editProfile);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
-            const response = await fetch('http://localhost:6262/api/users/save-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    firstName: editProfile.firstName,
-                    lastName: editProfile.lastName,
-                    email: editProfile.email,
-                    phoneNumber: editProfile.phoneNumber || null,
-                    idNumber: editProfile.idNumber || null,
-                    profilePicture: editProfile.profilePicture || null,
-                }),
-            });
-            console.log('Save Profile Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to save profile: ${errorData || 'Unknown error'}`);
-            }
-            const updatedUser = await response.json();
-            setProfile({
-                firstName: updatedUser.firstName || editProfile.firstName,
-                lastName: updatedUser.lastName || editProfile.lastName,
-                email: updatedUser.email || editProfile.email,
-                phoneNumber: updatedUser.phoneNumber || editProfile.phoneNumber,
-                idNumber: updatedUser.idNumber || editProfile.idNumber,
-                profilePicture: updatedUser.profilePicture || editProfile.profilePicture,
-                createdAt: profile.createdAt,
-                title: profile.title,
-            });
-            setUser({
-                ...user,
-                firstName: updatedUser.firstName || editProfile.firstName,
-                lastName: updatedUser.lastName || editProfile.lastName,
-                email: updatedUser.email || editProfile.email,
-                phoneNumber: updatedUser.phoneNumber || editProfile.phoneNumber,
-                idNumber: updatedUser.idNumber || editProfile.idNumber,
-                profilePicture: updatedUser.profilePicture || editProfile.profilePicture,
-                createdAt: profile.createdAt,
-                title: profile.title,
-            });
-            setSuccess('Profile saved successfully');
-            setError(null);
-            setIsEditModalOpen(false);
-        } catch (err) {
-            console.error('Save Profile Error:', err);
-            setError(`Failed to save profile: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleSaveSettings = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Saving settings with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch('http://localhost:6262/api/users/settings', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ ...settings, theme: darkMode ? 'dark' : 'light' }),
             });
-            console.log('Save Settings Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to save settings: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             setSuccess('Settings saved successfully');
             setError(null);
         } catch (err) {
-            console.error('Save Settings Error:', err);
             setError(`Failed to save settings: ${err.message}`);
         } finally {
             setLoading(false);
@@ -350,46 +163,23 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
 
     const handleChangePassword = async () => {
         const validationError = validatePassword();
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
+        if (validationError) return setError(validationError);
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Changing password with token:', token);
-            console.log('Password payload:', {
-                currentPassword: password.currentPassword,
-                newPassword: password.newPassword,
-            });
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch('http://localhost:6262/api/users/change-password', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     currentPassword: password.currentPassword,
                     newPassword: password.newPassword,
                 }),
             });
-            console.log('Change Password Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to change password: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             setSuccess('Password changed successfully');
             setError(null);
             setPassword({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            localStorage.removeItem('jwt');
-            navigate('/login');
         } catch (err) {
-            console.error('Change Password Error:', err);
             setError(`Failed to change password: ${err.message}`);
         } finally {
             setLoading(false);
@@ -400,30 +190,16 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Setting up 2FA with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch('http://localhost:6262/api/users/2fa/setup', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-            console.log('2FA Setup Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to setup 2FA: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             const { qrCode } = await response.json();
             setTwoFactor({ ...twoFactor, qrCode });
             setSuccess('Scan the QR code with your authenticator app');
             setError(null);
         } catch (err) {
-            console.error('2FA Setup Error:', err);
             setError(`Failed to setup 2FA: ${err.message}`);
         } finally {
             setLoading(false);
@@ -431,39 +207,20 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     };
 
     const handleVerify2FA = async () => {
-        if (!twoFactor.code.match(/^\d{6}$/)) {
-            setError('Enter a valid 6-digit code');
-            return;
-        }
+        if (!twoFactor.code.match(/^\d{6}$/)) return setError('Enter a valid 6-digit code');
         setLoading(true);
         try {
-            const
-
-                token = localStorage.getItem('jwt');
-            console.log('Verifying 2FA with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
+            const token = localStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/2fa/verify', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ code: twoFactor.code }),
             });
-            console.log('2FA Verify Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to verify 2FA: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             setTwoFactor({ enabled: true, qrCode: null, code: '' });
             setSuccess('2FA enabled successfully');
             setError(null);
         } catch (err) {
-            console.error('2FA Verify Error:', err);
             setError(`Failed to verify 2FA: ${err.message}`);
         } finally {
             setLoading(false);
@@ -474,29 +231,15 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Revoking session with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch(`http://localhost:6262/api/users/sessions/${sessionToRevoke}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-            console.log('Revoke Session Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to revoke session: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             setSessions(sessions.filter(s => s.id !== sessionToRevoke));
             setSuccess('Session revoked successfully');
             setError(null);
         } catch (err) {
-            console.error('Revoke Session Error:', err);
             setError(`Failed to revoke session: ${err.message}`);
         } finally {
             setLoading(false);
@@ -515,28 +258,14 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Deleting account with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch('http://localhost:6262/api/users/me', {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-            console.log('Delete Account Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to delete account: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             localStorage.removeItem('jwt');
             navigate('/login');
         } catch (err) {
-            console.error('Delete Account Error:', err);
             setError(`Failed to delete account: ${err.message}`);
         } finally {
             setLoading(false);
@@ -548,24 +277,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         setLoading(true);
         try {
             const token = localStorage.getItem('jwt');
-            console.log('Exporting data with token:', token);
-            if (!token) {
-                setError('Please log in to continue');
-                navigate('/login');
-                return;
-            }
             const response = await fetch('http://localhost:6262/api/users/data/export', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-            console.log('Data Export Response:', { status: response.status, headers: [...response.headers] });
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Failed to export data: ${errorData || 'Unknown error'}`);
-            }
+            if (!response.ok) throw new Error(await response.text());
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -576,7 +291,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             setSuccess('Data export initiated');
             setError(null);
         } catch (err) {
-            console.error('Data Export Error:', err);
             setError(`Failed to export data: ${err.message}`);
         } finally {
             setLoading(false);
@@ -584,12 +298,11 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     };
 
     const handleLogout = () => {
-        console.log('Logging out, removing token');
         localStorage.removeItem('jwt');
         navigate('/login');
     };
 
-    if (loading && !profile.firstName && !profile.lastName) {
+    if (loading) {
         return (
             <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
@@ -678,9 +391,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                         }
                         .shadow-xl {
                             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-                        }
-                        .shadow-md {
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                         }
                         .text-2xl {
                             font-size: 1.5rem;
@@ -809,34 +519,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                             transition: opacity 0.2s ease;
                             margin-bottom: 8px;
                         }
-                        .modal {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: rgba(0, 0, 0, 0.5);
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 1000;
-                        }
-                        .modal-content {
-                            background: var(--bg-secondary);
-                            padding: 24px;
-                            border-radius: 12px;
-                            width: 100%;
-                            max-width: 500px;
-                            position: relative;
-                        }
-                        .modal-close {
-                            position: absolute;
-                            top: 16px;
-                            right: 16px;
-                            cursor: pointer;
-                            color: var(--text-secondary);
-                            font-size: 1.25rem;
-                        }
                         .ml-16 {
                             margin-left: 64px;
                         }
@@ -911,215 +593,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                             </div>
 
                             {activeTab === 'profile' && (
-                                <div className="space-y-6">
-                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Profile Information</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                First Name
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.firstName || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Last Name
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.lastName || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Email Address
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.email || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Phone Number
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.phoneNumber || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                ID Number
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.idNumber || 'N/A'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Role
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">{profile.title || 'User'}</p>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Account Created
-                                            </label>
-                                            <p className="text-base text-[var(--text-primary)]">
-                                                {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Profile Photo
-                                        </label>
-                                        {profile.profilePicture ? (
-                                            <img
-                                                src={profile.profilePicture}
-                                                alt="Profile Photo"
-                                                className="w-20 h-20 rounded-full object-cover border border-[var(--border)]"
-                                            />
-                                        ) : (
-                                            <p className="text-base text-[var(--text-primary)]">No photo uploaded</p>
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={handleOpenEditModal}
-                                        className="btn-primary flex items-center gap-2"
-                                        aria-label="Edit Profile"
-                                        disabled={loading}
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                        Edit Profile
-                                    </button>
-                                </div>
-                            )}
-
-                            {isEditModalOpen && (
-                                <div className="modal">
-                                    <div className="modal-content">
-                                        <span
-                                            className="modal-close"
-                                            onClick={() => setIsEditModalOpen(false)}
-                                            aria-label="Close Modal"
-                                        >
-                                            &times;
-                                        </span>
-                                        <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Edit Profile</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    First Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="firstName"
-                                                    value={editProfile.firstName}
-                                                    onChange={handleProfileChange}
-                                                    className="form-input"
-                                                    placeholder="Enter first name"
-                                                    aria-label="First Name"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    Last Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="lastName"
-                                                    value={editProfile.lastName}
-                                                    onChange={handleProfileChange}
-                                                    className="form-input"
-                                                    placeholder="Enter last name"
-                                                    aria-label="Last Name"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    Email Address
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    name="email"
-                                                    value={editProfile.email}
-                                                    onChange={handleProfileChange}
-                                                    className="form-input"
-                                                    placeholder="Enter email"
-                                                    aria-label="Email Address"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    Phone Number
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="phoneNumber"
-                                                    value={editProfile.phoneNumber}
-                                                    onChange={handleProfileChange}
-                                                    className="form-input"
-                                                    placeholder="Enter phone number"
-                                                    aria-label="Phone Number"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    ID Number
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="idNumber"
-                                                    value={editProfile.idNumber}
-                                                    onChange={handleProfileChange}
-                                                    className="form-input"
-                                                    placeholder="Enter ID number"
-                                                    aria-label="ID Number"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="mt-4">
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Profile Photo
-                                            </label>
-                                            <div className="flex items-center gap-6">
-                                                {editProfile.profilePicture && (
-                                                    <img
-                                                        src={editProfile.profilePicture}
-                                                        alt="Profile Photo Preview"
-                                                        className="w-20 h-20 rounded-full object-cover border border-[var(--border)]"
-                                                    />
-                                                )}
-                                                <div className="flex flex-col gap-3">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        ref={fileInputRef}
-                                                        onChange={handleProfilePictureChange}
-                                                        className="hidden"
-                                                        aria-label="Upload Profile Photo"
-                                                    />
-                                                    <button
-                                                        onClick={() => fileInputRef.current.click()}
-                                                        className="btn-secondary flex items-center gap-2"
-                                                        aria-label="Upload Photo"
-                                                    >
-                                                        <PlusIcon className="w-4 h-4" />
-                                                        Upload Photo
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="mt-6 flex gap-4">
-                                            <button
-                                                onClick={handleSaveProfile}
-                                                className="btn-primary flex items-center gap-2"
-                                                aria-label="Save Profile"
-                                                disabled={loading}
-                                            >
-                                                <PencilIcon className="w-4 h-4" />
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={() => setIsEditModalOpen(false)}
-                                                className="btn-secondary flex items-center gap-2"
-                                                aria-label="Cancel"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ProfileTab
+                                    setUser={setUser}
+                                    user={user}
+                                />
                             )}
 
                             {activeTab === 'security' && (
@@ -1170,17 +647,15 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                 />
                                             </div>
                                         </div>
-                                        <div className="mt-4">
-                                            <button
-                                                onClick={handleChangePassword}
-                                                className="btn-primary flex items-center gap-2"
-                                                aria-label="Change Password"
-                                                disabled={loading}
-                                            >
-                                                <PencilIcon className="w-4 h-4" />
-                                                Change Password
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={handleChangePassword}
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            aria-label="Change Password"
+                                            disabled={loading}
+                                        >
+                                            <PencilIcon className="w-4 h-4" />
+                                            Change Password
+                                        </button>
                                     </div>
 
                                     <div>
@@ -1198,7 +673,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                             {!twoFactor.enabled && (
                                                 <button
                                                     onClick={handleSetup2FA}
-                                                    className="btn-primary flex items-center gap-2"
+                                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                                     aria-label="Enable 2FA"
                                                     disabled={loading}
                                                 >
@@ -1228,7 +703,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                     />
                                                     <button
                                                         onClick={handleVerify2FA}
-                                                        className="btn-primary flex items-center gap-2"
+                                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                                         aria-label="Verify 2FA Code"
                                                         disabled={loading}
                                                     >
@@ -1259,7 +734,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                                 setSessionToRevoke(s.id);
                                                                 setIsRevokeModalOpen(true);
                                                             }}
-                                                            className="btn-danger flex items-center gap-2"
+                                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                                             aria-label={`Revoke session ${s.device}`}
                                                             disabled={loading}
                                                         >
@@ -1349,7 +824,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     <div className="flex gap-4">
                                         <button
                                             onClick={handleSaveSettings}
-                                            className="btn-primary flex items-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Save Notification Settings"
                                             disabled={loading}
                                         >
@@ -1358,7 +833,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         </button>
                                         <button
                                             onClick={handleClearNotifications}
-                                            className="btn-secondary flex items-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Clear Notifications"
                                             disabled={loading}
                                         >
@@ -1420,7 +895,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     </div>
                                     <button
                                         onClick={handleSaveSettings}
-                                        className="btn-primary flex items-center gap-2"
+                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                         aria-label="Save Appearance Settings"
                                         disabled={loading}
                                     >
@@ -1467,7 +942,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     </div>
                                     <button
                                         onClick={handleSaveSettings}
-                                        className="btn-primary flex items-center gap-2"
+                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                         aria-label="Save Privacy Settings"
                                         disabled={loading}
                                     >
@@ -1490,7 +965,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                             </p>
                                             <button
                                                 onClick={handleDataExport}
-                                                className="btn-primary flex items-center gap-2"
+                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                                 aria-label="Export Data"
                                                 disabled={loading}
                                             >
@@ -1507,7 +982,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                             </p>
                                             <button
                                                 onClick={() => setIsDeleteModalOpen(true)}
-                                                className="btn-danger flex items-center gap-2"
+                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                                 aria-label="Delete Account"
                                                 disabled={loading}
                                             >
@@ -1542,14 +1017,11 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
 
 Settings.propTypes = {
     user: PropTypes.shape({
-        firstName: PropTypes.string,
-        lastName: PropTypes.string,
+        name: PropTypes.string.isRequired,
         email: PropTypes.string,
-        phoneNumber: PropTypes.string,
-        idNumber: PropTypes.string,
+        title: PropTypes.string,
         profilePicture: PropTypes.string,
         createdAt: PropTypes.string,
-        title: PropTypes.string,
     }).isRequired,
     setUser: PropTypes.func.isRequired,
     isCollapsed: PropTypes.bool.isRequired,
