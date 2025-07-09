@@ -11,6 +11,7 @@
   --hover-secondary: #E53E3E; /* Light mode secondary hover */
   --scrollbar-track: #E2E8F0;
   --scrollbar-thumb: #2DD4BF;
+  --text-normal: #1A202C;
 }
 
 [data-theme="dark"] {
@@ -25,6 +26,7 @@
   --hover-secondary: #F56565; /* Dark mode secondary hover */
   --scrollbar-track: #2D3748;
   --scrollbar-thumb: #4FD1C5;
+  --text-normal: #E2E8F0;
 }
 
 * {

@@ -24,7 +24,7 @@ const CourseMastery = ({ courses }) => {
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-            <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Course Mastery</h2>
+            <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)] text-center">Course Mastery</h2>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                 <input
                     type="text"

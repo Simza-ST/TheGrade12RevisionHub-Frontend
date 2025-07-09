@@ -27,8 +27,8 @@ const MotivationalQuote = () => {
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-            <p className="text-lg font-semibold">"{quotes[currentQuoteIndex].text}"</p>
-            <p className="text-sm mt-2">— {quotes[currentQuoteIndex].author}</p>
+            <p className="text-lg font-semibold text-[var(--text-normal)]">"{quotes[currentQuoteIndex].text}"</p>
+            <p className="text-sm mt-2 text-[var(--text-normal)]">— {quotes[currentQuoteIndex].author}</p>
         </div>
     );
 };
