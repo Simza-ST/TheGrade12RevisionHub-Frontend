@@ -26,7 +26,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const pageSize = 20;
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -59,7 +59,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
 
     const fetchData = useCallback(async (url, params = {}) => {
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             console.log('JWT token:', token ? 'Present' : 'Missing');
             if (!token) {
                 throw new Error('No authentication token found. Please log in.');
@@ -72,7 +72,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
             const fullUrl = query ? `${url}?${query}` : url;
             const response = await fetch(fullUrl, { headers });
             if (response.status === 401) {
-                localStorage.removeItem('jwt');
+                sessionStorage.removeItem('jwt');
                 setMessage({ text: 'Session expired. Please log in again.', type: 'error' });
                 navigate('/login');
                 return null;
@@ -170,7 +170,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
         const loadData = async () => {
             console.log('User prop:', user);
             let userId;
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (user && user.id && !isNaN(Number(user.id))) {
                 userId = Number(user.id);
             } else if (token) {
@@ -326,7 +326,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
     ]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 const Login = ({ setIsAuthenticated }) => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -26,7 +26,7 @@ const Login = ({ setIsAuthenticated }) => {
         // }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/login`, {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,13 +37,13 @@ const Login = ({ setIsAuthenticated }) => {
                 }),
             });
 
-            const { token, message } = await response.json();
+            const { token, message, role} = await response.json();
 
             if (!response.ok) {
                 throw new Error(message || `HTTP error! Status: ${response.status}`);
             }
 
-            localStorage.setItem('jwt', token);
+            sessionStorage.setItem('jwt', token);
             setIsAuthenticated(true); // Update authentication state
             console.log('Success:', message);
             alert('Login successful! Welcome back to Revision App.');
@@ -51,7 +51,7 @@ const Login = ({ setIsAuthenticated }) => {
             setError('');
             //navigate('/dashboard');
             //navigate('/admin-Dashboard');
-            if (email === "boitumelomatome2@gmail.com") {
+            if (role.toString().toUpperCase() === "ADMIN") {
                 navigate('/admin-Dashboard');
             }
             else {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 // Topbar Component
 const Topbar = () => {
@@ -44,7 +44,7 @@ const QuizViewer = () => {
     useEffect(() => {
         const fetchQuizzes = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/allQuizzes`);
+                const response = await fetch(`${API_BASE_URL}/allQuizzes`);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch quizzes: ${response.statusText}`);
                 }

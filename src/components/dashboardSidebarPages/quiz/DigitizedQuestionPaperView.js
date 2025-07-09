@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { API_BASE_URL, getAuthHeaders } from './utils/api';
+import { API_BASE_URL, getAuthHeaders } from '../../../utils/api';
 
 const DigitizedQuestionPaperView = ({ darkMode }) => {
     const { id } = useParams();
@@ -13,7 +13,7 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
         const fetchPaper = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${API_BASE_URL}/question-papers/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/user/question-papers/${id}`, {
                     headers: getAuthHeaders(),
                 });
                 const data = await response.json();
@@ -24,7 +24,7 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
                 setLoading(false);
             } catch (err) {
                 if (err.message.includes('Unauthorized') || err.message.includes('401')) {
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     navigate('/login');
                 } else {
                     setError(`Error: ${err.message}`);

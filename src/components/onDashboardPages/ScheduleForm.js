@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
 const ScheduleForm = ({ onSubmit, initialData, onCancel, darkMode }) => {
     const [formData, setFormData] = useState(
@@ -24,7 +24,7 @@ const ScheduleForm = ({ onSubmit, initialData, onCancel, darkMode }) => {
             try {
                 setSubjectsLoading(true);
                 setSubjectsError('');
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     throw new Error('No JWT token found');
                 }

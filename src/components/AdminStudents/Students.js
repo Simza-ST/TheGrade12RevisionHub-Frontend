@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './StudentsList.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 // Topbar Component
 const Topbar = () => {
@@ -43,7 +43,7 @@ const StudentsList = () => {
     // Fetch students
     const fetchStudents = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/students`);
+            const response = await fetch(`${API_BASE_URL}/students`);
             if (!response.ok) throw new Error('Failed to fetch students');
             const data = await response.json();
             setStudentList(data);
@@ -65,7 +65,7 @@ const StudentsList = () => {
 
         try {
             const encodedEmail = encodeURIComponent(studentEmail);
-            const response = await fetch(`${API_BASE_URL}/api/students/${encodedEmail}`, {
+            const response = await fetch(`${API_BASE_URL}/students/${encodedEmail}`, {
                 method: 'DELETE',
             });
 

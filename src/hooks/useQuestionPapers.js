@@ -20,7 +20,7 @@ export const useQuestionPapers = () => {
     useEffect(() => {
         const fetchSubjects = async () => {
             setLoading(true);
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 setError('Please log in to access question papers.');
                 setLoading(false);
@@ -28,7 +28,7 @@ export const useQuestionPapers = () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/enrolled-subjects`, {
+                const response = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, {
                     headers: getAuthHeaders(),
                 });
                 if (response.status === 401) {
@@ -72,7 +72,7 @@ export const useQuestionPapers = () => {
             setLoading(true);
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/question-papers?subjectName=${encodeURIComponent(selectedSubject)}`,
+                    `${API_BASE_URL}/user/question-papers?subjectName=${encodeURIComponent(selectedSubject)}`,
                     { headers: getAuthHeaders() }
                 );
                 if (response.status === 401) {
@@ -116,8 +116,8 @@ export const useQuestionPapers = () => {
     const viewPdf = async (paperId) => {
         setPdfLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/question-papers/${paperId}/view`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+            const response = await fetch(`${API_BASE_URL}/user/question-papers/${paperId}/view`, {
+                headers: { Authorization: `Bearer ${sessionStorage.getItem('jwt')}` },
             });
             if (response.status === 401) {
                 setError('Session expired. Please log in again.');
@@ -143,8 +143,8 @@ export const useQuestionPapers = () => {
     const downloadPdf = async (paperId, fileName) => {
         setPdfLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/question-papers/${paperId}/download`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+            const response = await fetch(`${API_BASE_URL}/user/question-papers/${paperId}/download`, {
+                headers: { Authorization: `Bearer ${sessionStorage.getItem('jwt')}` },
             });
             if (response.status === 401) {
                 setError('Session expired. Please log in again.');
@@ -173,13 +173,13 @@ export const useQuestionPapers = () => {
     // Reset error and optionally log out
     const resetError = () => {
         if (error && (error.includes('Session expired') || error.includes('Please log in'))) {
-            localStorage.removeItem('jwt');
+            sessionStorage.removeItem('jwt');
             navigate('/login');
             return;
         }
         setError(null);
         setLoading(true);
-        fetch(`${API_BASE_URL}/enrolled-subjects`, { headers: getAuthHeaders() })
+        fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers: getAuthHeaders() })
             .then((res) => {
                 if (res.status === 401) {
                     setError('Session expired. Please log in again.');

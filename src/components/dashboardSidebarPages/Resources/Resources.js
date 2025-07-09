@@ -46,7 +46,7 @@ const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMo
     }, [darkMode]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

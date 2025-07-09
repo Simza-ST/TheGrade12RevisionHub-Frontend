@@ -3,7 +3,7 @@ import Chart from 'chart.js/auto';
 import PropTypes from 'prop-types';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 // Mock data for fallback
 const defaultData = {
@@ -148,7 +148,7 @@ const SearchSection = ({ onSearch }) => {
                                 setError('No users found');
                             }
                         } else {
-                            const response = await fetch(`${API_BASE_URL}/api/search?email=${encodeURIComponent(email)}`, {
+                            const response = await fetch(`${API_BASE_URL}/search?email=${encodeURIComponent(email)}`, {
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
@@ -297,7 +297,7 @@ const GraphTable = ({ data, loading, error }) => {
 
 // Main AdminDashboard Component
 const AdminDashboard = ({ data: propData, onSearch }) => {
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [data, setData] = useState(propData || defaultData);
     const [loading, setLoading] = useState({
@@ -309,7 +309,7 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
 
     useEffect(() => {
         document.body.classList.toggle('dark-mode', isDarkMode);
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     useEffect(() => {
@@ -317,7 +317,7 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
             try {
                 setLoading((prev) => ({ ...prev, stats: true }));
                 // Fetch student stats
-                const statsResponse = await fetch(`${API_BASE_URL}/api/stats`, {
+                const statsResponse = await fetch(`${API_BASE_URL}/stats`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -330,7 +330,7 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
                 console.log('Stats response:', statsData);
 
                 // Fetch quiz count
-                const quizResponse = await fetch(`${API_BASE_URL}/api/quizzes/count`, {
+                const quizResponse = await fetch(`${API_BASE_URL}/quizzes/count`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },

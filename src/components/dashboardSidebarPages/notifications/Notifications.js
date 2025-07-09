@@ -36,9 +36,9 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         const fetchUserDetails = async () => {
             setLoading(true);
             try {
-                const token = window.localStorage.getItem('jwt');
+                const token = window.sessionStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
-                const response = await fetch('http://localhost:6262/api/users/me', {
+                const response = await fetch('http://localhost:6262/api/user/users/me', {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -76,7 +76,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 heartbeatIncoming: 4000,
                 heartbeatOutgoing: 4000,
                 connectHeaders: {
-                    Authorization: `Bearer ${window.localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${window.sessionStorage.getItem('jwt')}`,
                 },
                 onConnect: () => {
                     console.log('Connected to WebSocket');
@@ -127,14 +127,14 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
 // Fetch initial notifications
     useEffect(() => {
-        window.localStorage.removeItem('notifications'); // Clear stale data on mount
+        window.sessionStorage.removeItem('notifications'); // Clear stale data on mount
         const fetchNotifications = async () => {
             if (!user) return;
             setLoading(true);
             setError(null);
             try {
-                const token = window.localStorage.getItem('jwt');
-                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
+                const token = window.sessionStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/user/notifications/${user.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -146,10 +146,10 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 const data = await response.json();
                 console.log('FULL API Response:', data);
                 console.log('Fetched Notifications:', data);
-                const savedNotifications = window.localStorage.getItem('notifications')
-                    ? JSON.parse(window.localStorage.getItem('notifications'))
+                const savedNotifications = window.sessionStorage.getItem('notifications')
+                    ? JSON.parse(window.sessionStorage.getItem('notifications'))
                     : [];
-                console.log("Saved notifications from localstorage:", savedNotifications);
+                console.log("Saved notifications from sessionStorage:", savedNotifications);
                 const normalizedData = data.map((notification) => {
                     const saved = savedNotifications.find((n) => n.id === notification.id);
                     const readValue = notification.hasOwnProperty('read') ? notification.read : (saved?.read || false); // Check 'read' instead of 'isRead'
@@ -175,20 +175,20 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     useEffect(() => {
         if (notifications.length > 0 && notifications.every(n => n.id && n.read !== undefined)) {
-            window.localStorage.setItem('notifications', JSON.stringify(notifications));
-            console.log('Saved to localStorage:', notifications);
+            window.sessionStorage.setItem('notifications', JSON.stringify(notifications));
+            console.log('Saved to sessionStorage:', notifications);
         }
     }, [notifications]);
 
     const handleLogout = () => {
-        window.localStorage.removeItem('jwt');
+        window.sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 
     const markAsRead = async (id) => {
         try {
-            const token = window.localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/notifications/${id}/read`, {
+            const token = window.sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/notifications/${id}/read`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,8 +203,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             setError('Error marking notification as read');
             console.error('Error marking notification as read:', error);
             try {
-                const token = window.localStorage.getItem('jwt');
-                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
+                const token = window.sessionStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/user/notifications/${user.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -230,8 +230,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const markAllAsRead = async () => {
         try {
-            const token = window.localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/notifications/read/all/${user.id}`, {
+            const token = window.sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/notifications/read/all/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -246,8 +246,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             setError('Error marking all notifications as read');
             console.error('Error marking all notifications as read:', error);
             try {
-                const token = window.localStorage.getItem('jwt');
-                const response = await fetch(`http://localhost:6262/api/notifications/${user.id}`, {
+                const token = window.sessionStorage.getItem('jwt');
+                const response = await fetch(`http://localhost:6262/api/user/notifications/${user.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -273,8 +273,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const deleteNotification = async (id) => {
         try {
-            const token = window.localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/notifications/${id}`, {
+            const token = window.sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/notifications/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -294,8 +294,8 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const deleteAllNotifications = async () => {
 
         try {
-            const token = window.localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/notifications/all/${user.id}`, {
+            const token = window.sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/notifications/all/${user.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

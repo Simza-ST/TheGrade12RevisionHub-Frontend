@@ -34,7 +34,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
             try {
                 setLoading(true);
                 setError('');
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     throw new Error('No JWT token found');
                 }
@@ -83,7 +83,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
         try {
             setOperationLoading(true);
             setOperationError('');
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 throw new Error('No JWT token found');
             }
@@ -162,7 +162,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
         try {
             setOperationLoading(true);
             setOperationError('');
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 throw new Error('No JWT token found');
             }
@@ -202,7 +202,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
             try {
                 setLoading(true);
                 setError('');
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     throw new Error('No JWT token found');
                 }

@@ -48,7 +48,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         const fetchUserData = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
 
 
@@ -145,7 +145,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleSaveSettings = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/settings', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -166,7 +166,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         if (validationError) return setError(validationError);
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/change-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -189,7 +189,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleSetup2FA = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/2fa/setup', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -210,7 +210,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         if (!twoFactor.code.match(/^\d{6}$/)) return setError('Enter a valid 6-digit code');
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/2fa/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -230,7 +230,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleRevokeSession = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/users/sessions/${sessionToRevoke}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -257,13 +257,13 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleDeleteAccount = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/me', {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
             if (!response.ok) throw new Error(await response.text());
-            localStorage.removeItem('jwt');
+            sessionStorage.removeItem('jwt');
             navigate('/login');
         } catch (err) {
             setError(`Failed to delete account: ${err.message}`);
@@ -276,7 +276,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleDataExport = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const response = await fetch('http://localhost:6262/api/users/data/export', {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -298,7 +298,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

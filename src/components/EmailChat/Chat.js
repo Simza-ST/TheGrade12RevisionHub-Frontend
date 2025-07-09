@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
 const Chat = () => {
     const [to, setTo] = useState('');
@@ -49,7 +49,7 @@ const Chat = () => {
         const fetchStudents = async () => {
             try {
                 setLoading((prev) => ({ ...prev, students: true }));
-                const response = await fetch(`${API_BASE_URL}/api/students`, {
+                const response = await fetch(`${API_BASE_URL}/students`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -71,7 +71,7 @@ const Chat = () => {
         const fetchSubjects = async () => {
             try {
                 setLoading((prev) => ({ ...prev, subjects: true }));
-                const response = await fetch(`${API_BASE_URL}/api/subjects`, {
+                const response = await fetch(`${API_BASE_URL}/subjects`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -122,7 +122,7 @@ const Chat = () => {
 
         try {
             setLoading((prev) => ({ ...prev, submit: true }));
-            const response = await fetch(`${API_BASE_URL}/api/email/send`, {
+            const response = await fetch(`${API_BASE_URL}/email/send`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

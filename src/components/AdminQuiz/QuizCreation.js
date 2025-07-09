@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 const Topbar = () => {
     const menuItems = [
@@ -64,7 +64,7 @@ const CreateQuiz = () => {
         if (!validateForm()) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/quizzes`, {
+            const response = await fetch(`${API_BASE_URL}/quizzes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
