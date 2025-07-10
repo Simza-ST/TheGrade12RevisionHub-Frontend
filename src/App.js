@@ -27,12 +27,12 @@ import DigitizedQuestionPapers from './components/dashboardSidebarPages/quiz/Dig
 import EnglishFALP12020 from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020';
 import { API_BASE_URL, getAuthHeaders } from './utils/api';
 import AdminDashboard from "./components/AdminDashboard";
-import StudentsList from "./components/AdminStudents/Students";
-import UploadDocuments from "./components/UploadingDoc/UploadDocuments";
-import QuizCreation from "./components/AdminQuiz/QuizCreation";
-import CertificateGenerator from "./components/AdminStudents/CertificateGenerator";
-import QuizViewer from "./components/AdminQuiz/QuizViewer";
-import Chat from "./components/EmailChat/Chat";
+import StudentsList from "./components/adminDashboardSideBarPages/AdminStudents/Students";
+import UploadDocuments from "./components/adminDashboardSideBarPages/UploadingDoc/UploadDocuments";
+import QuizCreation from "./components/adminDashboardSideBarPages/AdminQuiz/QuizCreation";
+import CertificateGenerator from "./components/adminDashboardSideBarPages/AdminStudents/CertificateGenerator";
+import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizViewer";
+import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
 
 const PublicLayout = () => (
     <div>
