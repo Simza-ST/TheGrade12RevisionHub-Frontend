@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Chart from 'chart.js/auto';
 import PropTypes from 'prop-types';
+import AdminSidebar from './common/AdminSidebar';
+import AdminHeader from './common/AdminHeader';
 
 // API Base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
@@ -8,119 +10,42 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 // Mock data for fallback
 const defaultData = {
     studentCount: 200,
-    quizCount: 50, // Mock quiz count
+    quizCount: 50,
 };
 
-// Sidebar Component
-const Sidebar = ({ isOpen, toggleSidebar }) => {
-    const navItems = [
-        // { icon: 'bx-home', text: 'Home🏡', href: '#' },
-        // { icon: 'bx-task', text: 'List of students👨‍🎓', href: '/Students' },
-        // { icon: 'bx-file', text: 'Upload Documents📚', href: '/upload-documents' },
-        // { icon: 'bx-plus', text: 'Create Quiz📑', href: '/quiz-creation' },
-        // { icon: 'bx-plus', text: 'Create Certificate📜', href: '/cert-creation' },
-        // { icon: 'bx-mail-send', text: 'Send Email📩', href: '/chat' },
-        // { icon: 'bx-log-out', text: 'Logout', href: '/login' },
-    ];
-
-    return (
-        <nav
-            className={`sidebar fixed top-0 left-0 h-full w-64 p-5 pt-20 z-50 bg-gray-800 shadow-lg ${!isOpen ? 'close' : ''}`}
-            style={{ left: '-300px' }}
-            onMouseEnter={() => toggleSidebar(true)}
-            onMouseLeave={() => toggleSidebar(false)}
-        >
-            <div className="menu_content bg-transparent">
-                <ul className="menu_items list-none">
-                    {navItems.map((item, index) => (
-                        <li key={index} className="item">
-                            <a
-                                href={item.href}
-                                className="nav_link flex items-center p-3 rounded-lg text-gray-300 hover:bg-indigo-600 hover:text-white transition-all"
-                            >
-                                <span className={`navlink_icon text-2xl w-12 text-center`}>
-                                    <i className={`bx ${item.icon}`}></i>
-                                </span>
-                                <h4 className="navlink">{item.text}</h4>
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-                {/*<div className="bottom-content fixed bottom-8 left-5 w-56 bg-transparent">*/}
-                {/*    <div*/}
-                {/*        className={`bottom expand_sidebar flex items-center justify-center p-3 text-gray-400 rounded-md cursor-pointer hover:bg-indigo-600 hover:text-white ${isOpen ? 'hidden' : 'flex'}`}*/}
-                {/*        onClick={() => toggleSidebar(true)}*/}
-                {/*    >*/}
-                {/*        <h4>Expand</h4>*/}
-                {/*        <i className="bx bx-log-in ml-2"></i>*/}
-                {/*    </div>*/}
-                {/*    <div*/}
-                {/*        className={`bottom collapse_sidebar flex items-center justify-center p-3 text-gray-400 rounded-md cursor-pointer hover:bg-indigo-600 hover:text-white ${isOpen ? 'flex' : 'hidden'}`}*/}
-                {/*        onClick={() => toggleSidebar(false)}*/}
-                {/*    >*/}
-                {/*        <h4>Collapse</h4>*/}
-                {/*        <i className="bx bx-log-out ml-2"></i>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
-            </div>
-        </nav>
-    );
-};
-
-// Topbar Component
-const Topbar = () => {
-    const menuItems = [
-
-        { icon: 'bx-task', text: 'List of students👨‍🎓', href: '/Students' },
-        { icon: 'bx-file', text: 'Upload Documents📚', href: '/upload-documents' },
-        { icon: 'bx-plus', text: 'Create Quiz📑', href: '/quiz-creation' },
-        { icon: 'bx-plus', text: 'Create Certificate📜', href: '/cert-creation' },
-        { icon: 'bx-mail-send', text: 'Send Email📩', href: '/chat' },
-        {text: 'View Quizzes📓', href: '/quiz-viewer'},
-        { icon: 'bx-log-out', text: 'Logout', href: '/login' },
-    ];
-
-    return (
-        <header className="fixed top-0 left-0 w-full h-16 bg-gray-900 flex items-center justify-between px-6 text-white text-xl font-semibold shadow-md z-50">
-            <div className="text-2xl">ADMIN PORTAL</div>
-            <ul className="flex gap-5 list-none">
-                {menuItems.map((item, index) => (
-                    <li key={index}>
-                        <a
-                            href={item.href}
-                            className="text-white hover:bg-indigo-600 px-4 py-2 rounded transition-colors"
-                        >
-                            {item.text}
-                        </a>
-                    </li>
-                ))}
-            </ul>
-        </header>
-    );
-};
 // StatsCards Component
 const StatsCards = ({ data, loading, error }) => {
-    if (loading) return <div className="text-center text-white mt-24">Loading stats...</div>;
+    if (loading) return <div className="text-center text-[var(--text-normal)] mt-24">Loading stats...</div>;
     if (error) return <div className="text-center text-red-600 mt-24">{error}</div>;
 
     return (
-        <div className="stats-cards w-4/5 mx-auto mt-24 flex flex-wrap gap-5 justify-around bg-transparent">
+        <div className="stats-cards grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
             {[
-                { title: 'Number of Students', value: data.studentCount },
-                { title: 'Number of Quizzes', value: data.quizCount },
+                { title: 'Number of Students', value: data.studentCount, icon: '👨‍🎓', color: 'text-[var(--accent-primary)]' },
+                { title: 'Number of Quizzes', value: data.quizCount, icon: '📑', color: 'text-[var(--accent-primary)]' },
             ].map((card, index) => (
                 <div
                     key={index}
-                    className="card rounded-xl border-2 border-white shadow-lg p-5 flex-1 max-w-xs text-center text-white bg-transparent"
+                    className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow"
                 >
-                    <h3 className="mb-2">{card.title}</h3>
-                    <b>
-                        <p>{card.value}</p>
-                    </b>
+                    <div className={`text-3xl ${card.color}`}>{card.icon}</div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-[var(--text-normal)]">{card.title}</h3>
+                        <p className={`text-2xl ${card.color}`}>{card.value}</p>
+                    </div>
                 </div>
             ))}
         </div>
     );
+};
+
+StatsCards.propTypes = {
+    data: PropTypes.shape({
+        studentCount: PropTypes.number,
+        quizCount: PropTypes.number,
+    }).isRequired,
+    loading: PropTypes.bool.isRequired,
+    error: PropTypes.string,
 };
 
 // SearchSection Component
@@ -183,7 +108,7 @@ const SearchSection = ({ onSearch }) => {
     };
 
     return (
-        <div className="search-section border-2 border-white shadow-lg w-11/12 max-w-5xl mx-auto mt-16 p-5 rounded-lg bg-transparent">
+        <div className="search-section bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6">
             <form onSubmit={handleSubmit} className="search-container flex gap-2 items-center">
                 <input
                     type="text"
@@ -192,48 +117,48 @@ const SearchSection = ({ onSearch }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="flex-1 p-3 text-base border-2 border-gray-300 rounded-lg bg-gradient-to-br from-white to-gray-200 text-gray-900 focus:border-indigo-600 focus:shadow-lg outline-none"
+                    className="flex-1 p-3 text-base border-2 border-[var(--border)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-normal)] focus:border-[var(--accent-primary)] focus:shadow-lg outline-none"
                 />
                 <select
                     name="role"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="p-3 text-base border-2 border-gray-300 rounded-lg bg-gradient-to-br from-white to-gray-200 text-gray-900 focus:border-indigo-600 focus:shadow-lg outline-none"
+                    className="p-3 text-base border-2 border-[var(--border)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-normal)] focus:border-[var(--accent-primary)] focus:shadow-lg outline-none"
                 >
                     <option value="student">Student</option>
                 </select>
-                <button type="submit" className="sub-button bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition-all">
+                <button type="submit" className="sub-button bg-[var(--accent-primary)] text-[var(--text-primary)] p-2 rounded-lg hover:bg-[var(--hover-primary)] transition-all">
                     Search
                 </button>
             </form>
             {loading && (
-                <div className="loading absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-600 bg-transparent">Loading...</div>
+                <div className="loading absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--accent-primary)] bg-transparent">Loading...</div>
             )}
             {error && <p className="text-red-600 mt-4">{error}</p>}
             {searchResults.length > 0 && (
-                <div className="search-results bg-white rounded-lg shadow-lg mt-5 overflow-hidden">
+                <div className="search-results bg-[var(--bg-primary)] rounded-lg shadow-lg mt-5 overflow-hidden">
                     <table className="w-full border-collapse">
                         <thead>
                         <tr>
-                            <th className="p-3 bg-blue-600 text-white font-bold">No.</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">First Name</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">Last Name</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">ID</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">Email</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">Role</th>
-                            <th className="p-3 bg-blue-600 text-white font-bold">Status</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">No.</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">First Name</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">Last Name</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">ID</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">Email</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">Role</th>
+                            <th className="p-3 bg-[var(--accent-primary)] text-[var(--text-primary)] font-bold">Status</th>
                         </tr>
                         </thead>
                         <tbody>
                         {searchResults.map((user, index) => (
-                            <tr key={user.id} className="hover:bg-gray-100 transition-colors">
-                                <td className="p-3 bg-gray-50 text-black">{index + 1}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.firstName || 'N/A'}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.lastName || 'N/A'}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.id}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.email}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.role || 'student'}</td>
-                                <td className="p-3 bg-gray-50 text-black">{user.isValid ? 'Approved' : 'Pending'}</td>
+                            <tr key={user.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{index + 1}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.firstName || 'N/A'}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.lastName || 'N/A'}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.id}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.email}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.role || 'student'}</td>
+                                <td className="p-3 bg-[var(--bg-primary)] text-[var(--text-normal)]">{user.isValid ? 'Approved' : 'Pending'}</td>
                             </tr>
                         ))}
                         </tbody>
@@ -242,6 +167,10 @@ const SearchSection = ({ onSearch }) => {
             )}
         </div>
     );
+};
+
+SearchSection.propTypes = {
+    onSearch: PropTypes.func,
 };
 
 // GraphTable Component
@@ -258,8 +187,8 @@ const GraphTable = ({ data, loading, error }) => {
                     {
                         label: 'Admin Statistics',
                         data: [data.studentCount, data.quizCount],
-                        backgroundColor: ['#1E88E5', '#43A047'],
-                        borderColor: ['#1565C0', '#2E7D32'],
+                        backgroundColor: ['var(--accent-primary)', 'var(--accent-secondary)'],
+                        borderColor: ['var(--accent-primary)', 'var(--accent-secondary)'],
                         borderWidth: 1,
                         barThickness: 100,
                     },
@@ -267,10 +196,16 @@ const GraphTable = ({ data, loading, error }) => {
             },
             options: {
                 responsive: true,
+                plugins: {
+                    legend: { labels: { color: 'var(--text-normal)' } },
+                    title: { display: true, text: 'System Statistics', color: 'var(--text-normal)' },
+                },
                 scales: {
+                    x: { ticks: { color: 'var(--text-normal)' } },
                     y: {
                         beginAtZero: true,
                         ticks: {
+                            color: 'var(--text-normal)',
                             stepSize: 1,
                             callback: function (value) {
                                 return Number.isInteger(value) ? value : null;
@@ -284,31 +219,36 @@ const GraphTable = ({ data, loading, error }) => {
         return () => chart.destroy();
     }, [data, loading, error]);
 
-    if (loading) return <div className="text-center text-white mt-5">Loading chart...</div>;
+    if (loading) return <div className="text-center text-[var(--text-normal)] mt-5">Loading chart...</div>;
     if (error) return <div className="text-center text-red-600 mt-5">{error}</div>;
 
     return (
-        <div className="graph-Table w-4/5 max-w-6xl mx-auto mt-5 p-5 rounded-lg border-2 border-gray-600 text-center bg-transparent">
-            <h3 className="text-2xl font-bold mb-5">System Statistics</h3>
+        <div className="graph-table bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl mb-6">
+            <h3 className="text-xl font-semibold mb-4 text-[var(--text-normal)]">System Statistics</h3>
             <canvas id="adminStatsChart" width="400" height="200"></canvas>
         </div>
     );
 };
 
+GraphTable.propTypes = {
+    data: PropTypes.shape({
+        studentCount: PropTypes.number,
+        quizCount: PropTypes.number,
+    }).isRequired,
+    loading: PropTypes.bool.isRequired,
+    error: PropTypes.string,
+};
+
 // Main AdminDashboard Component
-const AdminDashboard = ({ data: propData, onSearch }) => {
+const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNotifications }) => {
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [data, setData] = useState(propData || defaultData);
-    const [loading, setLoading] = useState({
-        stats: false,
-    });
-    const [error, setError] = useState({
-        stats: '',
-    });
+    const [loading, setLoading] = useState({ stats: false });
+    const [error, setError] = useState({ stats: '' });
 
     useEffect(() => {
-        document.body.classList.toggle('dark-mode', isDarkMode);
+        document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
@@ -316,31 +256,23 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
         const fetchData = async () => {
             try {
                 setLoading((prev) => ({ ...prev, stats: true }));
-                // Fetch student stats
                 const statsResponse = await fetch(`${API_BASE_URL}/api/stats`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                 });
                 if (!statsResponse.ok) {
                     const errorText = await statsResponse.text();
                     throw new Error(`Student stats error! status: ${statsResponse.status}, message: ${errorText || 'Unknown error'}`);
                 }
                 const statsData = await statsResponse.json();
-                console.log('Stats response:', statsData);
 
-                // Fetch quiz count
                 const quizResponse = await fetch(`${API_BASE_URL}/api/quizzes/count`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                 });
                 if (!quizResponse.ok) {
                     const errorText = await quizResponse.text();
                     throw new Error(`Quiz count error! status: ${quizResponse.status}, message: ${errorText || 'Unknown error'}`);
                 }
                 const quizData = await quizResponse.json();
-                console.log('Quiz count response:', quizData);
 
                 setData((prev) => ({
                     ...prev,
@@ -348,14 +280,10 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
                     quizCount: quizData.quizCount || 0,
                 }));
             } catch (err) {
-                setError({
-                    stats: `Failed to fetch stats: ${err.message}`,
-                });
+                setError({ stats: `Failed to fetch stats: ${err.message}` });
                 console.error('Fetch error:', err);
             } finally {
-                setLoading({
-                    stats: false,
-                });
+                setLoading({ stats: false });
             }
         };
 
@@ -364,24 +292,36 @@ const AdminDashboard = ({ data: propData, onSearch }) => {
         }
     }, [propData]);
 
-    const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
-    const toggleSidebar = (open) => setIsSidebarOpen(open);
+    const handleLogout = () => {
+        localStorage.removeItem('jwt');
+        window.location.href = '/login';
+    };
 
     return (
-        <div className="relative bg-transparent">
-            <Topbar toggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <SearchSection onSearch={onSearch} />
-            <StatsCards
-                data={data}
-                loading={loading.stats}
-                error={error.stats}
+        <div className="flex min-h-screen">
+            <AdminSidebar
+                user={user}
+                onLogout={handleLogout}
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
+                darkMode={isDarkMode}
             />
-            <GraphTable
-                data={data}
-                loading={loading.stats}
-                error={error.stats}
-            />
+            <div className="flex-1">
+                <AdminHeader
+                    user={user}
+                    notifications={notifications}
+                    isCollapsed={isCollapsed}
+                    darkMode={isDarkMode}
+                    setDarkMode={setIsDarkMode}
+                    tabDescription="Admin Dashboard"
+                    userMessage="Welcome to Administrator Side"
+                />
+                <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                    <StatsCards data={data} loading={loading.stats} error={error.stats} />
+                    <SearchSection onSearch={onSearch} />
+                    <GraphTable data={data} loading={loading.stats} error={error.stats} />
+                </div>
+            </div>
         </div>
     );
 };
@@ -392,6 +332,22 @@ AdminDashboard.propTypes = {
         quizCount: PropTypes.number,
     }),
     onSearch: PropTypes.func,
+    user: PropTypes.shape({
+        firstName: PropTypes.string,
+        lastName: PropTypes.string,
+        email: PropTypes.string,
+        title: PropTypes.string,
+        profilePicture: PropTypes.string,
+    }),
+    notifications: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            message: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+            read: PropTypes.bool.isRequired,
+        })
+    ).isRequired,
+    setNotifications: PropTypes.func.isRequired,
 };
 
 export default AdminDashboard;
