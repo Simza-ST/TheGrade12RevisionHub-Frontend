@@ -55,6 +55,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 // Fetch settings
                 const settingsResponse = await fetch('http://localhost:6262/api/users/settings', {
                     headers: { 'Authorization': `Bearer ${token}` },
+                    method: 'GET',
                 });
                 let userSettings = {};
                 if (settingsResponse.ok) {
@@ -80,6 +81,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 try {
                     const sessionsResponse = await fetch('http://localhost:6262/api/users/sessions', {
                         headers: { 'Authorization': `Bearer ${token}` },
+                        method: 'GET',
                     });
                     if (sessionsResponse.ok) {
                         sessionsData = await sessionsResponse.json();
