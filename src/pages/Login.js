@@ -46,10 +46,17 @@ const Login = ({ setIsAuthenticated }) => {
             localStorage.setItem('jwt', token);
             setIsAuthenticated(true); // Update authentication state
             console.log('Success:', message);
-            alert('Login successful! Welcome back to Revision App.');
+            // alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
-            navigate('/dashboard'); // Navigate to dashboard
+            //navigate('/dashboard');
+            //navigate('/admin-Dashboard');
+            if (email === "simzast123@gmail.com") {
+                navigate('/admin-Dashboard');
+            }
+            else {
+                navigate('/dashboard');
+            }
         } catch (error) {
             console.error('Fetch error:', error);
             setError(error.message || 'An error occurred during login. Please try again.');
@@ -64,7 +71,7 @@ const Login = ({ setIsAuthenticated }) => {
                     <div className="flex justify-center mb-6">
                         <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                     </div>
-                    <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision App</h2>
+                    <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision Hub</h2>
                     <p className="text-gray-300 text-center mb-6">Access your study tools now!</p>
                     <form id="loginForm" className="space-y-5" onSubmit={handleSubmit}>
                         <div className="relative">
@@ -131,7 +138,7 @@ const Login = ({ setIsAuthenticated }) => {
                 </div>
                 {/* Right: Animated Services */}
                 <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-center items-center">
-                    <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision App?</h3>
+                    <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision Hub?</h3>
                     <br />
                     <div className="relative w-full h-full flex flex-col justify-center items-center">
                         <div className="service-card w-11/12 bg-red-900 bg-opacity-70 backdrop-blur-md rounded-lg p-4 text-white mb-4 animate-slide-up transition-all duration-500 ease-in-out" style={{ animationDelay: '0s' }}>

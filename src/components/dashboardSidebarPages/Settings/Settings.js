@@ -5,6 +5,7 @@ import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import ConfirmationModal from './ConfirmationModal';
 import { PencilIcon, TrashIcon, PlusIcon, InformationCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import ProfileTab from "./ProfileTab";
 
 const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
@@ -12,13 +13,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
-    const [profile, setProfile] = useState({
-        name: user?.name || '',
-        email: user?.email || '',
-        profilePicture: user?.profilePicture || null,
-        createdAt: user?.createdAt || '',
-        title: user?.title || '',
-    });
     const [password, setPassword] = useState({
         currentPassword: '',
         newPassword: '',
@@ -57,16 +51,11 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 const token = localStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
 
-                // Fetch user profile
-                const userResponse = await fetch('http://localhost:6262/api/users/me', {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                if (!userResponse.ok) throw new Error(`User fetch failed: ${await userResponse.text()}`);
-                const userData = await userResponse.json();
 
                 // Fetch settings
                 const settingsResponse = await fetch('http://localhost:6262/api/users/settings', {
                     headers: { 'Authorization': `Bearer ${token}` },
+                    method: 'GET',
                 });
                 let userSettings = {};
                 if (settingsResponse.ok) {
@@ -92,6 +81,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 try {
                     const sessionsResponse = await fetch('http://localhost:6262/api/users/sessions', {
                         headers: { 'Authorization': `Bearer ${token}` },
+                        method: 'GET',
                     });
                     if (sessionsResponse.ok) {
                         sessionsData = await sessionsResponse.json();
@@ -102,13 +92,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     console.warn(`Sessions endpoint unavailable: ${err.message}`);
                 }
 
-                setProfile({
-                    name: userData.name || userData.fullName || userData.email || '',
-                    email: userData.email || '',
-                    profilePicture: userData.profilePicture || null,
-                    createdAt: userData.createdAt || new Date().toISOString(),
-                    title: userData.title || 'User',
-                });
                 setSettings({
                     emailNotifications: userSettings.emailNotifications ?? true,
                     pushNotifications: userSettings.pushNotifications ?? false,
@@ -120,7 +103,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     profileVisibility: userSettings.profileVisibility || 'public',
                     dataSharing: userSettings.dataSharing ?? false,
                 });
-                setTwoFactor({ ...twoFactor, enabled: userData.twoFactorEnabled || false });
+                setTwoFactor({ ...twoFactor || false });
                 setSessions(sessionsData.map(s => ({
                     id: s.id,
                     device: s.device || 'Unknown Device',
@@ -136,11 +119,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         fetchUserData();
     }, [darkMode, setDarkMode]);
 
-    const validateProfile = () => {
-        if (!profile.name.trim()) return 'Name is required';
-        if (!profile.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'Invalid email address';
-        return null;
-    };
 
     const validatePassword = () => {
         if (!password.currentPassword) return 'Current password is required';
@@ -148,11 +126,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             return 'New password must be 8+ characters with uppercase and numbers';
         if (password.newPassword !== password.confirmPassword) return 'Passwords do not match';
         return null;
-    };
-
-    const handleProfileChange = (e) => {
-        const { name, value } = e.target;
-        setProfile((prev) => ({ ...prev, [name]: value }));
     };
 
     const handlePasswordChange = (e) => {
@@ -168,56 +141,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             if (key === 'fontSize') {
                 document.documentElement.style.fontSize = value === 'small' ? '14px' : value === 'large' ? '18px' : '16px';
             }
-        }
-    };
-
-    const handleProfilePictureChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/') && file.size < 5 * 1024 * 1024) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfile((prev) => ({ ...prev, profilePicture: reader.result }));
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setError('Please select a valid image under 5MB');
-        }
-    };
-
-    const handleSaveProfile = async () => {
-        const validationError = validateProfile();
-        if (validationError) return setError(validationError);
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('jwt');
-            const [firstName, ...lastNameParts] = profile.name.trim().split(' ');
-            const lastName = lastNameParts.join(' ') || '';
-            const response = await fetch('http://localhost:6262/api/users/me', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    email: profile.email,
-                    profilePicture: profile.profilePicture,
-                }),
-            });
-            if (!response.ok) throw new Error(await response.text());
-            const data = await response.json();
-            setUser({
-                ...user,
-                name: `${data.firstName} ${data.lastName}`.trim(),
-                email: data.email,
-                profilePicture: data.profilePicture,
-                title: data.role,
-                createdAt: profile.createdAt,
-            });
-            setSuccess('Profile updated successfully');
-            setError(null);
-        } catch (err) {
-            setError(`Failed to save profile: ${err.message}`);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -381,7 +304,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         navigate('/login');
     };
 
-    if (loading && !profile.name) {
+    if (loading) {
         return (
             <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
@@ -672,106 +595,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                             </div>
 
                             {activeTab === 'profile' && (
-                                <div className="space-y-6">
-                                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Profile Information</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Full Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={profile.name}
-                                                onChange={handleProfileChange}
-                                                className="form-input"
-                                                placeholder="Enter your name"
-                                                aria-label="Full Name"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Email Address
-                                            </label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={profile.email}
-                                                onChange={handleProfileChange}
-                                                className="form-input"
-                                                placeholder="Enter your email"
-                                                aria-label="Email Address"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Role
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={profile.title}
-                                                disabled
-                                                className="form-input bg-[var(--bg-tertiary)]"
-                                                readOnly
-                                                aria-label="Role"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                Account Created
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
-                                                disabled
-                                                className="form-input bg-[var(--bg-tertiary)]"
-                                                readOnly
-                                                aria-label="Account Creation Date"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                            Profile Photo
-                                        </label>
-                                        <div className="flex items-center gap-6">
-                                            {profile.profilePicture && (
-                                                <img
-                                                    src={profile.profilePicture}
-                                                    alt="Profile Photo"
-                                                    className="w-20 h-20 rounded-full object-cover border border-[var(--border)]"
-                                                />
-                                            )}
-                                            <div className="flex flex-col gap-3">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    ref={fileInputRef}
-                                                    onChange={handleProfilePictureChange}
-                                                    className="hidden"
-                                                    aria-label="Upload Profile Photo"
-                                                />
-                                                <button
-                                                    onClick={() => fileInputRef.current.click()}
-                                                    className="btn-secondary flex items-center gap-2"
-                                                    aria-label="Upload Photo"
-                                                >
-                                                    <PlusIcon className="w-4 h-4" />
-                                                    Upload Photo
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={handleSaveProfile}
-                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                        aria-label="Save Profile"
-                                        disabled={loading}
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                        Save Profile
-                                    </button>
-                                </div>
+                                <ProfileTab
+                                    setUser={setUser}
+                                    user={user}
+                                />
                             )}
 
                             {activeTab === 'security' && (

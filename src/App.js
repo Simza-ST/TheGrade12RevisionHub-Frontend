@@ -12,7 +12,7 @@ import ScrollButton from './components/ScrollButton';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
-import Dashboard from './components/Dashboard';
+import StudentDashboard from './components/./StudentDashboard';
 import Resources from './components/dashboardSidebarPages/Resources/Resources';
 import Schedule from './components/onDashboardPages/Schedule';
 import Performance from './components/dashboardSidebarPages/Perfomances/Performance';
@@ -26,6 +26,13 @@ import Subjects from './components/dashboardSidebarPages/subject/Subjects';
 import DigitizedQuestionPapers from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapers';
 import EnglishFALP12020 from './components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020';
 import { API_BASE_URL, getAuthHeaders } from './utils/api';
+import AdminDashboard from "./components/AdminDashboard";
+import StudentsList from "./components/adminDashboardSideBarPages/AdminStudents/Students";
+import UploadDocuments from "./components/adminDashboardSideBarPages/UploadingDoc/UploadDocuments";
+import QuizCreation from "./components/adminDashboardSideBarPages/AdminQuiz/QuizCreation";
+import CertificateGenerator from "./components/adminDashboardSideBarPages/AdminStudents/CertificateGenerator";
+import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizViewer";
+import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
 
 const PublicLayout = () => (
     <div>
@@ -74,6 +81,7 @@ function ProtectedRoute({ children }) {
                     id: data.userId,
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
+                    phoneNumber: data.phoneNumber || '',
                     email: data.email || '',
                     title: data.title || 'Grade 12 Learner',
                     profilePicture: data.profilePicture || null,
@@ -197,10 +205,67 @@ const App = () => {
                         path="/dashboard"
                         element={
                             <ProtectedRoute >
-                                <Dashboard {...commonProps} />
+                                <StudentDashboard {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/admin-Dashboard"
+                        element={
+                            <ProtectedRoute >
+                                <AdminDashboard {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/students"
+                        element={
+                            <ProtectedRoute >
+                                <StudentsList {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/upload-documents"
+                        element={
+                            <ProtectedRoute >
+                                <UploadDocuments {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/quiz-creation"
+                        element={
+                            <ProtectedRoute >
+                                <QuizCreation {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/cert-creation"
+                        element={
+                            <ProtectedRoute >
+                                <CertificateGenerator {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/quiz-viewer"
+                        element={
+                            <ProtectedRoute >
+                                <QuizViewer {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/chat"
+                        element={
+                            <ProtectedRoute >
+                                <Chat {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path="/chat" element={<Chat />} />
                     <Route
                         path="/subjects"
                         element={

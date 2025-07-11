@@ -36,7 +36,7 @@ StatsCard.propTypes = {
 
 
 
-const Dashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
@@ -162,7 +162,7 @@ const Dashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, n
                         isCollapsed={isCollapsed}
                         darkMode={darkMode}
                         setDarkMode={setDarkMode}
-                        tabDescription="Dashboard"
+                        tabDescription="Student Dashboard"
                         userMessage="Welcome"
                     />
                     <div
@@ -225,7 +225,7 @@ const Dashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, n
     );
 };
 
-Dashboard.propTypes = {
+StudentDashboard.propTypes = {
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
@@ -241,4 +241,4 @@ Dashboard.propTypes = {
     setNotifications: PropTypes.func.isRequired,
 };
 
-export default Dashboard;
+export default StudentDashboard;
