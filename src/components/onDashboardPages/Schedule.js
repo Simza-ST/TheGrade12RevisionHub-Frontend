@@ -266,7 +266,7 @@ const Schedule = ({ schedule: propSchedule, setRecentActivity, isCollapsed, dark
 
     return (
         <div
-            className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl"
+            className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl "
             aria-label="Schedule component"
         >
             <div className="flex justify-between items-center mb-4">

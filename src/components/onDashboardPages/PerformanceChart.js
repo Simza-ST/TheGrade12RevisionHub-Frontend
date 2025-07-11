@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
-import ChartDataLabels from 'chartjs-plugin-datalabels'; //for bar percentages
+import ChartDataLabels from 'chartjs-plugin-datalabels'; // for bar percentages
 
 const PerformanceChart = ({ courses, darkMode }) => {
     // Use darkMode to set text color
@@ -13,13 +13,27 @@ const PerformanceChart = ({ courses, darkMode }) => {
 
     // Log courses to verify data
     console.log('Courses:', courses);
+//sorting per progress
+    const sortedCourses = [...courses].sort((a, b) => b.progress - a.progress);
+
+    // Shorten course names for x-axis labels
+    const shortLabels = sortedCourses.map((course) => {
+        const name = course.name;
+        if (name.includes(' ')) {
+            // Use first word for multi-word names
+            const [firstWord, secondWord] = name.split(' ');
+            return `${firstWord}.${secondWord[0]}`;
+        }
+
+        return  name;
+    });
 
     const data = {
-        labels: courses.map((course) => course.name),
+        labels: shortLabels,
         datasets: [
             {
                 label: 'Progress (%)',
-                data: courses.map((course) => course.progress),
+                data: sortedCourses.map((course) => course.progress),
                 backgroundColor: barColor,
                 borderColor: barColor,
                 borderWidth: 1,
@@ -52,20 +66,23 @@ const PerformanceChart = ({ courses, darkMode }) => {
                 bodyColor: textColor,
             },
             datalabels: {
-              //configure fata labels
-              anchor: 'end',
-              align: 'bottom',
-              color: 'black',
-              font: {
-                  size: 12,
-                  weight: 'bold',
-              } ,
-              formatter: (value) => `${value}%`,
+                anchor: 'end',
+                align: 'bottom',
+                color: '#000000',
+                font: {
+                    size: 10,
+                    weight: 'bold',
+                },
+                formatter: (value) => ` ${value}%`,
             },
         },
         scales: {
             x: {
-                ticks: { color: textColor },
+                ticks: {
+                    color: textColor,
+                    maxRotation: 45, // Rotate labels 45 degrees
+                    minRotation: 45,
+                },
                 grid: { color: 'var(--border)' },
             },
             y: {
@@ -74,8 +91,8 @@ const PerformanceChart = ({ courses, darkMode }) => {
                 ticks: {
                     color: textColor,
                     stepSize: 10,
-                    count: 10, // Ensure 11 ticks (0, 10, ..., 100)
-                    autoSkip: false, // Prevent skipping ticks
+                    count: 10, // 10 ticks (0, 11.11, ..., 100)
+                    autoSkip: false,
                     callback: (value) => {
                         console.log('Y-axis tick:', value);
                         return `${value}%`;
@@ -90,11 +107,11 @@ const PerformanceChart = ({ courses, darkMode }) => {
     console.log('Chart options:', JSON.stringify(options.scales.y, null, 2));
 
     return (
-        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-96">
-
+        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-[500px] flex flex-col">
             <h2 className="text-xl font-semibold mb-4 text-[var(--text-normal)]">Performance Overview</h2>
-            <Bar key={darkMode ? 'dark' : 'light'} data={data} options={options}
-            plugins={[ChartDataLabels]}/>
+            <div className="flex-1">
+                <Bar key={darkMode ? 'dark' : 'light'} data={data} options={options} plugins={[ChartDataLabels]} />
+            </div>
         </div>
     );
 };

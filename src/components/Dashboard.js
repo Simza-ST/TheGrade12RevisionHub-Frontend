@@ -69,12 +69,14 @@ const Dashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, n
     useEffect(() => {
         setTimeout(() => {
             setCourses([
-                { name: 'Advanced Calculus', progress: 86 },
+                { name: 'Advanced Calculus', progress: 100 },
                 { name: 'Physical Sciences', progress: 80 },
                 { name: 'Mathematics', progress: 85 },
-                { name: 'Information Technology', progress: 81 },
-                { name: 'History', progress: 78 },
+                { name: 'Information Technology', progress: 50 },
+                { name: 'History', progress: 100 },
                 { name: 'Chemistry', progress: 92 },
+
+
             ]);
             setSchedule([
                 { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
