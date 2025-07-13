@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_BASE_URL, getAuthHeaders } from '../../../utils/api';
+import { getPaperComponent } from '../../../utils/paperMapper';
+import paperData from "sockjs-client/lib/transport/receiver/jsonp";
 
 const DigitizedQuestionPaperView = ({ darkMode }) => {
     const { id } = useParams();
@@ -8,30 +10,54 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
     const [paper, setPaper] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [PaperComponent, setPaperComponent] = useState(null);
 
     useEffect(() => {
         const fetchPaper = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${API_BASE_URL}/user/question-papers/${id}`, {
+
+                // CORRECTED: Fetch a single paper by ID
+                const response = await fetch(`${API_BASE_URL}/user/digitized/${id}`, {
                     headers: getAuthHeaders(),
                 });
-                const data = await response.json();
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Failed to fetch paper');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `HTTP error! Status: ${response.status}`);
                 }
-                setPaper(data.data);
+
+                const data = await response.json();
+
+                if (!data.success || !data.data) {
+                    throw new Error(data.message || 'Failed to fetch paper data');
+                }
+
+                const paperData = data.data;
+                console.log("Fetched paper data:", paperData); // Debugging log
+                setPaper(paperData);
+
+                // Check if paper ID exists
+                if (!paperData.id) {
+                    throw new Error("Paper ID is missing in API response");
+                }
+
+                setPaper(paperData);
+                const component = getPaperComponent(paperData.id);
+
+                if (!component) {
+                    throw new Error('No interactive viewer available');
+                }
+
+                setPaperComponent(() => component);
                 setLoading(false);
             } catch (err) {
-                if (err.message.includes('Unauthorized') || err.message.includes('401')) {
-                    sessionStorage.removeItem('jwt');
-                    navigate('/login');
-                } else {
-                    setError(`Error: ${err.message}`);
-                    setLoading(false);
-                }
+                console.error('Paper fetch error:', err);
+                setError(`Error: ${err.message}`);
+                setLoading(false);
             }
         };
+
         fetchPaper();
     }, [id, navigate]);
 
@@ -59,55 +85,29 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
         );
     }
 
-    if (!paper) {
-        return (
-            <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
-                <div className="p-4 rounded-lg bg-[var(--accent-secondary)] text-white">
-                    Paper not found
-                    <button
-                        onClick={() => navigate('/digitized-question-papers')}
-                        className="ml-4 px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                    >
-                        Back to Papers
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // Example rendering (customize based on paper data)
     return (
         <div className="flex min-h-screen bg-[var(--bg-primary)] p-6">
             <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-[var(--shadow)] w-full">
                 <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-                    {paper.fileName || 'Untitled Paper'}
+                    {paper.fileName || `Paper ${paper.id}`}
                 </h1>
                 <p className="text-sm text-[var(--text-secondary)]">
                     Subject: {paper.subject?.subjectName || paper.subjectName || 'Unknown'}
                 </p>
                 <p className="text-sm text-[var(--text-secondary)]">
-                    Type: {paper.isInteractive ? 'Interactive' : 'PDF'}
+                    Type: Interactive
                 </p>
-                {paper.isInteractive ? (
-                    <div className="mt-4">
-                        {/* Render interactive content, e.g., EnglishFALP12020 for id === '1' */}
-                        {id === '1' && <EnglishFALP12020 />}
-                    </div>
-                ) : (
-                    <div className="mt-4">
-                        {/* Render PDF viewer or link */}
-                        <a
-                            href={paper.fileUrl || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-4 py-2 bg-[var(--accent-primary)] text-white rounded-lg hover:bg-[var(--hover-primary)]"
-                        >
-                            View PDF
-                        </a>
-                    </div>
-                )}
+                <div className="mt-4">
+                    {PaperComponent && (
+                        <PaperComponent
+                            darkMode={darkMode}
+                            paperId={paper.id} // Ensure this is passed
+                        />
+                    )}
+                </div>
             </div>
         </div>
+
     );
 };
 

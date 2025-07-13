@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../common/Sidebar';
 import DigitizedQuestionPaperCard from './DigitizedQuestionPaperCard';
 import Header from "../../common/Header";
+import { getPaperComponent } from '../../../utils/paperMapper';
 
-const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode,
+                                     notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [questionPapers, setQuestionPapers] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -12,8 +14,8 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -74,16 +76,25 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
         fetchData();
     }, [fetchData]);
 
-    const handleViewPaper = (paper, paperTitle, isInteractive) => {
+    const handleViewPaper = (paper) => {
+        // Get the component based on paper ID
+        const component = getPaperComponent(paper.id);
+
+        if (!component) {
+            setError('No interactive viewer available for this paper');
+            return;
+        }
+
         setNotifications([
             ...notifications,
             {
                 id: notifications.length + 1,
-                message: `Viewed digitized question paper: ${paperTitle}`,
+                message: `Viewed digitized question paper`,
                 date: new Date().toISOString().split('T')[0],
                 read: false,
             },
         ]);
+
         navigate(`/digitized-question-papers/${paper.id}`);
     };
 

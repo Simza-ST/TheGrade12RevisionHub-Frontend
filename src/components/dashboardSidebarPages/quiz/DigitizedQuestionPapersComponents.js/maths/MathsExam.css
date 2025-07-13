@@ -1,0 +1,173 @@
+/* MathsExam.css */
+.math-exam {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.8;
+}
+
+h1 {
+    text-align: center;
+    color: #1a3c64;
+    font-size: 2.2em;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #1a3c64;
+    padding-bottom: 10px;
+}
+
+h2 {
+    color: #1a3c64;
+    font-size: 1.5em;
+    margin: 25px 0 15px;
+    font-weight: 600;
+}
+
+.question-section {
+    margin-bottom: 30px;
+}
+
+.question {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.question:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sub-question {
+    margin-bottom: 15px;
+}
+
+.equation {
+    font-style: italic;
+    color: #555;
+    display: block;
+    margin: 5px 0;
+}
+
+label {
+    font-weight: 500;
+    color: #444;
+    display: block;
+    margin-top: 10px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 5px;
+}
+
+input[type="text"] {
+    width: 100%;
+    max-width: 280px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #1a3c64;
+    outline: none;
+    box-shadow: 0 0 5px rgba(26, 60, 100, 0.2);
+}
+
+input[type="file"] {
+    padding: 8px;
+    font-size: 1em;
+}
+
+.wide-input {
+    max-width: 300px;
+}
+
+.image-placeholder {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 10px auto;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.check-button {
+    background-color: #1a3c64;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 30px auto;
+}
+
+.check-button:hover {
+    background-color: #153050;
+}
+
+.score-display {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #1a3c64;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.pass {
+    color: #2e7d32;
+}
+
+.fail {
+    color: #d32f2f;
+}
+
+@media (max-width: 600px) {
+    .math-exam {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .question {
+        padding: 15px;
+    }
+
+    .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    input[type="text"] {
+        max-width: 100%;
+    }
+
+    .image-placeholder {
+        width: 100%;
+    }
+}

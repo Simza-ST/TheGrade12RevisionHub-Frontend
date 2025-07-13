@@ -33,6 +33,9 @@ import QuizCreation from "./components/AdminQuiz/QuizCreation";
 import CertificateGenerator from "./components/AdminStudents/CertificateGenerator";
 import QuizViewer from "./components/AdminQuiz/QuizViewer";
 import Chat from "./components/EmailChat/Chat";
+import MathematicsP1Nov2022Eng
+    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 
 const PublicLayout = () => (
     <div>
@@ -362,11 +365,12 @@ const App = () => {
                             </ProtectedRoute>
                         }
                     />
+
                     <Route
                         path="/digitized-question-papers/:id"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <QuestionPaperView {...commonProps} />
+                                <DigitizedQuestionPaperView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -376,13 +380,5 @@ const App = () => {
         </div>
     );
 };
-
-function QuestionPaperView({ darkMode, setDarkMode, notifications, ...rest }) {
-    const { id } = useParams();
-    if (id === '1') {
-        return <EnglishFALP12020 darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} />;
-    }
-    return <div>Paper not found</div>;
-}
 
 export default App;
