@@ -94,7 +94,7 @@ const PerformanceChart = ({ courses, darkMode }) => {
                     count: 10, // 10 ticks (0, 11.11, ..., 100)
                     autoSkip: false,
                     callback: (value) => {
-                        console.log('Y-axis tick:', value);
+                       // console.log('Y-axis tick:', value);
                         return `${value}%`;
                     },
                 },
@@ -104,7 +104,7 @@ const PerformanceChart = ({ courses, darkMode }) => {
     };
 
     // Log options to debug configuration
-    console.log('Chart options:', JSON.stringify(options.scales.y, null, 2));
+   // console.log('Chart options:', JSON.stringify(options.scales.y, null, 2));
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-[500px] flex flex-col">
