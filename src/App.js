@@ -33,6 +33,7 @@ import QuizCreation from "./components/adminDashboardSideBarPages/AdminQuiz/Quiz
 import CertificateGenerator from "./components/adminDashboardSideBarPages/AdminStudents/CertificateGenerator";
 import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizViewer";
 import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
+import QuizView from "./components/dashboardSidebarPages/quiz/QuizView";
 
 const PublicLayout = () => (
     <div>
@@ -279,6 +280,14 @@ const App = () => {
                         element={
                             <ProtectedRoute >
                                 <Quizzes {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/quizzes/:id"
+                        element={
+                            <ProtectedRoute >
+                                <QuizView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />

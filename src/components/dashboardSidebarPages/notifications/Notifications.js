@@ -9,14 +9,14 @@ import NotificationHeader from './NotificationHeader';
 import NotificationControls from './NotificationControls';
 import NotificationStats from './NotificationStats';
 import NotificationList from './NotificationList';
+import Header from "../../common/Header";
 
 
-const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Notifications = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filterType, setFilterType] = useState('all');
-    const [user, setUser] = useState(null);
     const [showSidebar, setShowSidebar] = useState(false); // Hidden by default on mobile
 
     // Sync isCollapsed with showSidebar on mobile
@@ -32,38 +32,38 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     }, [darkMode]);
 
     // Fetch user details
-    useEffect(() => {
-        const fetchUserDetails = async () => {
-            setLoading(true);
-            try {
-                const token = window.localStorage.getItem('jwt');
-                if (!token) throw new Error('No JWT token found');
-                const response = await fetch('http://localhost:6262/api/users/me', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-                }
-                const data = await response.json();
-                setUser({
-                    id: data.id,
-                    name: `${data.firstName} ${data.lastName}`,
-                    title: data.role,
-                    profilePicture: data.profilePicture || null,
-                });
-            } catch (error) {
-                setError(`Error fetching user details: ${error.message}`);
-                console.error('Error fetching user details:', error);
-                navigate('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUserDetails();
-    }, [navigate]);
+    // useEffect(() => {
+    //     const fetchUserDetails = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const token = window.localStorage.getItem('jwt');
+    //             if (!token) throw new Error('No JWT token found');
+    //             const response = await fetch('http://localhost:6262/api/users/me', {
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'Authorization': `Bearer ${token}`,
+    //                 },
+    //             });
+    //             if (!response.ok) {
+    //                 throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    //             }
+    //             const data = await response.json();
+    //             setUser({
+    //                 id: data.id,
+    //                 name: `${data.firstName} ${data.lastName}`,
+    //                 title: data.role,
+    //                 profilePicture: data.profilePicture || null,
+    //             });
+    //         } catch (error) {
+    //             setError(`Error fetching user details: ${error.message}`);
+    //             console.error('Error fetching user details:', error);
+    //             navigate('/login');
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchUserDetails();
+    // }, [navigate]);
 
 // WebSocket setup
     useEffect(() => {
@@ -695,13 +695,19 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         disableHamburger={showSidebar && window.innerWidth <= 639}
                     />
                 </div>
+                <div className="flex-1">
+                <Header
+                    user={user}
+                    unreadNotifications={unreadNotifications}
+                    darkMode={darkMode}
+                    setDarkMode={setDarkMode}
+                    tabDescription="Notifications"
+                    userMessage="Stay updated"
+                    isCollapsed={isCollapsed}
+                    notifications={notifications}
+                />
                 <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <NotificationHeader
-                        user={user}
-                        unreadNotifications={unreadNotifications}
-                        darkMode={darkMode}
-                        setDarkMode={setDarkMode}
-                    />
+
                     <div className="notification-section mt-4">
                         <NotificationControls
                             filterType={filterType}
@@ -726,6 +732,7 @@ const Notifications = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         />
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );
