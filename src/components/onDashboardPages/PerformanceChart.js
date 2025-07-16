@@ -1,34 +1,60 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels'; // for bar percentages
 
-const PerformanceChart = ({ courses, darkMode }) => {
+const PerformanceChart = ({ darkMode }) => {
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+
     // Use darkMode to set text color
     const textColor = useMemo(() => (darkMode ? '#e2e8f0' : '#1A202C'), [darkMode]);
 
     // Use darkMode to set bar colors
     const barColor = useMemo(() => (darkMode ? '#5EEAD4' : '#2DD4BF'), [darkMode]);
 
-    // Log courses to verify data
-    console.log('Courses:', courses);
-//sorting per progress
-    const sortedCourses = [...courses].sort((a, b) => b.progress - a.progress);
+    useEffect(() => {
+        const fetchPerformanceData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const headers = {
+                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    'Content-Type': 'application/json',
+                };
+                const response = await fetch(`${API_BASE_URL}/performance-overview`, { headers });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    setCourses(data.data.map(item => ({ name: item.name, progress: item.progress })));
+                } else {
+                    setError(data.message || 'Failed to fetch performance data');
+                }
+            } catch (error) {
+                setError(`Error fetching performance data: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPerformanceData();
+    }, [API_BASE_URL]);
+
+    // Sorting per progress
+    const sortedCourses = useMemo(() => [...courses].sort((a, b) => b.progress - a.progress), [courses]);
 
     // Shorten course names for x-axis labels
-    const shortLabels = sortedCourses.map((course) => {
+    const shortLabels = useMemo(() => sortedCourses.map((course) => {
         const name = course.name;
         if (name.includes(' ')) {
-            // Use first word for multi-word names
             const [firstWord, secondWord] = name.split(' ');
             return `${firstWord}.${secondWord[0]}`;
         }
+        return name;
+    }), [sortedCourses]);
 
-        return  name;
-    });
-
-    const data = {
+    const data = useMemo(() => ({
         labels: shortLabels,
         datasets: [
             {
@@ -41,10 +67,10 @@ const PerformanceChart = ({ courses, darkMode }) => {
                 categoryPercentage: 0.7,
             },
         ],
-    };
+    }), [shortLabels, barColor, sortedCourses]);
 
     // Chart configuration
-    const options = {
+    const options = useMemo(() => ({
         responsive: true,
         maintainAspectRatio: false, // Allow flexible height
         plugins: {
@@ -91,20 +117,17 @@ const PerformanceChart = ({ courses, darkMode }) => {
                 ticks: {
                     color: textColor,
                     stepSize: 10,
-                    count: 10, // 10 ticks (0, 11.11, ..., 100)
+                    count: 10, // 10 ticks (0, 10, ..., 100)
                     autoSkip: false,
-                    callback: (value) => {
-                       // console.log('Y-axis tick:', value);
-                        return `${value}%`;
-                    },
+                    callback: (value) => `${value}%`,
                 },
                 grid: { color: 'var(--border)' },
             },
         },
-    };
+    }), [textColor]);
 
-    // Log options to debug configuration
-   // console.log('Chart options:', JSON.stringify(options.scales.y, null, 2));
+    if (loading) return <div className="text-center py-10 text-[var(--text-normal)]">Loading chart data...</div>;
+    if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-[500px] flex flex-col">
@@ -117,12 +140,6 @@ const PerformanceChart = ({ courses, darkMode }) => {
 };
 
 PerformanceChart.propTypes = {
-    courses: PropTypes.arrayOf(
-        PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            progress: PropTypes.number.isRequired,
-        })
-    ).isRequired,
     darkMode: PropTypes.bool.isRequired,
 };
 
