@@ -1,13 +1,166 @@
+import React, { useState } from "react";
 import { API_BASE_URL, getAuthHeaders } from '../../../../../utils/api';
-import {useState} from "react"; // Adjust path as needed
+import { useNavigate } from 'react-router-dom';
 
 const MathematicsP1Nov2022Eng = ({ paperId }) => {
+    const navigate = useNavigate();
     const [answers, setAnswers] = useState({});
     const [score, setScore] = useState(null);
     const [recording, setRecording] = useState(false);
     const [recordError, setRecordError] = useState(null);
+    const [showResults, setShowResults] = useState(false);
+    const [revealedAnswers, setRevealedAnswers] = useState({});
+    const [solutionModal, setSolutionModal] = useState({
+        open: false,
+        questionId: null,
+        content: ""
+    });
 
+    // Complete answer key for all questions
+    const answerKey = {
+        // Question 1
+        'q1-1-1a': ["x=2", "2"],
+        'q1-1-1b': ["x=-2", "-2"],
+        'q1-1-2a': ["x=2.82", "2.82"],
+        'q1-1-2b': ["x=0.18", "0.18"],
+        'q1-1-3a': ["x<-9", "x< -9", "x< -9", "x <= -9", "x< -9.0"],
+        'q1-1-3b': ["x>10", "x> 10", "x>10.0", "x >= 10"],
+        'q1-1-4a': ["x=9", "9"],
+        'q1-1-4b': ["x=16", "16"],
+        'q1-2a-x': ["x=2", "2"],
+        'q1-2a-y': ["y=2", "2"],
+        'q1-2b-x': ["x=-1", "-1"],
+        'q1-2b-y': ["y=-4", "-4"],
+        'q1-3': ["even", "proof", "2.5^n", "factor", "divisible by 2"],
+        'q1-4-x': ["x=1", "1"],
+        'q1-4-y': ["y=1", "1"],
 
+        // Question 2
+        'q2-1-1': ["r=2", "2"],
+        'q2-1-2': ["n=7", "7"],
+        'q2-1-3': ["s=896", "896"],
+        'q2-2': ["k=10", "10"],
+
+        // Question 3
+        'q3-1': ["b=4", "4"],
+        'q3-2': ["t60=3849", "3849"],
+        'q3-3': ["tp=2p+5", "2p+5", "tₚ=2p+5"],
+        'q3-4a': ["t76", "t₇₆", "76"],
+        'q3-4b': ["t77", "t₇₇", "77"],
+
+        // Question 4
+        'q4-1-1-p': ["p=-1", "-1"],
+        'q4-1-1-q': ["q=2", "2"],
+        'q4-1-2-x': ["x=0.5", "1/2", "0.5"],
+        'q4-1-2-y': ["y=0", "0"],
+        'q4-1-3': ["x=-2.5", "-5/2", "-2.5"],
+        'q4-1-4': ["t=1", "1"],
+        'q4-1-5a': ["x<=0.5", "x<0.5", "x≤0.5", "x<=1/2"],
+        'q4-1-5b': ["x>1", "x>1.0", "x>1.00"],
+        'q4-2-1': ["y=-5", "-5"],
+        'q4-2-2-x': ["x=2", "2"],
+        'q4-2-2-y': ["y=-9", "-9"],
+        'q4-2-3-a': ["a=-1", "-1"],
+        'q4-2-3-q': ["q=-5", "-5"],
+        'q4-2-4': ["y<-5", "y< -5", "range:y< -5"],
+        'q4-2-5': ["k<-9", "k< -9", "k< -9.0"],
+
+        // Question 5
+        'q5-1': ["y=6", "6"],
+        'q5-2': ["g-1(x)=0.5x-3", "g⁻¹(x)=0.5x-3", "1/2x-3", "0.5x-3"],
+        'q5-3-x': ["x=-6", "-6"],
+        'q5-3-y': ["y=-6", "-6"],
+        'q5-4': ["6√5", "6*sqrt(5)", "13.416"],
+        'q5-5': ["54", "54.0"],
+
+        // Question 6
+        'q6-1': ["m=5.78", "5.78"],
+        'q6-2': ["no", "insufficient", "12421.22,no", "r12421.22,no"],
+        'q6-3-1': ["212500", "r212500"],
+        'q6-3-2': ["4724.96", "r4724.96"],
+
+        // Question 7
+        'q7-1': ["f'(x)=2x+1", "2x+1"],
+        'q7-2': ["f'(x)=6x²-12x³+8", "6x^2-12x^3+8"],
+        'q7-3': ["x>-1", "x> -1"],
+
+        // Question 8
+        'q8-1-m': ["m=-3", "-3"],
+        'q8-1-n': ["n=2", "2"],
+        'q8-1-k': ["k=1", "1"],
+        'q8-2-1a-x': ["x=-1/3", "-1/3", "-0.333"],
+        'q8-2-1a-y': ["y=49/27", "49/27", "1.815"],
+        'q8-2-1b-x': ["x=1", "1"],
+        'q8-2-1b-y': ["y=3", "3"],
+        'q8-3-1': ["a=1/3", "1/3", "0.333"],
+        'q8-3-2': ["b<4/3", "b<1.333", "b<1.33"],
+
+        // Question 9
+        'q9-1': ["2√17", "2*sqrt(17)", "8.246"],
+
+        // Question 10
+        'q10-1-1a': ["y=0.107", "0.107"],
+        'q10-1-1b': ["x=0.16", "0.16"],
+        'q10-1-2': ["p=0.45", "0.45"],
+        'q10-1-3': ["yes", "independent", "p(b∩c)=p(b)p(c)"],
+        'q10-2-1': ["840", "840"],
+        'q10-2-2': ["0.0133", "1/75", "0.013"]
+    };
+
+    // Solutions for each question
+    const solutions = {
+        'q1-1-1a': "Using the zero product property: 3x - 6 = 0 → 3x = 6 → x = 2",
+        'q1-1-1b': "Using the zero product property: x + 2 = 0 → x = -2",
+        'q1-1-2a': "Using quadratic formula: x = [6 ± √(36 - 8)]/4 = [6 ± √28]/4 = [6 ± 2√7]/4 ≈ 2.82",
+        'q1-1-2b': "Using quadratic formula: x = [6 - √28]/4 ≈ 0.18",
+        'q1-1-3a': "Solve inequality: x² - x - 90 > 0 → (x - 10)(x + 9) > 0 → x < -9",
+        'q1-1-3b': "Solve inequality: x² - x - 90 > 0 → (x - 10)(x + 9) > 0 → x > 10",
+        'q1-1-4a': "Let u = √x → u² - 7u + 12 = 0 → (u-3)(u-4)=0 → u=3 or u=4 → x=9 or x=16",
+        'q1-1-4b': "Let u = √x → u² - 7u + 12 = 0 → (u-3)(u-4)=0 → u=3 or u=4 → x=9 or x=16",
+        'q1-2a-x': "From 2x - y = 2 and xy = 4: y = 2x - 2 → x(2x - 2) = 4 → 2x² - 2x - 4 = 0 → x=2",
+        'q1-2a-y': "When x=2, y=2(2)-2=2",
+        'q1-2b-x': "Solutions to 2x² - 2x - 4 = 0: x=2 or x=-1",
+        'q1-2b-y': "When x=-1, y=2(-1)-2=-4",
+        'q1-3': "Factor: 2.5ⁿ(1 - 5 + 25) = 2.5ⁿ(21) → even since 21 is odd but 2.5ⁿ is even for n≥1",
+        'q1-4-x': "Simplify: 3ʸ⁺¹ / (96ˣ)^{1/2} = 1 → 3ʸ⁺¹ = (32ˣ·3ˣ)^{1/2} → set exponents equal → x=1, y=1",
+        'q1-4-y': "Simplify: 3ʸ⁺¹ / (96ˣ)^{1/2} = 1 → 3ʸ⁺¹ = (32ˣ·3ˣ)^{1/2} → set exponents equal → x=1, y=1",
+
+        // Add solutions for other questions similarly...
+        'q2-1-1': "Geometric series: a₆ = a₁·r⁵ → 448 = 14·r⁵ → r⁵ = 32 → r=2",
+        'q2-1-2': "Sₙ = a(rⁿ-1)/(r-1) → S₆ = 14(2⁶-1)/(2-1) = 882 → Total needed: 114674 - 882 = 113792 → Solve 14(2ⁿ-1)/(2-1) = 113792 → n=13 → Additional terms: 13-6=7",
+        'q2-1-3': "New series: a₁=448, a₆=14 → 14=448·r⁵ → r⁵=1/32 → r=1/2 → S∞ = a/(1-r) = 448/(1-0.5) = 896",
+        'q2-2': "Sum: ∑(1/3 p + 1/6) = (1/3)∑p + ∑(1/6) = (1/3)[k(k+1)/2] + (k+1)/6 = (k(k+1)/6 + (k+1)/6 = (k+1)(k+1)/6 = (k+1)²/6 = 121/6 → k+1=11 → k=10",
+
+        // Placeholder solutions for other questions
+        'q3-1': "First differences: T₂ - T₁ = (4+2b+9) - (1+b+9) = 3+b = 7 → b=4",
+        'q3-2': "Tₙ = n² + 4n + 9 → T₆₀ = 3600 + 240 + 9 = 3849",
+        'q3-3': "First differences: Tₚ = (p+1)² + 4(p+1) + 9 - (p² + 4p + 9) = 2p + 5",
+        'q3-4a': "Set 2p+5=157 → p=76 → Terms T₇₆ and T₇₇",
+        'q3-4b': "Set 2p+5=157 → p=76 → Terms T₇₆ and T₇₇",
+
+        // Continue adding solutions for all questions...
+    };
+
+    // Normalize answers for comparison
+    const normalizeAnswer = (answer) => {
+        return answer
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .replace(/[^a-z0-9=.\-<>/]/g, '');
+    };
+
+    // Check if answer is correct
+    const isAnswerCorrect = (questionId, answer) => {
+        if (!answer) return false;
+
+        const normalized = normalizeAnswer(answer);
+        const correctAnswers = answerKey[questionId] || [];
+
+        return correctAnswers.some(correct =>
+            normalizeAnswer(correct) === normalized
+        );
+    };
 
     const handleInputChange = (questionId, value) => {
         setAnswers(prev => ({
@@ -28,8 +181,8 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    paperId:paperId,
-                    score: scoreData.correct,
+                    paperId: paperId,
+                    score: scoreData.percentage,
                     maxScore: scoreData.total
                 })
             });
@@ -49,30 +202,152 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
         }
     };
 
-
-    const checkAnswers = () => {
-        // This is a simplified version - in a real app you would have the full answer key
+    const calculateScore = () => {
         let correct = 0;
         let total = 0;
 
-        // Count total questions and check answers (simplified logic)
-        Object.keys(answers).forEach(qId => {
+        // Count total questions and check answers
+        Object.keys(answerKey).forEach(qId => {
             total++;
-            if (answers[qId].trim().toLowerCase() === "correct") {
+            if (isAnswerCorrect(qId, answers[qId])) {
                 correct++;
             }
         });
 
         const percentage = Math.round((correct / total) * 100);
-        const scoreData = { correct, total, percentage };
-        setScore(scoreData);
+        return { correct, total, percentage };
+    };
 
-        // Record performance after setting score
+    const submitAnswers = () => {
+        const scoreData = calculateScore();
+        setScore(scoreData);
+        setShowResults(true);
         recordPerformance(scoreData);
     };
 
+    // Reset the exam for another attempt
+    const handleRetry = () => {
+        setAnswers({});
+        setScore(null);
+        setShowResults(false);
+        setRecordError(null);
+        setRevealedAnswers({});
+    };
+
+    // Navigate back to the papers list
+    const handleExit = () => {
+        navigate('/digitized-question-papers');
+    };
+
+    const showSolution = (questionId) => {
+        setSolutionModal({
+            open: true,
+            questionId,
+            content: solutions[questionId] || "Solution not available for this question"
+        });
+    };
+
+    const showAnswer = (questionId) => {
+        const correctAnswer = answerKey[questionId]?.[0] || "No answer available";
+        setRevealedAnswers(prev => ({
+            ...prev,
+            [questionId]: correctAnswer
+        }));
+    };
+
+    // Render input with validation and solution buttons
+    const renderInput = (questionId, placeholder, isWide = false, isFile = false) => {
+        const value = answers[questionId] || '';
+        const revealedAnswer = revealedAnswers[questionId];
+
+        if (isFile) {
+            return (
+                <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    disabled={showResults}
+                />
+            );
+        }
+
+        const isCorrect = showResults && isAnswerCorrect(questionId, value);
+        const isIncorrect = showResults && value && !isCorrect;
+
+        return (
+            <div className="input-container">
+                <input
+                    type="text"
+                    className={`${isWide ? 'wide-input' : ''} 
+                        ${isCorrect ? 'correct-answer' : ''} 
+                        ${isIncorrect ? 'incorrect-answer' : ''}`}
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={(e) => handleInputChange(questionId, e.target.value)}
+                    disabled={showResults}
+                />
+
+                {showResults && (
+                    <div className="solution-buttons">
+                        <button
+                            className="solution-button"
+                            onClick={() => showAnswer(questionId)}
+                        >
+                            View Answer
+                        </button>
+                        <button
+                            className="solution-button"
+                            onClick={() => showSolution(questionId)}
+                        >
+                            View Solution
+                        </button>
+                    </div>
+                )}
+
+                {revealedAnswer && (
+                    <div className="revealed-answer">
+                        <strong>Correct Answer:</strong> {revealedAnswer}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Render coordinate inputs
+    const renderCoordinateInputs = (xId, yId, placeholderX, placeholderY) => (
+        <div className="input-group">
+            {renderInput(xId, placeholderX)}
+            <span>,</span>
+            {renderInput(yId, placeholderY)}
+        </div>
+    );
+
+    // Render paired inputs (e.g., "or" inputs)
+    const renderPairedInputs = (id1, id2, placeholder1, placeholder2) => (
+        <div className="input-group">
+            {renderInput(id1, placeholder1)}
+            <span>or</span>
+            {renderInput(id2, placeholder2)}
+        </div>
+    );
+
     return (
         <div className="math-exam">
+            {/* Solution Modal */}
+            {solutionModal.open && (
+                <div className="solution-modal">
+                    <div className="modal-content">
+                        <h3>Step-by-Step Solution</h3>
+                        <p>{solutionModal.content}</p>
+                        <button
+                            className="modal-close"
+                            onClick={() => setSolutionModal({ open: false, questionId: null, content: "" })}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <h1>MATHEMATICS P1 - NOVEMBER 2022</h1>
 
             {/* QUESTION 1 */}
@@ -84,78 +359,42 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>1.1.1 <span className="equation">(3x - 6)(x + 2) = 0</span></p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="(e.g., x = 2)"
-                                    value={answers['q1-1-1a'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-1a', e.target.value)}
-                                />
-                                <span>or</span>
-                                <input
-                                    type="text"
-                                    placeholder="(e.g., x = -2)"
-                                    value={answers['q1-1-1b'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-1b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q1-1-1a',
+                                'q1-1-1b',
+                                '(e.g., x = 2)',
+                                '(e.g., x = -2)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>1.1.2 <span className="equation">2x² - 6x + 1 = 0</span> (correct to TWO decimal places)</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="(e.g., x = 2.82)"
-                                    value={answers['q1-1-2a'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-2a', e.target.value)}
-                                />
-                                <span>or</span>
-                                <input
-                                    type="text"
-                                    placeholder="(e.g., x = 0.18)"
-                                    value={answers['q1-1-2b'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-2b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q1-1-2a',
+                                'q1-1-2b',
+                                '(e.g., x = 2.82)',
+                                '(e.g., x = 0.18)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>1.1.3 <span className="equation">x² - 90 > x</span></p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="First region (e.g., x < -9)"
-                                    value={answers['q1-1-3a'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-3a', e.target.value)}
-                                />
-                                <span>or</span>
-                                <input
-                                    type="text"
-                                    placeholder="Second region (e.g., x > 10)"
-                                    value={answers['q1-1-3b'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-3b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q1-1-3a',
+                                'q1-1-3b',
+                                'First region (e.g., x < -9)',
+                                'Second region (e.g., x > 10)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>1.1.4 <span className="equation">x - 7√x = -12</span></p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="First answer (e.g., x = 9)"
-                                    value={answers['q1-1-4a'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-4a', e.target.value)}
-                                />
-                                <span>or</span>
-                                <input
-                                    type="text"
-                                    placeholder="Second answer (e.g., x = 16)"
-                                    value={answers['q1-1-4b'] || ''}
-                                    onChange={(e) => handleInputChange('q1-1-4b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q1-1-4a',
+                                'q1-1-4b',
+                                'First answer (e.g., x = 9)',
+                                'Second answer (e.g., x = 16)'
+                            )}
                         </div>
                     </div>
 
@@ -164,67 +403,34 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                         <p><span className="equation">2x - y = 2</span></p>
                         <p><span className="equation">xy = 4</span></p>
                         <label>First Solution:</label>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                placeholder="x (e.g., x = 2)"
-                                value={answers['q1-2a-x'] || ''}
-                                onChange={(e) => handleInputChange('q1-2a-x', e.target.value)}
-                            />
-                            <span>,</span>
-                            <input
-                                type="text"
-                                placeholder="y (e.g., y = 2)"
-                                value={answers['q1-2a-y'] || ''}
-                                onChange={(e) => handleInputChange('q1-2a-y', e.target.value)}
-                            />
-                        </div>
+                        {renderCoordinateInputs(
+                            'q1-2a-x',
+                            'q1-2a-y',
+                            'x (e.g., 2)',
+                            'y (e.g., 2)'
+                        )}
                         <label>Second Solution:</label>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                placeholder="x (e.g., x = -1)"
-                                value={answers['q1-2b-x'] || ''}
-                                onChange={(e) => handleInputChange('q1-2b-x', e.target.value)}
-                            />
-                            <span>,</span>
-                            <input
-                                type="text"
-                                placeholder="y (e.g., y = -4)"
-                                value={answers['q1-2b-y'] || ''}
-                                onChange={(e) => handleInputChange('q1-2b-y', e.target.value)}
-                            />
-                        </div>
+                        {renderCoordinateInputs(
+                            'q1-2b-x',
+                            'q1-2b-y',
+                            'x (e.g., -1)',
+                            'y (e.g., -4)'
+                        )}
                     </div>
 
                     <div className="sub-question">
                         <p>1.3 Show that <i>2.5ⁿ - 5ⁿ⁺¹ + 5ⁿ⁺²</i> is even for all positive integer values of <i>n</i>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="Enter your proof"
-                            value={answers['q1-3'] || ''}
-                            onChange={(e) => handleInputChange('q1-3', e.target.value)}
-                        />
+                        {renderInput('q1-3', 'Enter your proof', true)}
                     </div>
 
                     <div className="sub-question">
                         <p>1.4 Determine the values of <i>x</i> and <i>y</i> if: <span className="equation">3ʸ⁺¹ ÷ √(96ˣ) = 1</span></p>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                placeholder="x (e.g., x = -2)"
-                                value={answers['q1-4-x'] || ''}
-                                onChange={(e) => handleInputChange('q1-4-x', e.target.value)}
-                            />
-                            <span>,</span>
-                            <input
-                                type="text"
-                                placeholder="y (e.g., y = -2)"
-                                value={answers['q1-4-y'] || ''}
-                                onChange={(e) => handleInputChange('q1-4-y', e.target.value)}
-                            />
-                        </div>
+                        {renderCoordinateInputs(
+                            'q1-4-x',
+                            'q1-4-y',
+                            'x (e.g., -2)',
+                            'y (e.g., -2)'
+                        )}
                     </div>
                 </div>
             </div>
@@ -238,47 +444,23 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>2.1.1 Calculate the value of the constant ratio, <i>r</i>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="r (e.g., r = 2)"
-                                value={answers['q2-1-1'] || ''}
-                                onChange={(e) => handleInputChange('q2-1-1', e.target.value)}
-                            />
+                            {renderInput('q2-1-1', 'r (e.g., 2)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>2.1.2 Determine the number of consecutive terms that must be added to the first 6 terms of the series in order to obtain a sum of 114674.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="(e.g., 7)"
-                                value={answers['q2-1-2'] || ''}
-                                onChange={(e) => handleInputChange('q2-1-2', e.target.value)}
-                            />
+                            {renderInput('q2-1-2', '(e.g., 7)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>2.1.3 If the first term of another series is 448 and the 6th term is 14, calculate the sum to infinity of the new series.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="(e.g., 896)"
-                                value={answers['q2-1-3'] || ''}
-                                onChange={(e) => handleInputChange('q2-1-3', e.target.value)}
-                            />
+                            {renderInput('q2-1-3', '(e.g., 896)', true)}
                         </div>
                     </div>
 
                     <div className="sub-question">
                         <p>2.2 If <span className="equation">∑ₚ₌₀ᵏ (1/3 p + 1/6) = 20 1/6</span>, determine the value of <i>k</i>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="k (e.g., k = 10)"
-                            value={answers['q2-2'] || ''}
-                            onChange={(e) => handleInputChange('q2-2', e.target.value)}
-                        />
+                        {renderInput('q2-2', 'k (e.g., 10)', true)}
                     </div>
                 </div>
             </div>
@@ -292,54 +474,27 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>3.1 Show that <i>b = 4</i>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="b (e.g., b = 4)"
-                                value={answers['q3-1'] || ''}
-                                onChange={(e) => handleInputChange('q3-1', e.target.value)}
-                            />
+                            {renderInput('q3-1', 'b (e.g., 4)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>3.2 Determine the value of the 60th term of this number pattern.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="T₆₀ (e.g., 3849)"
-                                value={answers['q3-2'] || ''}
-                                onChange={(e) => handleInputChange('q3-2', e.target.value)}
-                            />
+                            {renderInput('q3-2', 'T₆₀ (e.g., 3849)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>3.3 Determine the general term for the sequence of first differences of the quadratic number pattern. Write your answer in the form <span className="equation">Tₚ = mp + q</span>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Tₚ (e.g., 2p + 5)"
-                                value={answers['q3-3'] || ''}
-                                onChange={(e) => handleInputChange('q3-3', e.target.value)}
-                            />
+                            {renderInput('q3-3', 'Tₚ (e.g., 2p + 5)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>3.4 Which TWO consecutive terms in the quadratic number pattern have a first difference of 157?</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="First term (e.g., T₇₆)"
-                                    value={answers['q3-4a'] || ''}
-                                    onChange={(e) => handleInputChange('q3-4a', e.target.value)}
-                                />
-                                <span>and</span>
-                                <input
-                                    type="text"
-                                    placeholder="Second term (e.g., T₇₇)"
-                                    value={answers['q3-4b'] || ''}
-                                    onChange={(e) => handleInputChange('q3-4b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q3-4a',
+                                'q3-4b',
+                                'First term (e.g., T₇₆)',
+                                'Second term (e.g., T₇₇)'
+                            )}
                         </div>
                     </div>
                 </div>
@@ -355,81 +510,42 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>4.1.1 Write down the values of <i>p</i> and <i>q</i>.</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="p (e.g., p = -1)"
-                                    value={answers['q4-1-1-p'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-1-p', e.target.value)}
-                                />
-                                <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="q (e.g., q = 2)"
-                                    value={answers['q4-1-1-q'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-1-q', e.target.value)}
-                                />
-                            </div>
+                            {renderCoordinateInputs(
+                                'q4-1-1-p',
+                                'q4-1-1-q',
+                                'p (e.g., -1)',
+                                'q (e.g., 2)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>4.1.2 Calculate the coordinates of the <i>x</i>-intercept of <i>h</i>.</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="x (e.g., 1/2)"
-                                    value={answers['q4-1-2-x'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-2-x', e.target.value)}
-                                />
-                                <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="y (e.g., 0)"
-                                    value={answers['q4-1-2-y'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-2-y', e.target.value)}
-                                />
-                            </div>
+                            {renderCoordinateInputs(
+                                'q4-1-2-x',
+                                'q4-1-2-y',
+                                'x (e.g., 1/2)',
+                                'y (e.g., 0)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>4.1.3 Write down the <i>x</i>-coordinate of the <i>x</i>-intercept of <i>g</i> if <span className="equation">g(x) = h(x + 3)</span>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="x (e.g., -5/2)"
-                                value={answers['q4-1-3'] || ''}
-                                onChange={(e) => handleInputChange('q4-1-3', e.target.value)}
-                            />
+                            {renderInput('q4-1-3', 'x (e.g., -5/2)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>4.1.4 The equation of an axis of symmetry of <i>h</i> is <span className="equation">y = x + t</span>. Determine the value of <i>t</i>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="t (e.g., t = 1)"
-                                value={answers['q4-1-4'] || ''}
-                                onChange={(e) => handleInputChange('q4-1-4', e.target.value)}
-                            />
+                            {renderInput('q4-1-4', 't (e.g., 1)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>4.1.5 Determine the values of <i>x</i> for which <span className="equation">-2 ≤ 1/(x - 1)</span>.</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="First region (e.g., x ≤ 1/2)"
-                                    value={answers['q4-1-5a'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-5a', e.target.value)}
-                                />
-                                <span>or</span>
-                                <input
-                                    type="text"
-                                    placeholder="Second region (e.g., x > 1)"
-                                    value={answers['q4-1-5b'] || ''}
-                                    onChange={(e) => handleInputChange('q4-1-5b', e.target.value)}
-                                />
-                            </div>
+                            {renderPairedInputs(
+                                'q4-1-5a',
+                                'q4-1-5b',
+                                'First region (e.g., x ≤ 1/2)',
+                                'Second region (e.g., x > 1)'
+                            )}
                         </div>
                     </div>
 
@@ -439,73 +555,37 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>4.2.1 Write down the <i>y</i>-coordinate of C (the <i>y</i>-intercept of <i>f</i>).</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="y (e.g., -5)"
-                                value={answers['q4-2-1'] || ''}
-                                onChange={(e) => handleInputChange('q4-2-1', e.target.value)}
-                            />
+                            {renderInput('q4-2-1', 'y (e.g., -5)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>4.2.2 Determine the coordinates of D (the turning point of <i>f</i>).</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="x (e.g., 2)"
-                                    value={answers['q4-2-2-x'] || ''}
-                                    onChange={(e) => handleInputChange('q4-2-2-x', e.target.value)}
-                                />
-                                <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="y (e.g., -9)"
-                                    value={answers['q4-2-2-y'] || ''}
-                                    onChange={(e) => handleInputChange('q4-2-2-y', e.target.value)}
-                                />
-                            </div>
+                            {renderCoordinateInputs(
+                                'q4-2-2-x',
+                                'q4-2-2-y',
+                                'x (e.g., 2)',
+                                'y (e.g., -9)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>4.2.3 Determine the values of <i>a</i> and <i>q</i>.</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="a (e.g., -1)"
-                                    value={answers['q4-2-3-a'] || ''}
-                                    onChange={(e) => handleInputChange('q4-2-3-a', e.target.value)}
-                                />
-                                <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="q (e.g., -5)"
-                                    value={answers['q4-2-3-q'] || ''}
-                                    onChange={(e) => handleInputChange('q4-2-3-q', e.target.value)}
-                                />
-                            </div>
+                            {renderCoordinateInputs(
+                                'q4-2-3-a',
+                                'q4-2-3-q',
+                                'a (e.g., -1)',
+                                'q (e.g., -5)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>4.2.4 Write down the range of <i>g</i>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Range (e.g., y < -5)"
-                                value={answers['q4-2-4'] || ''}
-                                onChange={(e) => handleInputChange('q4-2-4', e.target.value)}
-                            />
+                            {renderInput('q4-2-4', 'Range (e.g., y < -5)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>4.2.5 Determine the values of <i>k</i> for which the value of <span className="equation">f(x) - k</span> will always be positive.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="k (e.g., k < -9)"
-                                value={answers['q4-2-5'] || ''}
-                                onChange={(e) => handleInputChange('q4-2-5', e.target.value)}
-                            />
+                            {renderInput('q4-2-5', 'k (e.g., k < -9)', true)}
                         </div>
                     </div>
                 </div>
@@ -521,65 +601,32 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>5.1 Write down the <i>y</i>-coordinate of B (the <i>y</i>-intercept of <i>g</i>).</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="y (e.g., 6)"
-                                value={answers['q5-1'] || ''}
-                                onChange={(e) => handleInputChange('q5-1', e.target.value)}
-                            />
+                            {renderInput('q5-1', 'y (e.g., 6)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>5.2 Determine the equation of <i>g⁻¹</i> in the form <span className="equation">g⁻¹(x) = mx + n</span>.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="g⁻¹(x) (e.g., (1/2)x - 3)"
-                                value={answers['q5-2'] || ''}
-                                onChange={(e) => handleInputChange('q5-2', e.target.value)}
-                            />
+                            {renderInput('q5-2', 'g⁻¹(x) (e.g., (1/2)x - 3)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>5.3 Determine the coordinates of A (the intersection of <i>g</i> and <i>g⁻¹</i>).</p>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="x (e.g., -6)"
-                                    value={answers['q5-3-x'] || ''}
-                                    onChange={(e) => handleInputChange('q5-3-x', e.target.value)}
-                                />
-                                <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="y (e.g., -6)"
-                                    value={answers['q5-3-y'] || ''}
-                                    onChange={(e) => handleInputChange('q5-3-y', e.target.value)}
-                                />
-                            </div>
+                            {renderCoordinateInputs(
+                                'q5-3-x',
+                                'q5-3-y',
+                                'x (e.g., -6)',
+                                'y (e.g., -6)'
+                            )}
                         </div>
 
                         <div className="sub-question">
                             <p>5.4 Calculate the length of AB.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Length (e.g., 6√5)"
-                                value={answers['q5-4'] || ''}
-                                onChange={(e) => handleInputChange('q5-4', e.target.value)}
-                            />
+                            {renderInput('q5-4', 'Length (e.g., 6√5)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>5.5 Calculate the area of △ABC.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Area (e.g., 54)"
-                                value={answers['q5-5'] || ''}
-                                onChange={(e) => handleInputChange('q5-5', e.target.value)}
-                            />
+                            {renderInput('q5-5', 'Area (e.g., 54)', true)}
                         </div>
                     </div>
                 </div>
@@ -591,25 +638,12 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 <div className="question">
                     <div className="sub-question">
                         <p>6.1 R12 000 was invested in a fund that paid interest at <i>m</i>% p.a., compounded quarterly. After 24 months, the value of the investment was R13 459. Determine the value of <i>m</i>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="m (e.g., 5.78)"
-                            value={answers['q6-1'] || ''}
-                            onChange={(e) => handleInputChange('q6-1', e.target.value)}
-                        />
+                        {renderInput('q6-1', 'm (e.g., 5.78)', true)}
                     </div>
 
                     <div className="sub-question">
                         <p>6.2 On 31 January 2022, Tino deposited R1 000 in an account that paid interest at 7.5% p.a., compounded monthly. He continued depositing R1 000 on the last day of every month. He will make the last deposit on 31 December 2022. Will Tino have sufficient funds in the account on 1 January 2023 to buy a computer that costs R13 000?</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="Amount and conclusion (e.g., R12421.22, No)"
-                            value={answers['q6-2'] || ''}
-                            onChange={(e) => handleInputChange('q6-2', e.target.value)}
-                            style={{maxWidth: '380px'}}
-                        />
+                        {renderInput('q6-2', 'Amount and conclusion (e.g., R12421.22, No)', true)}
                     </div>
 
                     <div className="sub-question">
@@ -617,25 +651,12 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>6.3.1 Calculate the value of the loan.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Loan amount (e.g., R212500)"
-                                value={answers['q6-3-1'] || ''}
-                                onChange={(e) => handleInputChange('q6-3-1', e.target.value)}
-                            />
+                            {renderInput('q6-3-1', 'Loan amount (e.g., R212500)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>6.3.2 The first repayment will be made 6 months after the loan has been granted. The loan will be repaid over a period of 6 years after it has been granted. Calculate the MONTHLY instalment.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Monthly instalment (e.g., R4724.96)"
-                                value={answers['q6-3-2'] || ''}
-                                onChange={(e) => handleInputChange('q6-3-2', e.target.value)}
-                                style={{maxWidth: '350px'}}
-                            />
+                            {renderInput('q6-3-2', 'Monthly instalment (e.g., R4724.96)', true)}
                         </div>
                     </div>
                 </div>
@@ -647,35 +668,17 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 <div className="question">
                     <div className="sub-question">
                         <p>7.1 Determine <span className="equation">f'(x)</span> from first principles if <span className="equation">f(x) = x² + x</span>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="f'(x) (e.g., 2x + 1)"
-                            value={answers['q7-1'] || ''}
-                            onChange={(e) => handleInputChange('q7-1', e.target.value)}
-                        />
+                        {renderInput('q7-1', 'f\'(x) (e.g., 2x + 1)', true)}
                     </div>
 
                     <div className="sub-question">
                         <p>7.2 Determine <span className="equation">f'(x)</span> if <span className="equation">f(x) = 2x³ - 3x⁴ + 8x</span>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="f'(x) (e.g., 10x⁴ - 12x³ + 8)"
-                            value={answers['q7-2'] || ''}
-                            onChange={(e) => handleInputChange('q7-2', e.target.value)}
-                        />
+                        {renderInput('q7-2', 'f\'(x) (e.g., 6x² - 12x³ + 8)', true)}
                     </div>
 
                     <div className="sub-question">
                         <p>7.3 The tangent to <span className="equation">g(x) = ax³ + 3x² + bx + c</span> has a minimum gradient at the point (-1; -7). For which values of <i>x</i> will <i>g</i> be concave up?</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="Region (e.g., x > -1)"
-                            value={answers['q7-3'] || ''}
-                            onChange={(e) => handleInputChange('q7-3', e.target.value)}
-                        />
+                        {renderInput('q7-3', 'Region (e.g., x > -1)', true)}
                     </div>
                 </div>
             </div>
@@ -691,26 +694,11 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                         <div className="sub-question">
                             <p>8.1 Determine the values of <i>m</i>, <i>n</i>, and <i>k</i>.</p>
                             <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="m (e.g., -3)"
-                                    value={answers['q8-1-m'] || ''}
-                                    onChange={(e) => handleInputChange('q8-1-m', e.target.value)}
-                                />
+                                {renderInput('q8-1-m', 'm (e.g., -3)')}
                                 <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="n (e.g., 2)"
-                                    value={answers['q8-1-n'] || ''}
-                                    onChange={(e) => handleInputChange('q8-1-n', e.target.value)}
-                                />
+                                {renderInput('q8-1-n', 'n (e.g., 2)')}
                                 <span>,</span>
-                                <input
-                                    type="text"
-                                    placeholder="k (e.g., 1)"
-                                    value={answers['q8-1-k'] || ''}
-                                    onChange={(e) => handleInputChange('q8-1-k', e.target.value)}
-                                />
+                                {renderInput('q8-1-k', 'k (e.g., 1)')}
                             </div>
                         </div>
 
@@ -720,43 +708,25 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                             <div className="sub-question">
                                 <p>8.2.1 Determine the coordinates of the turning points of <i>f</i>.</p>
                                 <label>First Turning Point:</label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        placeholder="x (e.g., -1/3)"
-                                        value={answers['q8-2-1a-x'] || ''}
-                                        onChange={(e) => handleInputChange('q8-2-1a-x', e.target.value)}
-                                    />
-                                    <span>,</span>
-                                    <input
-                                        type="text"
-                                        placeholder="y (e.g., 49/27)"
-                                        value={answers['q8-2-1a-y'] || ''}
-                                        onChange={(e) => handleInputChange('q8-2-1a-y', e.target.value)}
-                                    />
-                                </div>
+                                {renderCoordinateInputs(
+                                    'q8-2-1a-x',
+                                    'q8-2-1a-y',
+                                    'x (e.g., -1/3)',
+                                    'y (e.g., 49/27)'
+                                )}
                                 <label>Second Turning Point:</label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        placeholder="x (e.g., 1)"
-                                        value={answers['q8-2-1b-x'] || ''}
-                                        onChange={(e) => handleInputChange('q8-2-1b-x', e.target.value)}
-                                    />
-                                    <span>,</span>
-                                    <input
-                                        type="text"
-                                        placeholder="y (e.g., 3)"
-                                        value={answers['q8-2-1b-y'] || ''}
-                                        onChange={(e) => handleInputChange('q8-2-1b-y', e.target.value)}
-                                    />
-                                </div>
+                                {renderCoordinateInputs(
+                                    'q8-2-1b-x',
+                                    'q8-2-1b-y',
+                                    'x (e.g., 1)',
+                                    'y (e.g., 3)'
+                                )}
                             </div>
 
                             <div className="sub-question">
                                 <p>8.2.2 Draw the graph of <i>f</i>. Indicate on your graph the coordinates of the turning points and the intercepts with the axes.</p>
                                 <div className="input-group">
-                                    <input type="file" accept="image/*,application/pdf" />
+                                    {renderInput('q8-2-2', '', false, true)}
                                 </div>
                             </div>
                         </div>
@@ -766,24 +736,12 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                             <div className="sub-question">
                                 <p>8.3.1 Write down the value of <i>a</i> (x-coordinate of D, the intersection of tangents at E and W).</p>
-                                <input
-                                    type="text"
-                                    className="wide-input"
-                                    placeholder="a (e.g., 1/3)"
-                                    value={answers['q8-3-1'] || ''}
-                                    onChange={(e) => handleInputChange('q8-3-1', e.target.value)}
-                                />
+                                {renderInput('q8-3-1', 'a (e.g., 1/3)', true)}
                             </div>
 
                             <div className="sub-question">
                                 <p>8.3.2 Determine the value(s) of <i>b</i> for which <i>h</i> and <i>g</i> will no longer be tangents to <i>f'</i>.</p>
-                                <input
-                                    type="text"
-                                    className="wide-input"
-                                    placeholder="b (e.g., b < 4/3)"
-                                    value={answers['q8-3-2'] || ''}
-                                    onChange={(e) => handleInputChange('q8-3-2', e.target.value)}
-                                />
+                                {renderInput('q8-3-2', 'b (e.g., b < 4/3)', true)}
                             </div>
                         </div>
                     </div>
@@ -796,13 +754,7 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 <div className="question">
                     <div className="sub-question">
                         <p>Given <span className="equation">f(x) = x²</span>. Determine the minimum distance between the point (10; 2) and a point on <i>f</i>.</p>
-                        <input
-                            type="text"
-                            className="wide-input"
-                            placeholder="Minimum distance (e.g., 2√17)"
-                            value={answers['q9-1'] || ''}
-                            onChange={(e) => handleInputChange('q9-1', e.target.value)}
-                        />
+                        {renderInput('q9-1', 'Minimum distance (e.g., 2√17)', true)}
                     </div>
                 </div>
             </div>
@@ -820,48 +772,23 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                             <div className="sub-question">
                                 <p>(a) <i>y</i>, the probability that none of the events will occur.</p>
-                                <input
-                                    type="text"
-                                    className="wide-input"
-                                    placeholder="y (e.g., 0.107)"
-                                    value={answers['q10-1-1a'] || ''}
-                                    onChange={(e) => handleInputChange('q10-1-1a', e.target.value)}
-                                />
+                                {renderInput('q10-1-1a', 'y (e.g., 0.107)', true)}
                             </div>
 
                             <div className="sub-question">
                                 <p>(b) <i>x</i>, the probability that all three events will occur.</p>
-                                <input
-                                    type="text"
-                                    className="wide-input"
-                                    placeholder="x (e.g., 0.16)"
-                                    value={answers['q10-1-1b'] || ''}
-                                    onChange={(e) => handleInputChange('q10-1-1b', e.target.value)}
-                                />
+                                {renderInput('q10-1-1b', 'x (e.g., 0.16)', true)}
                             </div>
                         </div>
 
                         <div className="sub-question">
                             <p>10.1.2 Determine the probability that at least two of the events will take place.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Probability (e.g., 0.45)"
-                                value={answers['q10-1-2'] || ''}
-                                onChange={(e) => handleInputChange('q10-1-2', e.target.value)}
-                            />
+                            {renderInput('q10-1-2', 'Probability (e.g., 0.45)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>10.1.3 Are events B and C independent? Justify your answer.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Conclusion (e.g., Yes, P(B ∩ C) = P(B)P(C))"
-                                value={answers['q10-1-3'] || ''}
-                                onChange={(e) => handleInputChange('q10-1-3', e.target.value)}
-                                style={{maxWidth: '350px'}}
-                            />
+                            {renderInput('q10-1-3', 'Conclusion (e.g., Yes, P(B ∩ C) = P(B)P(C))', true)}
                         </div>
                     </div>
 
@@ -870,45 +797,310 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
                         <div className="sub-question">
                             <p>10.2.1 How many possible 4-digit combinations are there to open the lock?</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Number (e.g., 840)"
-                                value={answers['q10-2-1'] || ''}
-                                onChange={(e) => handleInputChange('q10-2-1', e.target.value)}
-                            />
+                            {renderInput('q10-2-1', 'Number (e.g., 840)', true)}
                         </div>
 
                         <div className="sub-question">
                             <p>10.2.2 Calculate the probability that you will open the lock at the first attempt if it is given that the code is greater than 5000 and the third digit is 2.</p>
-                            <input
-                                type="text"
-                                className="wide-input"
-                                placeholder="Probability (e.g., 0.0133)"
-                                value={answers['q10-2-2'] || ''}
-                                onChange={(e) => handleInputChange('q10-2-2', e.target.value)}
-                            />
+                            {renderInput('q10-2-2', 'Probability (e.g., 0.0133)', true)}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button
-                className="check-button"
-                onClick={checkAnswers}
-                disabled={recording}
-            >
-                {recording ? 'Recording...' : 'Check Answers'}
-            </button>
+            <div className="submission-section">
+                <button
+                    className="submit-button"
+                    onClick={submitAnswers}
+                    disabled={recording || showResults}
+                >
+                    {recording ? 'Submitting...' : 'Submit Answers'}
+                </button>
 
-            {score && (
-                <div className="score-display">
-                    {/* ... existing score display ... */}
-                    {recordError && (
-                        <p className="error">Recording failed: {recordError}</p>
-                    )}
-                </div>
-            )}
+                {score && (
+                    <div className="score-display">
+                        <h3>Your Score: {score.percentage}%</h3>
+                        <p>({score.correct} out of {score.total} correct)</p>
+                        {score.percentage >= 50 ? (
+                            <p className="pass">Excellent work! You've passed!</p>
+                        ) : (
+                            <p className="fail">Keep practicing! You'll improve!</p>
+                        )}
+
+                        {recordError && (
+                            <p className="error">Recording failed: {recordError}</p>
+                        )}
+
+                        {/* Add Retry and Exit buttons */}
+                        <div className="action-buttons">
+                            <button
+                                className="retry-button"
+                                onClick={handleRetry}
+                            >
+                                Retry Exam
+                            </button>
+                            <button
+                                className="exit-button"
+                                onClick={handleExit}
+                            >
+                                Exit
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <style jsx>{`
+                .math-exam {
+                    font-family: 'Arial', sans-serif;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f9f9f9;
+                    border-radius: 10px;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                }
+                
+                h1, h2 {
+                    color: #2c3e50;
+                    text-align: center;
+                }
+                
+                .question-section {
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                }
+                
+                .sub-question {
+                    margin: 15px 0;
+                }
+                
+                .equation {
+                    font-family: 'Times New Roman', serif;
+                    font-style: italic;
+                }
+                
+                input {
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: 16px;
+                }
+                
+                .input-container {
+                    margin-bottom: 15px;
+                }
+                
+                .input-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin: 10px 0;
+                }
+                
+                .wide-input {
+                    width: 100%;
+                    max-width: 400px;
+                }
+                
+                .correct-answer {
+                    border: 2px solid #4CAF50;
+                    background-color: #e8f5e9;
+                }
+                
+                .incorrect-answer {
+                    border: 2px solid #f44336;
+                    background-color: #ffebee;
+                }
+                
+                .solution-buttons {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 8px;
+                }
+                
+                .solution-button {
+                    padding: 6px 12px;
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                }
+                
+                .solution-button:hover {
+                    background-color: #2980b9;
+                }
+                
+                .revealed-answer {
+                    margin-top: 8px;
+                    padding: 10px;
+                    background-color: #e9f7ef;
+                    border-left: 4px solid #28a745;
+                    border-radius: 4px;
+                    font-size: 14px;
+                }
+                
+                .solution-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.7);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+                
+                .modal-content {
+                    background-color: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    max-width: 600px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+                }
+                
+                .modal-content h3 {
+                    margin-top: 0;
+                    color: #2c3e50;
+                    border-bottom: 2px solid #eee;
+                    padding-bottom: 10px;
+                }
+                
+                .modal-content p {
+                    line-height: 1.6;
+                    font-size: 16px;
+                    white-space: pre-wrap;
+                }
+                
+                .modal-close {
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-top: 20px;
+                    font-size: 16px;
+                }
+                
+                .modal-close:hover {
+                    background-color: #2980b9;
+                }
+                
+                .submit-button {
+                    background-color: #2196F3;
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                    margin: 20px 0;
+                    display: block;
+                    width: 200px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .submit-button:hover:not(:disabled) {
+                    background-color: #0b7dda;
+                }
+                
+                .submit-button:disabled {
+                    background-color: #bbbbbb;
+                    cursor: not-allowed;
+                }
+                
+                .score-display {
+                    margin-top: 20px;
+                    padding: 20px;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                    border: 1px solid #ddd;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    text-align: center;
+                }
+                
+                .score-display h3 {
+                    margin: 0 0 10px 0;
+                    font-size: 24px;
+                    color: #333;
+                }
+                
+                .pass {
+                    color: #4CAF50;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                
+                .fail {
+                    color: #f44336;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                
+                .error {
+                    color: #f44336;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                
+                .action-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    margin-top: 20px;
+                }
+                
+                .retry-button, .exit-button {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-weight: bold;
+                }
+                
+                .retry-button {
+                    background-color: #4CAF50;
+                    color: white;
+                }
+                
+                .retry-button:hover {
+                    background-color: #3e8e41;
+                }
+                
+                .exit-button {
+                    background-color: #f44336;
+                    color: white;
+                }
+                
+                .exit-button:hover {
+                    background-color: #d32f2f;
+                }
+                
+                .image-placeholder {
+                    max-width: 100%;
+                    height: auto;
+                    display: block;
+                    margin: 15px auto;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+            `}</style>
         </div>
     );
 };

@@ -57,6 +57,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
             }
             const papersData = await papersResponse.json();
             if (!papersResponse.ok || !papersData.success) {
+                console.log(papersData.data)
                 throw new Error(papersData.message || `Failed to fetch digitized question papers: HTTP ${papersResponse.status}`);
             }
 
