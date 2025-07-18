@@ -229,7 +229,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                                     Subject: {quiz.subjectId || 'Unknown'} | Questions: {quiz.questions?.length || 0}
                                 </p>
                                 <div className="space-y-6">
-                                    {quiz.questions?.map((question) => {
+                                    {quiz.questions?.map((question, qIndex) => {
                                         if (!question.questionId) {
                                             console.error('Missing question ID:', question);
                                             return null;
@@ -240,7 +240,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                                                 className="question-card bg-[var(--bg-secondary)] rounded-lg p-6 border border-[var(--border)]"
                                             >
                                                 <h3 className="text-lg font-medium text-[var(--text-primary)] mb-4">
-                                                    {question.questionText}
+                                                    {qIndex + 1}. {question.questionText}
                                                 </h3>
                                                 <div className="space-y-2">
                                                     {question.options?.map((option, optIndex) => (

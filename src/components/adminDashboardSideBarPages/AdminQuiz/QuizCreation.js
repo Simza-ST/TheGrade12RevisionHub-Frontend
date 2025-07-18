@@ -1,31 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import AdminSidebar from "../../common/AdminSidebar";
-import AdminHeader from "../../common/AdminHeader";
+import AdminSidebar from '../../common/AdminSidebar';
+import AdminHeader from '../../common/AdminHeader';
 
 // API Base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
 const CreateQuiz = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [subjects, setSubjects] = useState([]);
     const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
     const [quiz, setQuiz] = useState({
         title: '',
-        subjectId: '',
+        subject: '',
+        description: '',
         questions: [{ questionText: '', options: [''], correctAnswer: '' }],
     });
     const [errors, setErrors] = useState({});
     const [responseMessage, setResponseMessage] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('No authentication token found. Please log in.');
+                }
+                const headers = {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                };
+                console.log('Fetching subjects from:', `${API_BASE_URL}/user/subjects`);
+                const response = await fetch(`${API_BASE_URL}/user/subjects`, { headers });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const subjectList = (data.data || []).map(s => s.subjectName || s.name || s).sort();
+                    console.log('Subjects fetched:', subjectList);
+                    setSubjects(subjectList);
+                } else {
+                    throw new Error(data.message || 'Failed to fetch subjects');
+                }
+            } catch (error) {
+                console.error('Error fetching subjects:', error);
+                setResponseMessage(`Error fetching subjects: ${error.message}`);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSubjects();
+    }, []); // Empty dependency array to run once on mount
+
     const validateForm = () => {
         const newErrors = {};
         if (!quiz.title.trim()) newErrors.title = 'Title is required';
-        if (!quiz.subjectId.trim()) newErrors.subjectId = 'Subject ID is required';
+        if (!quiz.subject.trim()) newErrors.subject = 'Subject is required';
+        if (!quiz.description.trim()) newErrors.description = 'Description is required';
         quiz.questions.forEach((q, index) => {
             if (!q.questionText.trim()) newErrors[`questionText${index}`] = `Question ${index + 1} text is required`;
             if (q.options.length === 0 || q.options.some((opt) => !opt.trim())) {
@@ -45,7 +81,7 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
             const response = await fetch(`${API_BASE_URL}/api/quizzes`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(quiz),
             });
@@ -57,9 +93,10 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
 
             const data = await response.text();
             setResponseMessage(data);
-            setQuiz({ title: '', subjectId: '', questions: [{ questionText: '', options: [''], correctAnswer: '' }] });
+            setQuiz({ title: '', subject: '', description: '', questions: [{ questionText: '', options: [''], correctAnswer: '' }] });
             setErrors({});
         } catch (error) {
+            console.error('Error creating quiz:', error);
             setResponseMessage(error.message || 'Failed to create quiz');
         }
     };
@@ -120,6 +157,48 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
 
     return (
         <div className="flex min-h-screen">
+            <style>
+                {`
+                    .form-input {
+                        margin-top: 4px;
+                        display: block;
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid var(--border, ${isDarkMode ? '#475569' : '#e5e7eb'});
+                        border-radius: 6px;
+                        background-color: var(--bg-primary, ${isDarkMode ? '#1e293b' : '#ffffff'});
+                        color: var(--text-normal, ${isDarkMode ? '#e2e8f0' : '#1f2937'});
+                        font-size: 0.875rem;
+                        line-height: 1.25rem;
+                    }
+                    .form-input:focus {
+                        border-color: var(--accent-primary, #007bff);
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+                    }
+                    .form-input:disabled {
+                        background-color: var(--bg-disabled, ${isDarkMode ? '#2d3748' : '#f1f5f9'});
+                        cursor: not-allowed;
+                    }
+                    .form-input-select {
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        appearance: none;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 0.5rem center;
+                        background-size: 1.5em;
+                        padding-right: 2rem;
+                    }
+                    .animate-spin {
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}
+            </style>
             <AdminSidebar
                 user={user}
                 onLogout={onLogout}
@@ -149,7 +228,45 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
                                 {responseMessage}
                             </div>
                         )}
+                        {loading && (
+                            <div className="flex justify-center items-center mb-4">
+                                <div
+                                    className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[var(--accent-primary)]"
+                                    role="status"
+                                    aria-label="Loading subjects..."
+                                ></div>
+                            </div>
+                        )}
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label htmlFor="subject-select" className="block text-sm font-medium text-[var(--text-normal)]">
+                                    Select a Subject
+                                </label>
+                                <select
+                                    id="subject-select"
+                                    value={quiz.subject}
+                                    onChange={(e) => updateQuizField('subject', e.target.value)}
+                                    className="mt-1 block w-full p-2 border border-[var(--border)] rounded-md bg-[var(--bg-primary)] text-[var(--text-normal)] focus:border-[var(--accent-primary)] focus:shadow-lg form-input-select"
+                                    aria-label="Select a subject"
+                                    disabled={loading || subjects.length === 0}
+                                >
+                                    <option value="" disabled>
+                                        Choose a subject
+                                    </option>
+                                    {subjects.length > 0 ? (
+                                        subjects.map((subject, index) => (
+                                            <option key={`${subject}-${index}`} value={subject}>
+                                                {subject}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>
+                                            No subjects available
+                                        </option>
+                                    )}
+                                </select>
+                                {errors.subject && <p className="text-red-500 text-sm">{errors.subject}</p>}
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-[var(--text-normal)]">Quiz Title</label>
                                 <input
@@ -162,15 +279,15 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
                                 {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[var(--text-normal)]">Subject ID</label>
+                                <label className="block text-sm font-medium text-[var(--text-normal)]">Description</label>
                                 <input
                                     type="text"
-                                    value={quiz.subjectId}
-                                    onChange={(e) => updateQuizField('subjectId', e.target.value)}
+                                    value={quiz.description}
+                                    onChange={(e) => updateQuizField('description', e.target.value)}
                                     className="mt-1 block w-full p-2 border border-[var(--border)] rounded-md bg-[var(--bg-primary)] text-[var(--text-normal)] focus:border-[var(--accent-primary)] focus:shadow-lg"
-                                    placeholder="Enter subject ID"
+                                    placeholder="Enter quiz description"
                                 />
-                                {errors.subjectId && <p className="text-red-500 text-sm">{errors.subjectId}</p>}
+                                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
                             </div>
                             {quiz.questions.map((question, qIndex) => (
                                 <div key={qIndex} className="border border-[var(--border)] p-4 rounded-md">

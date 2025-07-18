@@ -4,24 +4,45 @@ import AdminSidebar from "../../common/AdminSidebar";
 import AdminHeader from "../../common/AdminHeader";
 import './UploadDocuments.css';
 
-// Mock data for fallback
-const defaultSubjects = [
-    { subjectName: 'Mathematics' },
-    { subjectName: 'Physics' },
-    { subjectName: 'Chemistry' },
-];
-
-const UploadDocuments = ({ user, notifications, onLogout, subjects = defaultSubjects, onUpload }) => {
+const UploadDocuments = ({ user, notifications, onLogout,  onUpload }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
     const [subjectName, setSubjectName] = useState('');
     const [file, setFile] = useState(null);
     const selectRef = useRef(null);
+    const [subjects, setSubjects] = useState([]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
         localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
+
+    useEffect(() => {
+        const fetchSubjects = async () => {
+
+            try {
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('No authentication token found. Please log in.');
+                }
+                const headers = {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                };
+                const response = await fetch("http://localhost:6262/user/subjects", { headers });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const subjectList = (data.data || []).map(s => s.subjectName || s.name || s).sort();
+                    setSubjects(subjectList);
+                } else {
+                    throw new Error(data.message || 'Failed to fetch subjects');
+                }
+            } catch (error) {
+                console.error('Error fetching subjects:', error);
+            }
+        };
+        fetchSubjects();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -87,8 +108,8 @@ const UploadDocuments = ({ user, notifications, onLogout, subjects = defaultSubj
                             >
                                 <option value="">Select Subject</option>
                                 {subjects.map((subject, index) => (
-                                    <option key={index} value={subject.subjectName}>
-                                        {subject.subjectName}
+                                    <option key={index} value={subject}>
+                                        {subject}
                                     </option>
                                 ))}
                             </select>

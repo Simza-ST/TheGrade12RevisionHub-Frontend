@@ -90,6 +90,9 @@ const QuizCard = ({ quiz, onStartQuiz, darkMode }) => {
                 {quiz.title || 'Untitled Quiz'}
             </h3>
             <p className="text-sm text-[var(--text-secondary)] mb-2">
+                Description: {quiz.description || 'Unknown'}
+            </p>
+            <p className="text-sm text-[var(--text-secondary)] mb-2">
                 Subject: {quiz.subject || 'Unknown'}
             </p>
             <p className="text-sm text-[var(--text-secondary)] mb-2">
