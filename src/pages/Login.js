@@ -51,7 +51,7 @@ const Login = ({ setIsAuthenticated }) => {
             setError('');
             //navigate('/dashboard');
             //navigate('/admin-Dashboard');
-            if (email === "simzast123@gmail.com") {
+            if (email === "boitumelomatome2@gmail.com") {
                 navigate('/admin-Dashboard');
             }
             else {
