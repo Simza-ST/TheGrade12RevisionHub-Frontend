@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
-import FilterSection from '../../dashboardSidebarPages/question-papers/FilterSection'; // Reuse from question papers
-import ResourcesList from './ResourcesList';
-import PDFModal from '../../dashboardSidebarPages/question-papers/PDFModal'; // Reuse from question papers
+
 import useResources from '../../../hooks/useResources';
+import FilterSection from "./FilterSection";
+import ResourcesList from "./ResourcesList";
+import PDFModal from "./PDFModal";
 
 const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();

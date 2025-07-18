@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-//import Tooltip from './Tooltip'; // Assuming Tooltip is available from question papers
 import Tooltip from '../../dashboardSidebarPages/question-papers/Tooltip';
 
 const ResourcesList = ({ resources, selectedSubject, selectedYear, pdfLoading, onViewPdf, onDownloadPdf }) => {
