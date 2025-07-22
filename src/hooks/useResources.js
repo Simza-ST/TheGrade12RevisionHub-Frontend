@@ -12,6 +12,7 @@ const useResources = () => {
     const [pdfLoading, setPdfLoading] = useState(false);
     const [currentResource, setCurrentResource] = useState(null);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    console.log('API_BASE_URL:', API_BASE_URL);
 
     const fetchData = async (url, setData, errorMessage) => {
         try {
@@ -35,14 +36,12 @@ const useResources = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch enrolled subjects
         fetchData(
             `${API_BASE_URL}/user/enrolled-subjects`,
             (data) => setSubjects(Array.isArray(data) ? data.map((s) => s.subjectName || s) : []),
             'Failed to fetch subjects'
         );
 
-        // Fetch resources
         const fetchResources = async () => {
             try {
                 const headers = {
@@ -70,19 +69,57 @@ const useResources = () => {
         fetchResources();
     }, [selectedSubject, selectedYear]);
 
-    const viewPdf = (resource) => {
+    const viewPdf = async (resource) => {
+        if (resource.resourceType !== 'file') return;
+
         setPdfLoading(true);
         setCurrentResource(resource);
-        setPdfUrl(`${API_BASE_URL}${resource.url}`);
-        setShowModal(true);
-        setTimeout(() => setPdfLoading(false), 1000); // Simulate loading
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${resource.url}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch PDF');
+
+            // Create object URL from response
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            setPdfUrl(blobUrl);
+            setShowModal(true);
+        } catch (err) {
+            setError(`Failed to load PDF: ${err.message}`);
+        } finally {
+            setPdfLoading(false);
+        }
     };
 
-    const downloadPdf = (resource) => {
-        const link = document.createElement('a');
-        link.href = `${API_BASE_URL}${resource.url}`;
-        link.download = resource.fileName;
-        link.click();
+    const downloadPdf = async (resource) => {
+        if (resource.resourceType === 'file') {
+            try {
+                const headers = {
+                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                };
+                const response = await fetch(`${API_BASE_URL}${resource.url}?download=true`, { headers });
+
+                if (!response.ok) throw new Error(`Failed to download ${resource.fileName}`);
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = resource.fileName || 'resource.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                setError(`Failed to download: ${err.message}`);
+            }
+        }
     };
 
     const resetError = () => setError(null);

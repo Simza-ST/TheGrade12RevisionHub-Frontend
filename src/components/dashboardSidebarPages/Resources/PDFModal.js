@@ -1,110 +1,111 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import { Document, Page, pdfjs } from 'react-pdf';
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import { useEffect, useCallback, useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
-const PDFModal = ({ showModal, onClose, pdfUrl, currentPaper, pdfLoading, onDownloadPdf }) => {
+const PDFModal = ({ showModal, onClose, pdfUrl, currentResource, pdfLoading, onDownloadPdf }) => {
+    const [pdfError, setPdfError] = useState(null);
+    const [iframeLoaded, setIframeLoaded] = useState(false);
+
+    const closeModal = useCallback(() => {
+        onClose();
+        if (pdfUrl && pdfUrl.startsWith('blob:')) {
+            window.URL.revokeObjectURL(pdfUrl);
+        }
+        setPdfError(null);
+        setIframeLoaded(false);
+    }, [onClose, pdfUrl]);
+
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape' && showModal) closeModal();
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [showModal, closeModal]);
+
+    useEffect(() => {
+        if (pdfUrl && showModal) {
+            // Verify the PDF URL is accessible
+            fetch(pdfUrl, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    setPdfError(null);
+                })
+                .catch((error) => {
+                    console.error('Failed to fetch pdfUrl:', error);
+                    setPdfError(`Failed to load ${currentResource?.title || 'resource'}: ${error.message}`);
+                });
+        }
+    }, [pdfUrl, showModal, currentResource]);
+
     if (!showModal) return null;
 
     return (
-        <div className="modal">
-            <style>
-                {`
-                    .modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0, 0, 0, 0.5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 1000;
-                    }
-                    .modal-content {
-                        background-color: var(--bg-secondary, #ffffff);
-                        padding: 24px;
-                        border-radius: 8px;
-                        max-width: 90%;
-                        max-height: 90%;
-                        overflow: auto;
-                        position: relative;
-                    }
-                    .btn-primary {
-                        background-color: var(--accent-primary, #007bff);
-                        color: #ffffff;
-                        padding: 8px 16px;
-                        border-radius: 4px;
-                        border: none;
-                        cursor: pointer;
-                        margin-right: 8px;
-                    }
-                    .btn-primary:hover {
-                        background-color: var(--hover-primary, #0056b3);
-                    }
-                    .btn-secondary {
-                        background-color: var(--bg-tertiary, #e5e7eb);
-                        color: var(--text-primary, #333333);
-                        padding: 8px 16px;
-                        border-radius: 4px;
-                        border: none;
-                        cursor: pointer;
-                    }
-                    .btn-secondary:hover {
-                        background-color: var(--hover-tertiary, #d1d5db);
-                    }
-                    .flex {
-                        display: flex;
-                    }
-                    .justify-end {
-                        justify-content: flex-end;
-                    }
-                    .mt-4 {
-                        margin-top: 16px;
-                    }
-                    .text-center {
-                        text-align: center;
-                    }
-                    .text-sm {
-                        font-size: 0.875rem;
-                        line-height: 1.25rem;
-                    }
-                    .text-[var(--text-secondary)] {
-                        color: var(--text-secondary, #666666);
-                    }
-                `}
-            </style>
-            <div className="modal-content">
-                {pdfLoading ? (
-                    <div className="text-center text-sm text-[var(--text-secondary)]">Loading PDF...</div>
-                ) : pdfUrl ? (
-                    <Document
-                        file={pdfUrl}
-                        onLoadError={(error) => {
-                            console.error('PDF Load Error:', error);
-                            alert(`Failed to load ${currentPaper?.fileName}: ${error.message}`);
-                        }}
+        <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+        >
+            <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+                <div className="flex justify-between items-center mb-3">
+                    <h2 id="modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
+                        {currentResource ? currentResource.title : 'View Resource'}
+                    </h2>
+                    <button
+                        onClick={closeModal}
+                        className="text-[var(--text-primary)] hover:text-[var(--accent-primary)] text-xl"
+                        aria-label="Close modal"
                     >
-                        <Page pageNumber={1} width={600} />
-                    </Document>
-                ) : (
-                    <div className="text-center text-sm text-[var(--text-secondary)]">Failed to load PDF</div>
-                )}
-                <div className="flex justify-end mt-4">
-                    {currentPaper && (
-                        <button
-                            onClick={() => onDownloadPdf(currentPaper)}
-                            className="btn-primary"
-                            disabled={pdfLoading}
-                        >
-                            Download
-                        </button>
-                    )}
-                    <button onClick={onClose} className="btn-secondary">
-                        Close
+                        ✕
                     </button>
                 </div>
+                {pdfLoading && !iframeLoaded ? (
+                    <LoadingSpinner className="h-[60vh]" />
+                ) : pdfError ? (
+                    <div className="text-center text-sm text-[var(--accent-secondary)] p-4 bg-[rgba(220,53,69,0.1)] rounded">
+                        {pdfError}
+                    </div>
+                ) : pdfUrl ? (
+                    <>
+                        <iframe
+                            src={pdfUrl}
+                            className="w-full h-[60vh] rounded"
+                            title={currentResource?.title || 'Resource Viewer'}
+                            onLoad={() => setIframeLoaded(true)}
+                            onError={(e) => {
+                                console.error('Iframe error:', e);
+                                setPdfError('Failed to display document. Please try downloading instead.');
+                            }}
+                            style={{ border: 'none', display: iframeLoaded ? 'block' : 'none' }}
+                            sandbox="allow-same-origin allow-scripts"
+                        />
+                        {!iframeLoaded && !pdfLoading && (
+                            <div className="h-[60vh] flex items-center justify-center">
+                                <p className="text-[var(--text-secondary)]">Loading document...</p>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="text-center text-sm text-[var(--text-secondary)]">
+                        No document URL provided
+                    </div>
+                )}
+                {currentResource && iframeLoaded && (
+                    <button
+                        onClick={() => onDownloadPdf(currentResource)}
+                        className="mt-3 text-[var(--accent-primary)] hover:underline px-2 py-1"
+                        aria-label={`Download ${currentResource?.title || 'resource'}`}
+                    >
+                        Download PDF
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -114,11 +115,9 @@ PDFModal.propTypes = {
     showModal: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     pdfUrl: PropTypes.string,
-    currentPaper: PropTypes.shape({
+    currentResource: PropTypes.shape({
         id: PropTypes.number,
         title: PropTypes.string,
-        fileName: PropTypes.string,
-        url: PropTypes.string,
     }),
     pdfLoading: PropTypes.bool.isRequired,
     onDownloadPdf: PropTypes.func.isRequired,

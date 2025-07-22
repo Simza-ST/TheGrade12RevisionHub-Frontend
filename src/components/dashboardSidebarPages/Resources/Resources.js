@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
-
 import useResources from '../../../hooks/useResources';
 import FilterSection from "./FilterSection";
 import ResourcesList from "./ResourcesList";
@@ -370,7 +369,7 @@ const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMo
                             showModal={showModal}
                             onClose={() => setShowModal(false)}
                             pdfUrl={pdfUrl}
-                            currentPaper={currentResource}
+                            currentResource={currentResource}
                             pdfLoading={pdfLoading}
                             onDownloadPdf={downloadPdf}
                         />

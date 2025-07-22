@@ -50,7 +50,7 @@ const AdminSidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode })
         { name: 'Admin Dashboard', path: '/admin-dashboard', icon: '🏠' },
         { name: 'List of Students', path: '/students', icon: '👨‍🎓' },
         { name: 'Upload Documents', path: '/upload-documents', icon: '📚' },
-        { name: 'Upload Resources', path: '/uploading-resources', icon: '📚' },
+        { name: 'Upload Resources', path: '/uploading-resources', icon: '📤' },
         { name: 'Create Quiz', path: '/quiz-creation', icon: '📑' },
         { name: 'Create Certificate', path: '/cert-creation', icon: '📜' },
         { name: 'Send Email', path: '/chat', icon: '📩' },
