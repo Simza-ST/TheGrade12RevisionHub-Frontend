@@ -5,7 +5,7 @@ import './Signup.css';
 const Signup = () => {
     const [error, setError] = useState('');
 
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -40,7 +40,7 @@ const Signup = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/signup`, {
+            const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

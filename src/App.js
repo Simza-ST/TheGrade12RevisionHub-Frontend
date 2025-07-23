@@ -34,6 +34,9 @@ import CertificateGenerator from "./components/adminDashboardSideBarPages/AdminS
 import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizViewer";
 import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
 import QuizView from "./components/dashboardSidebarPages/quiz/QuizView";
+import MathematicsP1Nov2022Eng
+    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 
 const PublicLayout = () => (
     <div>
@@ -52,7 +55,7 @@ function ProtectedRoute({ children }) {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             console.log('JWT Token:', token || 'No token found');
             if (!token) {
                 setIsAuthenticated(false);
@@ -91,7 +94,7 @@ function ProtectedRoute({ children }) {
             } catch (error) {
                 console.error('Auth Check Failed:', error.message);
                 setError(`Authentication failed: ${error.message}`);
-                localStorage.removeItem('jwt');
+                sessionStorage.removeItem('jwt');
                 setIsAuthenticated(false);
             }
         };
@@ -143,7 +146,7 @@ const App = () => {
 
     useEffect(() => {
         const validateToken = async () => {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 setIsAuthenticated(false);
                 return;
@@ -153,7 +156,7 @@ const App = () => {
                     headers: getAuthHeaders(),
                 });
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     setIsAuthenticated(false);
                 } else if (response.ok) {
                     setIsAuthenticated(true);
@@ -375,7 +378,7 @@ const App = () => {
                         path="/digitized-question-papers/:id"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <QuestionPaperView {...commonProps} />
+                                <DigitizedQuestionPaperView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -385,13 +388,5 @@ const App = () => {
         </div>
     );
 };
-
-function QuestionPaperView({ darkMode, setDarkMode, notifications, ...rest }) {
-    const { id } = useParams();
-    if (id === '17') {
-        return <EnglishFALP12020 darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} />;
-    }
-    return <div>Paper not found</div>;
-}
 
 export default App;

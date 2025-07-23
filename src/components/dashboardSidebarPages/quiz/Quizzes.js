@@ -17,7 +17,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const notificationCount = notifications.filter(notification => !notification.read).length;
 
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -28,7 +28,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
             try {
                 setLoading(true);
                 setError('');
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
@@ -37,7 +37,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     'Content-Type': 'application/json',
                 };
 
-                const subjectsResponse = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers });
+                const subjectsResponse = await fetch(`${API_BASE_URL}/enrolled-subjects`, { headers });
                 const subjectsData = await subjectsResponse.json();
                 if (!subjectsResponse.ok || !subjectsData.success) {
                     throw new Error(subjectsData.message || 'Failed to fetch enrolled subjects');
@@ -45,7 +45,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                 const enrolledSubjects = (subjectsData.data || []).map(s => s.subjectName || s).sort();
                 setSubjects(enrolledSubjects);
 
-                const quizzesResponse = await fetch(`${API_BASE_URL}/user/quizzes`, { headers });
+                const quizzesResponse = await fetch(`${API_BASE_URL}/quizzes`, { headers });
                 const quizzesData = await quizzesResponse.json();
                 if (!quizzesResponse.ok || !quizzesData.success) {
                     throw new Error(quizzesData.message || 'Failed to fetch quizzes');
@@ -101,7 +101,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     });
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

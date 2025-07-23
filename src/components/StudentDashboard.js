@@ -60,7 +60,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
 
     useEffect(() => {
@@ -127,10 +127,10 @@ setTimeout(() => {
 fetchData();
 }, []);
 
-const handleLogout = () => {
-    localStorage.removeItem('jwt');
-    navigate('/login');
-};
+    const handleLogout = () => {
+        sessionStorage.removeItem('jwt');
+        navigate('/login');
+    };
 
 const handleTimerFinish = () => {
     setShowPopup(true);

@@ -31,7 +31,7 @@ const ResetPassword = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/password/reset-password`, {
+            const response = await fetch(`${API_BASE_URL}/auth/password/reset-password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({otp, newPassword }),

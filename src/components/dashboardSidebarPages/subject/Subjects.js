@@ -14,7 +14,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     const [selectedSubject, setSelectedSubject] = useState('');
     const [isAdding, setIsAdding] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -23,7 +23,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     const fetchData = async (url, setData) => {
         try {
             const headers = {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
             const response = await fetch(url, { headers });
@@ -63,7 +63,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
         }
         try {
             const headers = {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
             const response = await fetch(`${API_BASE_URL}/add-subject`, {
@@ -91,7 +91,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     const handleRemoveSubject = async (subjectName) => {
         try {
             const headers = {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
             const response = await fetch(`${API_BASE_URL}/remove-subject?subjectName=${encodeURIComponent(subjectName)}`, {
@@ -114,7 +114,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

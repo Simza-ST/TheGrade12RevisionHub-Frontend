@@ -5,7 +5,7 @@ import AdminSidebar from './common/AdminSidebar';
 import AdminHeader from './common/AdminHeader';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 // Mock data for fallback
 const defaultData = {
@@ -73,7 +73,7 @@ const SearchSection = ({ onSearch }) => {
                                 setError('No users found');
                             }
                         } else {
-                            const response = await fetch(`${API_BASE_URL}/api/search?email=${encodeURIComponent(email)}`, {
+                            const response = await fetch(`${API_BASE_URL}/search?email=${encodeURIComponent(email)}`, {
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
@@ -249,30 +249,38 @@ const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNoti
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading((prev) => ({ ...prev, stats: true }));
-                const statsResponse = await fetch(`${API_BASE_URL}/api/stats`, {
-                    headers: { 'Content-Type': 'application/json' },
+                // Fetch student stats
+                const statsResponse = await fetch(`${API_BASE_URL}/stats`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 });
                 if (!statsResponse.ok) {
                     const errorText = await statsResponse.text();
                     throw new Error(`Student stats error! status: ${statsResponse.status}, message: ${errorText || 'Unknown error'}`);
                 }
                 const statsData = await statsResponse.json();
+                console.log('Stats response:', statsData);
 
-                const quizResponse = await fetch(`${API_BASE_URL}/api/quizzes/count`, {
-                    headers: { 'Content-Type': 'application/json' },
+                // Fetch quiz count
+                const quizResponse = await fetch(`${API_BASE_URL}/quizzes/count`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 });
                 if (!quizResponse.ok) {
                     const errorText = await quizResponse.text();
                     throw new Error(`Quiz count error! status: ${quizResponse.status}, message: ${errorText || 'Unknown error'}`);
                 }
                 const quizData = await quizResponse.json();
+                console.log('Quiz count response:', quizData);
 
                 setData((prev) => ({
                     ...prev,
@@ -293,7 +301,7 @@ const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNoti
     }, [propData]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         window.location.href = '/login';
     };
 

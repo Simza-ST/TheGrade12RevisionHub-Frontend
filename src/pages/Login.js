@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 const Login = ({ setIsAuthenticated }) => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -26,7 +26,7 @@ const Login = ({ setIsAuthenticated }) => {
         // }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/login`, {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,21 +37,21 @@ const Login = ({ setIsAuthenticated }) => {
                 }),
             });
 
-            const { token, message } = await response.json();
+            const { token, message, role} = await response.json();
 
             if (!response.ok) {
                 throw new Error(message || `HTTP error! Status: ${response.status}`);
             }
 
-            localStorage.setItem('jwt', token);
+            sessionStorage.setItem('jwt', token);
             setIsAuthenticated(true); // Update authentication state
             console.log('Success:', message);
-            // alert('Login successful! Welcome back to Revision App.');
+            alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
             //navigate('/dashboard');
             //navigate('/admin-Dashboard');
-            if (email === "simzast123@gmail.com") {
+            if (role.toString().toUpperCase() === "ADMIN") {
                 navigate('/admin-Dashboard');
             }
             else {
@@ -71,7 +71,7 @@ const Login = ({ setIsAuthenticated }) => {
                     <div className="flex justify-center mb-6">
                         <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                     </div>
-                    <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision Hub</h2>
+                    <h2 className="text-3xl font-bold text-white text-center mb-2">Log In to Revision App</h2>
                     <p className="text-gray-300 text-center mb-6">Access your study tools now!</p>
                     <form id="loginForm" className="space-y-5" onSubmit={handleSubmit}>
                         <div className="relative">
@@ -138,7 +138,7 @@ const Login = ({ setIsAuthenticated }) => {
                 </div>
                 {/* Right: Animated Services */}
                 <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-center items-center">
-                    <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision Hub?</h3>
+                    <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision App?</h3>
                     <br />
                     <div className="relative w-full h-full flex flex-col justify-center items-center">
                         <div className="service-card w-11/12 bg-red-900 bg-opacity-70 backdrop-blur-md rounded-lg p-4 text-white mb-4 animate-slide-up transition-all duration-500 ease-in-out" style={{ animationDelay: '0s' }}>

@@ -48,7 +48,7 @@ const ProfileTab = ({ user, setUser }) => {
 
         setSavingProfile(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const profileData = {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -66,7 +66,7 @@ const ProfileTab = ({ user, setUser }) => {
             const result = await response.json();
             if (!response.ok || !result.success) {
                 if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     navigate('/login');
                     return;
                 }
@@ -93,7 +93,7 @@ const ProfileTab = ({ user, setUser }) => {
 
         setSavingPicture(true);
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             const formData = new FormData();
             formData.append('profilePicture', file);
 
@@ -106,7 +106,7 @@ const ProfileTab = ({ user, setUser }) => {
             const result = await response.json();
             if (!response.ok || !result.success) {
                 if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     navigate('/login');
                     return;
                 }

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../common/Sidebar';
 import DigitizedQuestionPaperCard from './DigitizedQuestionPaperCard';
 import Header from "../../common/Header";
+import { getPaperComponent } from '../../../utils/paperMapper';
 
-const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode,
+                                     notifications, setNotifications }) => {
     const navigate = useNavigate();
     const [questionPapers, setQuestionPapers] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -12,8 +14,8 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -23,7 +25,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
         try {
             setLoading(true);
             setError('');
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 navigate('/login');
                 return;
@@ -35,7 +37,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
 
             const subjectsResponse = await fetch(`${API_BASE_URL}/user/enrolled-subjects`, { headers });
             if (subjectsResponse.status === 401) {
-                localStorage.removeItem('jwt');
+                sessionStorage.removeItem('jwt');
                 navigate('/login');
                 return;
             }
@@ -46,15 +48,16 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
             const enrolledSubjects = subjectsData.data.map(s => s.subjectName || s).sort();
             setSubjects(enrolledSubjects);
 
-            const papersUrl = `${API_BASE_URL}/user${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
+            const papersUrl = `${API_BASE_URL}/user/digitized${filterSubject ? `?subjectName=${encodeURIComponent(filterSubject)}` : ''}`;
             const papersResponse = await fetch(papersUrl, { headers });
             if (papersResponse.status === 401) {
-                localStorage.removeItem('jwt');
+                sessionStorage.removeItem('jwt');
                 navigate('/login');
                 return;
             }
             const papersData = await papersResponse.json();
             if (!papersResponse.ok || !papersData.success) {
+                console.log(papersData.data)
                 throw new Error(papersData.message || `Failed to fetch digitized question papers: HTTP ${papersResponse.status}`);
             }
 
@@ -74,16 +77,25 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
         fetchData();
     }, [fetchData]);
 
-    const handleViewPaper = (paper, paperTitle, isInteractive) => {
+    const handleViewPaper = (paper) => {
+        // Get the component based on paper ID
+        const component = getPaperComponent(paper.id);
+
+        if (!component) {
+            setError('No interactive viewer available for this paper');
+            return;
+        }
+
         setNotifications([
             ...notifications,
             {
                 id: notifications.length + 1,
-                message: `Viewed digitized question paper: ${paperTitle}`,
+                message: `Viewed digitized question paper`,
                 date: new Date().toISOString().split('T')[0],
                 read: false,
             },
         ]);
+
         navigate(`/digitized-question-papers/${paper.id}`);
     };
 
@@ -92,7 +104,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

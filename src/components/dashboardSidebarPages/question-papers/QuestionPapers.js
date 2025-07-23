@@ -38,7 +38,7 @@ const QuestionPapers = ({ isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     }, [darkMode]);
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 

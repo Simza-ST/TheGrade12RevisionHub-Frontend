@@ -46,10 +46,10 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
     const fetchUsers = useCallback(
         async (query = '', type = 'private') => {
             try {
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 const url = query.trim()
-                    ? `http://localhost:6262/api/chat/users/search?query=${encodeURIComponent(query)}`
-                    : 'http://localhost:6262/api/chat/users';
+                    ? `http://localhost:6262/api/user/chat/users/search?query=${encodeURIComponent(query)}`
+                    : 'http://localhost:6262/api/user/chat/users';
                 const response = await fetch(url, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -97,8 +97,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
         const fetchGroups = async () => {
             if (!user) return;
             try {
-                const token = localStorage.getItem('jwt');
-                const response = await fetch('http://localhost:6262/api/chat/groups', {
+                const token = sessionStorage.getItem('jwt');
+                const response = await fetch('http://localhost:6262/api/user/chat/groups', {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -127,8 +127,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
 
     const fetchGroupUsers = async (groupId) => {
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}/users`, {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/chat/group/${groupId}/users`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -158,14 +158,14 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             if (!user) return;
             setLoading(true);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 let url;
                 if (chatMode === 'group') {
                     url = selectedGroupId
-                        ? `http://localhost:6262/api/chat/group/${selectedGroupId}`
-                        : `http://localhost:6262/api/chat/group`;
+                        ? `http://localhost:6262/api/user/chat/group/${selectedGroupId}`
+                        : `http://localhost:6262/api/user/chat/group`;
                 } else if (chatMode === 'private' && selectedUserId) {
-                    url = `http://localhost:6262/api/chat/private/${selectedUserId}`;
+                    url = `http://localhost:6262/api/user/chat/private/${selectedUserId}`;
                 } else {
                     setMessages([]);
                     return;
@@ -294,7 +294,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             connectHeaders: {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
             },
             onConnect: () => {
                 console.log('WebSocket connected for user:', user.email);
@@ -372,8 +372,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
 
     const handleAddUser = async (userId) => {
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/chat/group/${editGroupId}/users`, {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/chat/group/${editGroupId}/users`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -408,8 +408,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
 
     const handleRemoveUser = async (userId) => {
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/chat/group/${editGroupId}/users/${userId}`, {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/chat/group/${editGroupId}/users/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -494,8 +494,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             return;
         }
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch('http://localhost:6262/api/chat/group', {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch('http://localhost:6262/api/user/chat/group', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -529,8 +529,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             return;
         }
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/chat/group/${editGroupId}`, {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/chat/group/${editGroupId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -557,8 +557,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
     const handleDeleteGroup = async (groupId) => {
 
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await fetch(`http://localhost:6262/api/chat/group/${groupId}`, {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch(`http://localhost:6262/api/user/chat/group/${groupId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -608,7 +608,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
+        sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 
