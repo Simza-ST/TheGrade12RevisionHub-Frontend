@@ -37,6 +37,7 @@ import QuizView from "./components/dashboardSidebarPages/quiz/QuizView";
 import MathematicsP1Nov2022Eng
     from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
+import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
 
 const PublicLayout = () => (
     <div>
@@ -55,7 +56,7 @@ function ProtectedRoute({ children }) {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = sessionStorage.getItem('jwt');
+            const token = localStorage.getItem('jwt');
             console.log('JWT Token:', token || 'No token found');
             if (!token) {
                 setIsAuthenticated(false);
@@ -94,7 +95,7 @@ function ProtectedRoute({ children }) {
             } catch (error) {
                 console.error('Auth Check Failed:', error.message);
                 setError(`Authentication failed: ${error.message}`);
-                sessionStorage.removeItem('jwt');
+                localStorage.removeItem('jwt');
                 setIsAuthenticated(false);
             }
         };
@@ -146,7 +147,7 @@ const App = () => {
 
     useEffect(() => {
         const validateToken = async () => {
-            const token = sessionStorage.getItem('jwt');
+            const token = localStorage.getItem('jwt');
             if (!token) {
                 setIsAuthenticated(false);
                 return;
@@ -156,7 +157,7 @@ const App = () => {
                     headers: getAuthHeaders(),
                 });
                 if (response.status === 401) {
-                    sessionStorage.removeItem('jwt');
+                    localStorage.removeItem('jwt');
                     setIsAuthenticated(false);
                 } else if (response.ok) {
                     setIsAuthenticated(true);
@@ -327,6 +328,14 @@ const App = () => {
                         }
                     />
                     <Route
+                        path="/uploading-resources"
+                        element={
+                            <ProtectedRoute >
+                                <UploadResources {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/schedule"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
@@ -378,7 +387,7 @@ const App = () => {
                         path="/digitized-question-papers/:id"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <DigitizedQuestionPaperView {...commonProps} />
+                                <QuestionPaperView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -388,5 +397,13 @@ const App = () => {
         </div>
     );
 };
+
+function QuestionPaperView({ darkMode, setDarkMode, notifications, ...rest }) {
+    const { id } = useParams();
+    if (id === '1') {
+        return <EnglishFALP12020 darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} />;
+    }
+    return <div>Paper not found</div>;
+}
 
 export default App;
