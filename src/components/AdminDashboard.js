@@ -75,6 +75,7 @@ const SearchSection = ({ onSearch }) => {
                         } else {
                             const response = await fetch(`${API_BASE_URL}/search?email=${encodeURIComponent(email)}`, {
                                 headers: {
+                                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                                     'Content-Type': 'application/json',
                                 },
                             });
@@ -242,7 +243,7 @@ GraphTable.propTypes = {
 // Main AdminDashboard Component
 const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNotifications }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [data, setData] = useState(propData || defaultData);
     const [loading, setLoading] = useState({ stats: false });
     const [error, setError] = useState({ stats: '' });
@@ -259,6 +260,7 @@ const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNoti
                 // Fetch student stats
                 const statsResponse = await fetch(`${API_BASE_URL}/stats`, {
                     headers: {
+                        Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -272,6 +274,7 @@ const AdminDashboard = ({ data: propData, onSearch, user, notifications, setNoti
                 // Fetch quiz count
                 const quizResponse = await fetch(`${API_BASE_URL}/quizzes/count`, {
                     headers: {
+                        Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                         'Content-Type': 'application/json',
                     },
                 });

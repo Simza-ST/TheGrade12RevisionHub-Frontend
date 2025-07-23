@@ -4,22 +4,27 @@ import AdminSidebar from "../../common/AdminSidebar";
 import AdminHeader from "../../common/AdminHeader";
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 const StudentsList = ({ user, notifications, onLogout }) => {
     const [studentList, setStudentList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     const fetchStudents = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/students`);
+            const response = await fetch(`${API_BASE_URL}/students`,{
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             if (!response.ok) throw new Error('Failed to fetch students');
             const data = await response.json();
             setStudentList(data);
@@ -42,6 +47,10 @@ const StudentsList = ({ user, notifications, onLogout }) => {
             const encodedEmail = encodeURIComponent(studentEmail);
             const response = await fetch(`${API_BASE_URL}/api/students/${encodedEmail}`, {
                 method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (!response.ok) throw new Error('Failed to delete student');

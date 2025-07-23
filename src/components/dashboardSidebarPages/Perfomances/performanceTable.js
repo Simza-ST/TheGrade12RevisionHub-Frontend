@@ -11,9 +11,9 @@ const PerformanceTable = ({ performanceData, onSort, sortConfig }) => {
   };
 
   return (
-    <div className="table-container">
-      <table className="performance-table">
-        <thead>
+      <div className="table-container">
+        <table className="performance-table">
+          <thead>
           <tr>
             <th onClick={() => onSort('subjectName')} className="cursor-pointer">
               Subject {getSortIndicator('subjectName')}
@@ -46,53 +46,53 @@ const PerformanceTable = ({ performanceData, onSort, sortConfig }) => {
               Comments {getSortIndicator('comments')}
             </th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {performanceData && performanceData.length > 0 ? (
-            performanceData.map((data, index) => (
-              <tr key={data.id || index}>
-                <td>{data.subjectName || 'N/A'}</td>
-                <td>{data.activityType || 'N/A'}</td>
-                <td>{data.activityName || 'N/A'}</td>
-                <td>
-                  {data.date ? new Date(data.date).toLocaleDateString('en-CA') : 'N/A'}
-                </td>
-                <td>{data.score != null ? data.score : 'N/A'}</td>
-                <td>{data.maxScore != null ? data.maxScore : 'N/A'}</td>
-                <td>{data.timeSpent != null ? data.timeSpent : 'N/A'}</td>
-                <td>{data.difficulty || 'N/A'}</td>
-                <td>{data.status || 'N/A'}</td>
-                <td>{data.comments || 'N/A'}</td>
-              </tr>
-            ))
+              performanceData.map((data, index) => (
+                  <tr key={data.id || index}>
+                    <td>{data.subjectName || 'N/A'}</td>
+                    <td>{data.activityType || 'N/A'}</td>
+                    <td>{data.activityName || 'N/A'}</td>
+                    <td>
+                      {data.date ? new Date(data.date).toLocaleDateString('en-CA') : 'N/A'}
+                    </td>
+                    <td>{data.score != null ? data.score : 'N/A'}</td>
+                    <td>{data.maxScore != null ? data.maxScore : 'N/A'}</td>
+                    <td>{data.timeSpent != null ? data.timeSpent : 'N/A'}</td>
+                    <td>{data.difficulty || 'N/A'}</td>
+                    <td>{data.status || 'N/A'}</td>
+                    <td>{data.comments || 'N/A'}</td>
+                  </tr>
+              ))
           ) : (
-            <tr>
-              <td colSpan="10" className="text-center text-[var(--text-secondary)]">
-                No performance data available.
-              </td>
-            </tr>
+              <tr>
+                <td colSpan="10" className="text-center text-[var(--text-secondary)]">
+                  No performance data available.
+                </td>
+              </tr>
           )}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
   );
 };
 
 PerformanceTable.propTypes = {
   performanceData: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number,
-      subjectName: PropTypes.string,
-      activityType: PropTypes.string,
-      activityName: PropTypes.string,
-      date: PropTypes.string,
-      score: PropTypes.number,
-      maxScore: PropTypes.number,
-      timeSpent: PropTypes.number,
-      difficulty: PropTypes.string,
-      status: PropTypes.string,
-      comments: PropTypes.string,
-    })
+      PropTypes.shape({
+        id: PropTypes.number,
+        subjectName: PropTypes.string,
+        activityType: PropTypes.string,
+        activityName: PropTypes.string,
+        date: PropTypes.string,
+        score: PropTypes.number,
+        maxScore: PropTypes.number,
+        timeSpent: PropTypes.number,
+        difficulty: PropTypes.string,
+        status: PropTypes.string,
+        comments: PropTypes.string,
+      })
   ).isRequired,
   onSort: PropTypes.func.isRequired,
   sortConfig: PropTypes.shape({

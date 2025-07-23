@@ -4,12 +4,12 @@ import AdminSidebar from '../../common/AdminSidebar';
 import AdminHeader from '../../common/AdminHeader';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 const CreateQuiz = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [subjects, setSubjects] = useState([]);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [quiz, setQuiz] = useState({
         title: '',
         subject: '',
@@ -22,14 +22,14 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     useEffect(() => {
         const fetchSubjects = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     throw new Error('No authentication token found. Please log in.');
                 }
@@ -38,7 +38,7 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
                     'Content-Type': 'application/json',
                 };
                 console.log('Fetching subjects from:', `${API_BASE_URL}/user/subjects`);
-                const response = await fetch(`${API_BASE_URL}/user/subjects`, { headers });
+                const response = await fetch("http://localhost:6262/api/user/subjects", { headers });
                 const data = await response.json();
                 if (response.ok && data.success) {
                     const subjectList = (data.data || []).map(s => s.subjectName || s.name || s).sort();
@@ -78,7 +78,7 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
         if (!validateForm()) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/quizzes`, {
+            const response = await fetch(`${API_BASE_URL}/quizzes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

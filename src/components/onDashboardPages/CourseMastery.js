@@ -6,13 +6,13 @@ const CourseMastery = ({ enrolledSubjects, darkMode }) => {
     const [sortBy, setSortBy] = useState('score');
     const [sortOrder, setSortOrder] = useState('desc');
     const [searchTerm, setSearchTerm] = useState('');
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         const fetchMasteryData = async () => {
             try {
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 };
                 const response = await fetch(`${API_BASE_URL}/subject-mastery`, { headers });

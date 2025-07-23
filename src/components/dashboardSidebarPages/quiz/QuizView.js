@@ -17,7 +17,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
         const fetchQuiz = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) {
                     setError('No authentication token found. Please log in.');
                     setLoading(false);
@@ -25,7 +25,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 }
 
                 console.log('Fetching quiz with ID:', id);
-                const response = await fetch(`http://localhost:6262/user/quizzes/${id}/questions`, {
+                const response = await fetch(`http://localhost:6262/api/user/quizzes/${id}/questions`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 if (!response.ok) {
                     if (response.status === 401 || response.status === 403) {
                         console.error('Unauthorized or forbidden. Clearing JWT.');
-                        localStorage.removeItem('jwt');
+                        sessionStorage.removeItem('jwt');
                         navigate('/login');
                         return;
                     }
@@ -79,7 +79,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
     const handleSubmit = async () => {
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 setError('No authentication token found. Please log in.');
                 return;
@@ -93,7 +93,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
             };
             console.log('Submitting answers:', JSON.stringify(submission, null, 2));
 
-            const response = await fetch(`http://localhost:6262/user/quizzes/${id}/submit`, {
+            const response = await fetch(`http://localhost:6262/api/user/quizzes/${id}/submit`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -105,7 +105,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
                     console.error('Unauthorized or forbidden. Clearing JWT.');
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     navigate('/login');
                     return;
                 }
@@ -196,7 +196,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                 <Sidebar
                     user={user}
                     onLogout={() => {
-                        localStorage.removeItem('jwt');
+                        sessionStorage.removeItem('jwt');
                         navigate('/login');
                     }}
                     isCollapsed={isCollapsed}
@@ -226,7 +226,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                                     {quiz.title || 'Untitled Quiz'}
                                 </h2>
                                 <p className="text-sm text-[var(--text-secondary)] mb-6">
-                                    Subject: {quiz.subjectId || 'Unknown'} | Questions: {quiz.questions?.length || 0}
+                                    Subject: {quiz.subject || 'Unknown'} | Questions: {quiz.questions?.length || 0}
                                 </p>
                                 <div className="space-y-6">
                                     {quiz.questions?.map((question, qIndex) => {

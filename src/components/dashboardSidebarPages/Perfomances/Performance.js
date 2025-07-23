@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
@@ -60,6 +60,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
     const fetchData = useCallback(async (url, params = {}) => {
         try {
             const token = sessionStorage.getItem('jwt');
+            console.log('JWT token:', token ? 'Present' : 'Missing');
             if (!token) {
                 throw new Error('No authentication token found. Please log in.');
             }
@@ -77,6 +78,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                 return null;
             }
             const data = await response.json();
+            console.log(`Fetched from ${fullUrl}:`, data);
             if (response.ok && data.success) {
                 return data.data;
             } else {
@@ -87,77 +89,6 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
             throw error;
         }
     }, [navigate, setMessage]);
-
-    const fetchPerformanceData = useCallback(async (userId, filters = {}) => {
-        const token = sessionStorage.getItem('jwt');
-        if (!token) {
-            throw new Error('No authentication token found. Please log in.');
-        }
-
-        try {
-            const params = {
-                userId,
-                page: filters.page || currentPage,
-                size: filters.size || pageSize,
-            };
-            if (filters.subjectName) params.subjectName = filters.subjectName;
-            if (filters.activityType) params.activityType = filters.activityType;
-            if (filters.startDate) params.startDate = filters.startDate;
-            if (filters.endDate) params.endDate = filters.endDate;
-
-            const API_URL = API_BASE_URL + '/performance';
-            const query = new URLSearchParams(params).toString();
-            const url = query ? `${API_URL}?${query}` : API_URL;
-
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 401) {
-                sessionStorage.removeItem('jwt');
-                setMessage({ text: 'Session expired. Please log in again.', type: 'error' });
-                navigate('/login');
-                return null;
-            }
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to fetch performance data');
-            }
-
-            const responseData = await response.json();
-
-            if (!responseData.success) {
-                throw new Error(responseData.message || 'Server returned unsuccessful response');
-            }
-
-            const transformedData = {
-                ...responseData,
-                content: (responseData.content || []).map(item => ({
-                    id: item.id,
-                    subjectName: item.paper?.subject?.name || 'N/A',
-                    activityType: 'Exam',
-                    activityName: item.paper?.name || 'Untitled Paper',
-                    date: item.attemptDate,
-                    score: item.score,
-                    maxScore: item.maxScore,
-                    timeSpent: item.timeSpent || 0,
-                    difficulty: item.paper?.difficulty || 'Medium',
-                    status: 'Completed',
-                    comments: ''
-                }))
-            };
-
-            return transformedData;
-        } catch (error) {
-            console.error('Fetch performance error:', error);
-            setMessage({ text: `Error: ${error.message}`, type: 'error' });
-            throw error;
-        }
-    }, [API_BASE_URL, currentPage, pageSize, navigate, setMessage]);
 
     const exportToCSV = () => {
         const headers = [
@@ -201,39 +132,26 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
         }));
     };
 
-    const sortedData = useMemo(() => {
+    const sortedData = () => {
         const data = [...performanceData];
         if (sortConfig.key) {
             data.sort((a, b) => {
                 let aValue = a[sortConfig.key];
                 let bValue = b[sortConfig.key];
-
-                if (['score', 'maxScore', 'timeSpent'].includes(sortConfig.key)) {
+                if (sortConfig.key === 'score' || sortConfig.key === 'maxScore' || sortConfig.key === 'timeSpent') {
                     aValue = Number(aValue) || 0;
                     bValue = Number(bValue) || 0;
-                    return sortConfig.direction === 'asc'
-                        ? aValue - bValue
-                        : bValue - aValue;
+                } else if (sortConfig.key === 'date') {
+                    aValue = new Date(aValue);
+                    bValue = new Date(bValue);
                 }
-
-                if (sortConfig.key === 'date') {
-                    aValue = new Date(aValue).getTime();
-                    bValue = new Date(bValue).getTime();
-                    return sortConfig.direction === 'asc'
-                        ? aValue - bValue
-                        : bValue - aValue;
-                }
-
-                aValue = aValue?.toString().toLowerCase() || '';
-                bValue = bValue?.toString().toLowerCase() || '';
-
                 if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
                 if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
             });
         }
         return data;
-    }, [performanceData, sortConfig]);
+    };
 
     const clearFilters = () => {
         setSelectedSubject('');
@@ -250,6 +168,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
         let isMounted = true;
 
         const loadData = async () => {
+            console.log('User prop:', user);
             let userId;
             const token = sessionStorage.getItem('jwt');
             if (user && user.id && !isNaN(Number(user.id))) {
@@ -257,9 +176,12 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
             } else if (token) {
                 const decoded = decodeJwt(token);
                 userId = Number(decoded?.id || decoded?.sub || decoded?.userId) || 1;
+                console.log('Decoded JWT:', decoded);
             } else {
                 userId = 1;
+                console.log('No token found, using fallback userId: 1');
             }
+            console.log('Using userId:', userId);
 
             if (!API_BASE_URL) {
                 if (isMounted) {
@@ -271,8 +193,10 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
 
             setLoading(true);
             try {
+                // Fetch enrolled subjects
                 const subjectsData = await fetchData(`${API_BASE_URL}/enrolled-subjects`);
                 if (!subjectsData) return;
+                console.log('Raw subjects data:', subjectsData);
                 let subjectNames = [];
                 if (Array.isArray(subjectsData)) {
                     subjectNames = subjectsData
@@ -283,35 +207,59 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                         .filter(Boolean)
                         .sort();
                 }
+                console.log('Processed subject names:', subjectNames);
 
-                const activityTypesData = ['Exam'];
-                setActivityTypes(activityTypesData);
+                // Fetch activity types
+                const allPerformance = await fetchData(`${API_BASE_URL}/performance`, { userId, size: 1000 });
+                const types = [
+                    ...new Set(
+                        allPerformance?.content
+                            ?.map((record) => record.activityType)
+                            .filter(Boolean)
+                            .sort()
+                    ),
+                ];
+                console.log('Activity types:', types);
 
                 if (isMounted) {
                     setEnrolledSubjects(subjectNames);
+                    setActivityTypes(types);
                     if (subjectNames.length === 0) {
                         setMessage({ text: 'No enrolled subjects found. Please enroll in subjects.', type: 'warning' });
                     }
                 }
 
+                // Fetch performance data with filters
                 const performanceParams = {
                     userId,
-                    subjectName: selectedSubject || undefined,
-                    activityType: selectedActivityType || undefined,
-                    startDate: dateRange.startDate || undefined,
-                    endDate: dateRange.endDate || undefined,
                     page: currentPage,
-                    size: pageSize
+                    size: pageSize,
                 };
+                if (selectedSubject) performanceParams.subjectName = selectedSubject;
+                if (selectedActivityType) performanceParams.activityType = selectedActivityType;
+                if (dateRange.startDate) performanceParams.startDate = dateRange.startDate;
+                if (dateRange.endDate) performanceParams.endDate = dateRange.endDate;
 
-                const performancePage = await fetchPerformanceData(userId, performanceParams);
+                const performancePage = await fetchData(`${API_BASE_URL}/performance`, performanceParams);
                 if (!performancePage) return;
+                console.log('Performance page data:', performancePage);
 
                 if (isMounted) {
                     const filteredPerformance = Array.isArray(performancePage.content)
-                        ? performancePage.content
+                        ? performancePage.content.map((record) => ({
+                            id: record.id,
+                            subjectName: record.subjectName,
+                            activityType: record.activityType,
+                            activityName: record.activityName,
+                            date: record.date,
+                            score: record.score,
+                            maxScore: record.maxScore,
+                            timeSpent: record.timeSpent,
+                            difficulty: record.difficulty,
+                            status: record.status,
+                            comments: record.comments,
+                        }))
                         : [];
-
                     setPerformanceData(filteredPerformance);
                     setTotalPages(Math.max(1, performancePage.totalPages || 1));
 
@@ -374,9 +322,7 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
         selectedSubject,
         selectedActivityType,
         dateRange,
-        fetchData,
-        fetchPerformanceData,
-        pageSize
+        fetchData
     ]);
 
     const handleLogout = () => {
@@ -418,6 +364,171 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
     return (
         <div className="full">
             <div className="flex min-h-screen bg-[var(--bg-primary)]">
+                <style>
+                    {`
+            .full {
+              width: 100%;
+              min-height: 100vh;
+              position: relative;
+              z-index: 10;
+            }
+            .bg-[var(--bg-primary)] {
+              background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f8fafc'});
+            }
+            .bg-[var(--bg-secondary)] {
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+            }
+            .bg-[var(--bg-tertiary)] {
+              background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+            }
+            .bg-[var(--accent-primary)] {
+              background-color: var(--accent-primary, #2563eb);
+            }
+            .bg-[var(--accent-secondary)] {
+              background-color: var(--accent-secondary, #dc3545);
+            }
+            .text-[var(--text-primary)] {
+              color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
+            }
+            .text-[var(--text-secondary)] {
+              color: var(--text-secondary, ${darkMode ? '#9ca3af' : '#4b5563'});
+            }
+            .text-error {
+              color: var(--text-error, ${darkMode ? '#f87171' : '#dc2626'});
+            }
+            .text-success {
+              color: var(--text-success, ${darkMode ? '#34d399' : '#059669'});
+            }
+            .message-banner {
+              padding: 12px 16px;
+              border-radius: 6px;
+              margin-bottom: 16px;
+              font-size: 0.875rem;
+              font-weight: 500;
+              text-align: center;
+            }
+            .message-banner.error {
+              background-color: var(--bg-error, ${darkMode ? '#7f1d1d' : '#fee2e2'});
+              color: var(--text-error, ${darkMode ? '#f87171' : '#dc2626'});
+            }
+            .message-banner.success {
+              background-color: var(--bg-success, ${darkMode ? '#064e3b' : '#d1fae5'});
+              color: var(--text-success, ${darkMode ? '#34d399' : '#059669'});
+            }
+            .message-banner.warning {
+              background-color: var(--bg-warning, ${darkMode ? '#92400e' : '#fef3c7'});
+              color: var(--text-warning, ${darkMode ? '#f59e0b' : '#b45309'});
+            }
+            .flex {
+              display: flex;
+            }
+            .min-h-screen {
+              min-height: 100vh;
+            }
+            .min-w-0 {
+              min-width: 0;
+            }
+            .p-6 {
+              padding: 24px;
+            }
+            .sm\\:p-8 {
+              padding: 32px;
+            }
+            .mb-4 {
+              margin-bottom: 16px;
+            }
+            .mb-6 {
+              margin-bottom: 24px;
+            }
+            .mt-6 {
+              margin-top: 24px;
+            }
+            .rounded-2xl {
+              border-radius: 16px;
+            }
+            .shadow-lg {
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            .sm\\:ml-16 {
+              margin-left: 64px;
+            }
+            .sm\\:ml-64 {
+              margin-left: 256px;
+            }
+            .quiz-section {
+              background: ${darkMode
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+              padding: 32px;
+              border-radius: 16px;
+            }
+            .form-label {
+              color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
+              font-weight: 600;
+              margin-bottom: 8px;
+              display: block;
+            }
+            .form-input {
+              width: 100%;
+              padding: 8px;
+              border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+              border-radius: 4px;
+              background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+              color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
+              font-size: 0.875rem;
+            }
+            .form-input:focus {
+              border-color: var(--accent-primary, #2563eb);
+              outline: none;
+            }
+            .btn-primary {
+              background-color: var(--accent-primary, #2563eb);
+              color: #ffffff;
+              padding: 8px 16px;
+              border-radius: 4px;
+              border: none;
+              cursor: pointer;
+            }
+            .btn-primary:hover {
+              background-color: var(--hover-primary, #1d4ed8);
+            }
+            .btn-secondary {
+              background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+              color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
+              padding: 8px 16px;
+              border-radius: 4px;
+              border: none;
+              cursor: pointer;
+            }
+            .btn-secondary:hover {
+              background-color: var(--hover-secondary, ${darkMode ? '#4b5563' : '#d1d5db'});
+            }
+            .filter-container {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 16px;
+              align-items: flex-end;
+            }
+            .filter-item {
+              flex: 1;
+              min-width: 200px;
+            }
+            @media (min-width: 640px) {
+              .sm\\:ml-16 {
+                margin-left: 64px;
+              }
+              .sm\\:ml-64 {
+                margin-left: 256px;
+              }
+              .sm\\:p-8 {
+                padding: 32px;
+              }
+            }
+          `}
+                </style>
                 <Sidebar
                     user={user}
                     onLogout={handleLogout}
@@ -447,8 +558,6 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                             <p className="mb-6 text-[var(--text-secondary)]">
                                 Filter and sort your performance data to analyze your progress.
                             </p>
-
-                            {/* RESTORED HORIZONTAL FILTER LAYOUT */}
                             <div className="filter-container mb-6">
                                 <div className="filter-item">
                                     <label className="form-label">Filter by Subject</label>
@@ -510,7 +619,6 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                                     </button>
                                 </div>
                             </div>
-
                             <div className="mb-6">
                                 <button onClick={exportToCSV}
                                         className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
@@ -518,14 +626,12 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                                     Export to CSV
                                 </button>
                             </div>
-
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Performance Data</h2>
                             <PerformanceTable
-                                performanceData={sortedData}
+                                performanceData={sortedData()}
                                 onSort={handleSort}
                                 sortConfig={sortConfig}
                             />
-
                             {totalPages > 1 && (
                                 <div className="flex justify-between mt-4">
                                     <button
@@ -536,8 +642,8 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                                         Previous
                                     </button>
                                     <span className="text-[var(--text-secondary)]">
-                                        Page {currentPage + 1} of {totalPages}
-                                    </span>
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage >= totalPages - 1}
@@ -547,13 +653,10 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                                     </button>
                                 </div>
                             )}
-
                             <h2 className="text-xl font-semibold mt-6 text-[var(--text-primary)]">Summary of Activities per Subject</h2>
                             <SummaryTable summaryData={summaryData} />
-
                             <h2 className="text-xl font-semibold mt-6 text-[var(--text-primary)]">Average Scores by Subject</h2>
                             <BarChart chartData={chartData} />
-
                             <Notes />
                         </div>
                     </main>

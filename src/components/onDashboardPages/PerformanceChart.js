@@ -8,7 +8,7 @@ const PerformanceChart = ({ darkMode }) => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     // Use darkMode to set text color
     const textColor = useMemo(() => (darkMode ? '#e2e8f0' : '#1A202C'), [darkMode]);
@@ -22,7 +22,7 @@ const PerformanceChart = ({ darkMode }) => {
             setError(null);
             try {
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 };
                 const response = await fetch(`${API_BASE_URL}/performance-overview`, { headers });

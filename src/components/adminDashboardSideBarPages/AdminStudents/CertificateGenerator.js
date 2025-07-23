@@ -6,7 +6,7 @@ import AdminHeader from "../../common/AdminHeader";
 
 const CertificateGenerator = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -19,7 +19,7 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     const handleChange = (e) => {

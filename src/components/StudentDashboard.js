@@ -37,7 +37,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [showPopup, setShowPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [courses, setCourses] = useState([]); // Reintroduced to fix undefined error
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/user';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     const [stats] = useState({
         performance: '90%',
@@ -52,8 +52,8 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [quote, setQuote] = useState({ text: '', author: '' });
 
     useEffect(() => {
-        // Initialize theme from localStorage or system preference
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        // Initialize theme from sessionStorage or system preference
+        const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
     }, []);
@@ -68,7 +68,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
             try {
                 setLoading(true);
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 };
                 // Fetch enrolled subjects

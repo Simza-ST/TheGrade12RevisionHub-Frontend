@@ -4,11 +4,11 @@ import AdminSidebar from "../../common/AdminSidebar";
 import AdminHeader from "../../common/AdminHeader";
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 const Chat = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [to, setTo] = useState('');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
@@ -20,15 +20,16 @@ const Chat = ({ user, notifications, onLogout }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     useEffect(() => {
         const fetchStudents = async () => {
             try {
                 setLoading((prev) => ({ ...prev, students: true }));
-                const response = await fetch(`${API_BASE_URL}/api/students`, {
+                const response = await fetch(`${API_BASE_URL}/students`, {
                     headers: {
+                        Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -49,8 +50,9 @@ const Chat = ({ user, notifications, onLogout }) => {
         const fetchSubjects = async () => {
             try {
                 setLoading((prev) => ({ ...prev, subjects: true }));
-                const response = await fetch(`${API_BASE_URL}/api/subjects`, {
+                const response = await fetch(`${API_BASE_URL}/subjects`, {
                     headers: {
+                        Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -100,7 +102,7 @@ const Chat = ({ user, notifications, onLogout }) => {
 
         try {
             setLoading((prev) => ({ ...prev, submit: true }));
-            const response = await fetch(`${API_BASE_URL}/api/email/send`, {
+            const response = await fetch(`${API_BASE_URL}/email/send`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

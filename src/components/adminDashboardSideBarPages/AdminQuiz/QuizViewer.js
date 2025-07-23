@@ -4,11 +4,11 @@ import AdminSidebar from '../../common/AdminSidebar';
 import AdminHeader from '../../common/AdminHeader';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/admin';
 
 const QuizViewer = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,15 +18,15 @@ const QuizViewer = ({ user, notifications, onLogout }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     useEffect(() => {
         const fetchQuizzes = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/allQuizzes`, {
+                const response = await fetch(`${API_BASE_URL}/allQuizzes`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                        Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     },
                 });
                 if (!response.ok) {
@@ -46,10 +46,10 @@ const QuizViewer = ({ user, notifications, onLogout }) => {
     const handleDeleteQuiz = async () => {
         if (!quizToDelete) return;
         try {
-            const response = await fetch(`${API_BASE_URL}/api/quizzes/${quizToDelete.id}`, {
+            const response = await fetch(`${API_BASE_URL}/quizzes/${quizToDelete.id}`, {
                 method: 'DELETE',
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 },
             });
