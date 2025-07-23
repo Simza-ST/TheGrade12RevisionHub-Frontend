@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import Tooltip from '../../dashboardSidebarPages/question-papers/Tooltip';
 
-const ResourcesList = ({ resources, selectedSubject, selectedYear, pdfLoading, onViewPdf, onDownloadPdf }) => {
+const ResourcesList = ({ resources, selectedSubject, selectedYear, resourceLoading, onViewResource, onDownloadResource }) => {
     const filteredResources = resources.filter((resource) => {
         const matchesSubject = selectedSubject ? resource.subject?.subjectName === selectedSubject : true;
         const matchesYear = selectedYear ? resource.year === selectedYear : true;
@@ -36,18 +36,18 @@ const ResourcesList = ({ resources, selectedSubject, selectedYear, pdfLoading, o
                                 <>
                                     <Tooltip text="Preview in browser">
                                         <button
-                                            onClick={() => onViewPdf(resource)}
+                                            onClick={() => onViewResource(resource)}
                                             className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            disabled={pdfLoading}
+                                            disabled={resourceLoading}
                                         >
                                             View
                                         </button>
                                     </Tooltip>
                                     <Tooltip text="Download resource">
                                         <button
-                                            onClick={() => onDownloadPdf(resource)}
+                                            onClick={() => onDownloadResource(resource)}
                                             className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            disabled={pdfLoading}
+                                            disabled={resourceLoading}
                                         >
                                             Download
                                         </button>
@@ -95,9 +95,9 @@ ResourcesList.propTypes = {
     ).isRequired,
     selectedSubject: PropTypes.string,
     selectedYear: PropTypes.string,
-    pdfLoading: PropTypes.bool.isRequired,
-    onViewPdf: PropTypes.func.isRequired,
-    onDownloadPdf: PropTypes.func.isRequired,
+    resourceLoading: PropTypes.bool.isRequired,
+    onViewResource: PropTypes.func.isRequired,
+    onDownloadResource: PropTypes.func.isRequired,
 };
 
 export default ResourcesList;

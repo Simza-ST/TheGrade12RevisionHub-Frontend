@@ -172,7 +172,7 @@ const UploadResources = ({ user, notifications, onLogout }) => {
                                     aria-label="Select resource type"
                                     required
                                 >
-                                    <option value="file">File (PDF, Image, Video, Audio)</option>
+                                    <option value="file">File (PDF, Image, Video)</option>
                                     <option value="link">Link (Website, Video URL)</option>
                                 </select>
                                 <input
@@ -202,7 +202,7 @@ const UploadResources = ({ user, notifications, onLogout }) => {
                                         type="file"
                                         name="file"
                                         id="fileUpload"
-                                        accept=".pdf,.png,.jpg,.jpeg,.docx,.mp4,.webm,.mp3,.wav"
+                                        accept=".pdf,.png,.jpg,.jpeg,.docx,.mp4,.webm,.wav"
                                         onChange={handleFileChange}
                                         required
                                         className="w-full p-3 mb-3 border-2 border-[var(--border)] rounded-md text-base text-[var(--text-normal)] bg-[var(--bg-primary)]"
