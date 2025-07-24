@@ -351,6 +351,9 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     />
                     <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                         <div className="quiz-section">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Quizzes</h2>
+                            </div>
                             <div className="mb-6">
                                 <p className="text-sm text-[var(--text-secondary)] mb-4">
                                     Filter by subject, due date and title to find quizzes and test your knowledge!

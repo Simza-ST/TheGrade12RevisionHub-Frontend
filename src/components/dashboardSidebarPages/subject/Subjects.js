@@ -369,8 +369,26 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     />
                     <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 mx-auto ${isCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`}>
                         <section className="section-card">
-                            <header className="flex justify-between items-center mb-4">
+                            <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Enrolled Subjects</h2>
+                            </div>
+                            <div className="mb-6">
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Select subjects to explore study materials for your courses!
+                                </p>
+                                <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                    <strong>NB:</strong> Subject resources enhance your understanding and exam readiness.
+                                </p>
+                                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                                <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                    <li>Add subject  with the <strong>Add New Subject</strong> button in a new tab.</li>
+                                    <li>Access papers for the using the <strong>Past papers</strong> button.</li>
+                                    <li>Remove subject with the <strong>X</strong> button.</li>
+                                    <li>Check resource details for more information.</li>
+                                </ul>
+                            </div>
+                            <header className="flex justify-between items-center mb-4">
+                                {/*<h2 className="text-xl font-semibold text-[var(--text-primary)]">Your Enrolled Subjects</h2>*/}
                                 <button
                                     onClick={() => setIsAdding(!isAdding)}
                                     className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200"

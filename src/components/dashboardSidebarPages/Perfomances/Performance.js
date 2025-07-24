@@ -551,13 +551,28 @@ const Performance = ({ user, setNotifications, isCollapsed, setIsCollapsed, dark
                         className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`}
                     >
                         <div className="quiz-section">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Performance Dashboard</h2>
+                            </div>
+                            <div className="mb-6">
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Filter and sort your performance data to analyze your progress.
+                                </p>
+                                <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                    <strong>NB:</strong> Performance records help you identify strengths and areas for improvement.
+                                </p>
+                                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                                <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                    <li>Filter by subject, activity type and dates to view relevant performance records.</li>
+                                    <li>Clear filters using the <strong>Clear Filters</strong> button.</li>
+                                    <li>Export external performance data to CSV with the <strong>Export to CSV</strong> button.</li>
+                                    <li>Check resource details for more information.</li>
+                                </ul>
+                            </div>
                             <header className="mb-4">
-                                <h1 className="text-2xl font-bold text-[var(--text-primary)]">Performance Dashboard</h1>
+                                {/*<h1 className="text-2xl font-bold text-[var(--text-primary)]">Performance Dashboard</h1>*/}
                             </header>
                             <MessageBanner message={message.text} type={message.type} />
-                            <p className="mb-6 text-[var(--text-secondary)]">
-                                Filter and sort your performance data to analyze your progress.
-                            </p>
                             <div className="filter-container mb-6">
                                 <div className="filter-item">
                                     <label className="form-label">Filter by Subject</label>

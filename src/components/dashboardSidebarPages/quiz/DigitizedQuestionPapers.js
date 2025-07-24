@@ -358,6 +358,9 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                     className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
                 >
                     <div className="paper-section">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Digitized Question Papers</h2>
+                        </div>
                         <div className="mb-6">
                             <p className="text-sm text-[var(--text-secondary)] mb-4">
                                 Filter by subject to access digitized question papers for exam practice!
