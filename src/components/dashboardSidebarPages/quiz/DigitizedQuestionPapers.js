@@ -358,6 +358,20 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                     className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
                 >
                     <div className="paper-section">
+                        <div className="mb-6">
+                            <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                Filter by subject and year to access digitized question papers for exam practice!
+                            </p>
+                            <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                <strong>NB:</strong> Past question papers are essential for effective exam preparation.
+                            </p>
+                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                            <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                <li>Filter by subject and year to find relevant question papers.</li>
+                                <li>Preview papers using the <strong>View Paper</strong> button.</li>
+                                <li>Check resource details for more information.</li>
+                            </ul>
+                        </div>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Digitized Question Papers</h2>
                         </div>

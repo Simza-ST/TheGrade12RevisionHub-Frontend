@@ -351,6 +351,20 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     />
                     <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
                         <div className="quiz-section">
+                            <div className="mb-6">
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Filter by subject and year to find quizzes and test your knowledge!
+                                </p>
+                                <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                    <strong>NB:</strong> Quizzes help reinforce concepts and prepare for exams.
+                                </p>
+                                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                                <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                    <li>Filter by subject and year to find relevant quizzes.</li>
+                                    <li>Access online quizzes with the <strong>View</strong> button in a new tab.</li>
+                                    <li>Check quiz details for more information.</li>
+                                </ul>
+                            </div>
                             {error && (
                                 <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
                                     {error}
