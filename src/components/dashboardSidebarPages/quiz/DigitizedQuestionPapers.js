@@ -360,7 +360,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                     <div className="paper-section">
                         <div className="mb-6">
                             <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                Filter by subject and year to access digitized question papers for exam practice!
+                                Filter by subject to access digitized question papers for exam practice!
                             </p>
                             <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
                                 <strong>NB:</strong> Past question papers are essential for effective exam preparation.

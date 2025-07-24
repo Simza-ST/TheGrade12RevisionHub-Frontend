@@ -353,7 +353,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         <div className="quiz-section">
                             <div className="mb-6">
                                 <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                    Filter by subject and year to find quizzes and test your knowledge!
+                                    Filter by subject, due date and title to find quizzes and test your knowledge!
                                 </p>
                                 <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
                                     <strong>NB:</strong> Quizzes help reinforce concepts and prepare for exams.
