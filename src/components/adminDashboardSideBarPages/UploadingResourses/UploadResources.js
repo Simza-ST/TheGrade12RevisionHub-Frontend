@@ -6,7 +6,7 @@ import AdminHeader from '../../common/AdminHeader';
 
 const UploadResources = ({ user, notifications, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
+    const [isDarkMode, setIsDarkMode] = useState(sessionStorage.getItem('theme') === 'dark');
     const [subjectName, setSubjectName] = useState('');
     const [resourceType, setResourceType] = useState('file');
     const [file, setFile] = useState(null);
@@ -21,15 +21,15 @@ const UploadResources = ({ user, notifications, onLogout }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 
         const fetchSubjects = async () => {
             try {
                 setIsLoadingSubjects(true);
                 setError(null);
-                const token = localStorage.getItem('jwt');
+                const token = sessionStorage.getItem('jwt');
                 if (!token) throw new Error('No authentication token found. Please log in.');
-                const response = await fetch('http://localhost:6262/user/subjects', {
+                const response = await fetch('http://localhost:6262/api/user/subjects', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -91,7 +91,7 @@ const UploadResources = ({ user, notifications, onLogout }) => {
         if (resourceType === 'link' && link) formData.append('link', link);
 
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('No authentication token found. Please log in.');
             const response = await fetch('http://localhost:6262/api/upload-resource', {
                 method: 'POST',

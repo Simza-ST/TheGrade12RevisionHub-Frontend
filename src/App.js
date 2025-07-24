@@ -56,7 +56,7 @@ function ProtectedRoute({ children }) {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             console.log('JWT Token:', token || 'No token found');
             if (!token) {
                 setIsAuthenticated(false);
@@ -95,7 +95,7 @@ function ProtectedRoute({ children }) {
             } catch (error) {
                 console.error('Auth Check Failed:', error.message);
                 setError(`Authentication failed: ${error.message}`);
-                localStorage.removeItem('jwt');
+                sessionStorage.removeItem('jwt');
                 setIsAuthenticated(false);
             }
         };
@@ -147,7 +147,7 @@ const App = () => {
 
     useEffect(() => {
         const validateToken = async () => {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 setIsAuthenticated(false);
                 return;
@@ -157,7 +157,7 @@ const App = () => {
                     headers: getAuthHeaders(),
                 });
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt');
+                    sessionStorage.removeItem('jwt');
                     setIsAuthenticated(false);
                 } else if (response.ok) {
                     setIsAuthenticated(true);
