@@ -7,6 +7,7 @@ import useResources from '../../../hooks/useResources';
 import FilterSection from "./FilterSection";
 import ResourcesList from "./ResourcesList";
 import ResourceModal from "./ResourceModal";
+import VideoModal from "./VideoModal";
 
 const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
     const navigate = useNavigate();
@@ -21,8 +22,10 @@ const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMo
         error,
         resetError,
         resourceUrl,
-        showModal,
-        setShowModal,
+        showResourceModal,
+        setShowResourceModal,
+        showVideoModal,
+        setShowVideoModal,
         resourceLoading,
         currentResource,
         viewResource,
@@ -66,8 +69,8 @@ const Resources = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMo
                     {`
 * {
     transition: none !important;
-animation: none !important;
-opacity: 1 !important;
+    animation: none !important;
+    opacity: 1 !important;
 }
 .full {
     width: 100%;
@@ -131,6 +134,9 @@ opacity: 1 !important;
 }
 .gap-4 {
     gap: 16px;
+}
+.gap-2 {
+    gap: 8px;
 }
 .p-6 {
     padding: 24px;
@@ -252,8 +258,8 @@ opacity: 1 !important;
 }
 .quiz-section {
     background: ${darkMode
-        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
-        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
     background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
     border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -340,8 +346,9 @@ opacity: 1 !important;
                                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
                                 <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
                                     <li>Filter by subject and year to narrow down resources.</li>
-                                    <li>Preview resources using the <strong>View</strong> button.</li>
-                                    <li>Save resources offline with the <strong>Download</strong> button.</li>
+                                    <li>Preview files using the <strong>View</strong> button.</li>
+                                    <li>Open external resources with the <strong>View Link</strong> button in a new tab.</li>
+                                    <li>Save files offline with the <strong>Download</strong> button (except for videos).</li>
                                     <li>Check resource details for more information.</li>
                                 </ul>
                             </div>
@@ -366,12 +373,19 @@ opacity: 1 !important;
                             </div>
                         </div>
                         <ResourceModal
-                            showModal={showModal}
-                            onClose={() => setShowModal(false)}
+                            showModal={showResourceModal}
+                            onClose={() => setShowResourceModal(false)}
                             resourceUrl={resourceUrl}
                             currentResource={currentResource}
                             resourceLoading={resourceLoading}
                             onDownloadResource={downloadResource}
+                        />
+                        <VideoModal
+                            showModal={showVideoModal}
+                            onClose={() => setShowVideoModal(false)}
+                            resourceUrl={resourceUrl}
+                            currentResource={currentResource}
+                            resourceLoading={resourceLoading}
                         />
                     </div>
                 </div>

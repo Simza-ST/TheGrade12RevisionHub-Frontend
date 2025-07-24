@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useCallback, useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
-const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resourceLoading, onDownloadResource }) => {
+const VideoModal = ({ showModal, onClose, resourceUrl, currentResource, resourceLoading }) => {
     const [resourceError, setResourceError] = useState(null);
     const [contentLoaded, setContentLoaded] = useState(false);
 
@@ -41,43 +41,37 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     const contentType = response.headers.get('Content-Type');
-                    if (!contentType.includes('application/pdf') &&
-                        !contentType.includes('image/') &&
-                        !contentType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+                    if (!contentType.includes('video/')) {
                         throw new Error(`Invalid content type received: ${contentType}`);
                     }
                     setResourceError(null);
                     setContentLoaded(true);
                 })
                 .catch((error) => {
-                    console.error('Failed to fetch resourceUrl:', error);
-                    setResourceError(`Failed to load ${currentResource?.title || 'resource'}: ${error.message}`);
+                    console.error('Failed to fetch video URL:', error);
+                    setResourceError(`Failed to load video ${currentResource?.title || 'resource'}: ${error.message}`);
                 });
         }
     }, [resourceUrl, showModal, currentResource]);
 
     if (!showModal) return null;
 
-    const fileExtension = currentResource?.fileName?.split('.').pop()?.toLowerCase();
-    const isImage = ['png', 'jpg', 'jpeg'].includes(fileExtension) ||
-        currentResource?.fileType?.includes('image/');
-
     return (
         <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="modal-title"
+            aria-labelledby="video-modal-title"
         >
             <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
                 <div className="flex justify-between items-center mb-3">
-                    <h2 id="modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
-                        {currentResource ? currentResource.title : 'View Resource'}
+                    <h2 id="video-modal-title" className="text-lg font-semibold text-[var(--text-primary)]">
+                        {currentResource ? currentResource.title : 'View Video'}
                     </h2>
                     <button
                         onClick={closeModal}
                         className="text-[var(--text-primary)] hover:text-[var(--accent-primary)] text-xl"
-                        aria-label="Close modal"
+                        aria-label="Close video modal"
                     >
                         ✕
                     </button>
@@ -89,50 +83,21 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                         {resourceError}
                     </div>
                 ) : resourceUrl ? (
-                    <>
-                        {isImage ? (
-                            <img
-                                src={resourceUrl}
-                                alt={currentResource?.title || 'Resource'}
-                                className="w-full h-[60vh] object-contain rounded"
-                                onLoad={() => setContentLoaded(true)}
-                                onError={(e) => {
-                                    console.error('Image error:', e);
-                                    setResourceError('Failed to display image. Please try downloading instead.');
-                                }}
-                            />
-                        ) : (
-                            <object
-                                data={resourceUrl}
-                                type={currentResource?.fileType || 'application/pdf'}
-                                className="w-full h-[60vh] rounded"
-                                title={currentResource?.title || 'Resource Viewer'}
-                            >
-                                <p className="text-[var(--text-secondary)]">
-                                    Unable to display resource.{' '}
-                                    <button
-                                        onClick={() => onDownloadResource(currentResource)}
-                                        className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                        aria-label={`Download ${currentResource?.title || 'resource'}`}
-                                    >
-                                        Download instead
-                                    </button>.
-                                </p>
-                            </object>
-                        )}
-                        {contentLoaded && (
-                            <button
-                                onClick={() => onDownloadResource(currentResource)}
-                                className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                aria-label={`Download ${currentResource?.title || 'resource'}`}
-                            >
-                                Download Resource
-                            </button>
-                        )}
-                    </>
+                    <video
+                        controls
+                        src={resourceUrl}
+                        className="w-full h-[60vh] object-contain rounded"
+                        onLoadedData={() => setContentLoaded(true)}
+                        onError={(e) => {
+                            console.error('Video error:', e);
+                            setResourceError('Failed to play video. Please try again.');
+                        }}
+                    >
+                        Your browser does not support the video tag.
+                    </video>
                 ) : (
                     <div className="text-center text-sm text-[var(--text-secondary)]">
-                        No resource URL provided
+                        No video URL provided
                     </div>
                 )}
             </div>
@@ -140,7 +105,7 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
     );
 };
 
-ResourceModal.propTypes = {
+VideoModal.propTypes = {
     showModal: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     resourceUrl: PropTypes.string,
@@ -151,7 +116,6 @@ ResourceModal.propTypes = {
         fileType: PropTypes.string,
     }),
     resourceLoading: PropTypes.bool.isRequired,
-    onDownloadResource: PropTypes.func.isRequired,
 };
 
-export default ResourceModal;
+export default VideoModal;

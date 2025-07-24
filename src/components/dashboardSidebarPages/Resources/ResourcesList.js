@@ -1,85 +1,96 @@
 import PropTypes from 'prop-types';
-import Tooltip from '../../dashboardSidebarPages/question-papers/Tooltip';
+import Tooltip from './Tooltip';
+import LoadingSpinner from './LoadingSpinner';
 
 const ResourcesList = ({ resources, selectedSubject, selectedYear, resourceLoading, onViewResource, onDownloadResource }) => {
     const filteredResources = resources.filter((resource) => {
-        const matchesSubject = selectedSubject ? resource.subject?.subjectName === selectedSubject : true;
-        const matchesYear = selectedYear ? resource.year === selectedYear : true;
+        const matchesSubject = !selectedSubject || resource.subject?.subjectName === selectedSubject;
+        const matchesYear = !selectedYear || resource.year === selectedYear;
         return matchesSubject && matchesYear;
     });
 
     return (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {filteredResources.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {filteredResources.length === 0 ? (
+                <p className="col-span-full text-center text-[var(--text-secondary)]">
+                    No resources found{selectedSubject ? ` for ${selectedSubject}` : ''}{selectedYear ? ` in ${selectedYear}` : ''}.
+                </p>
+            ) : (
                 filteredResources.map((resource) => {
                     const fileExtension = resource.fileName?.split('.').pop()?.toLowerCase();
-                    const isViewable = ['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) &&
-                        (resource.fileType?.includes('application/pdf') ||
-                            resource.fileType?.includes('image/png') ||
-                            resource.fileType?.includes('image/jpeg'));
+                    const isVideo = resource.resourceType === 'file' &&
+                        (['mp4', 'webm'].includes(fileExtension) || resource.fileType?.includes('video/'));
+                    const isLink = resource.resourceType === 'link';
+
                     return (
-                        <div key={resource.id} className="service-card">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="text-lg font-medium text-[var(--text-primary)]">
-                                    {resource.title}
-                                </h3>
-                            </div>
+                        <div
+                            key={resource.id}
+                            className="service-card shadow-[var(--shadow)] rounded-lg p-4 hover:shadow-lg transition-shadow bg-[var(--bg-secondary)] relative"
+                        >
+                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+                                {resource.title}
+                            </h3>
                             <p className="text-sm text-[var(--text-secondary)] mb-2">
-                                Subject: {resource.subject?.subjectName || 'Unknown'}
+                                {resource.description || 'No description available'}
                             </p>
-                            {resource.resourceType === 'file' && resource.fileName && (
-                                <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                    File: {resource.fileName}
-                                </p>
-                            )}
-                            {resource.resourceType === 'link' && resource.url && (
-                                <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                    Link: <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{resource.url}</a>
-                                </p>
-                            )}
-                            <div className="flex gap-2">
-                                {resource.resourceType === 'file' && (
-                                    <>
-                                        <Tooltip text={isViewable ? "Preview in browser" : "Only PDFs and images can be viewed"}>
-                                            <button
-                                                onClick={() => isViewable && onViewResource(resource)}
-                                                className={`px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${!isViewable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                disabled={resourceLoading || !isViewable}
-                                            >
-                                                View
-                                            </button>
-                                        </Tooltip>
-                                        <Tooltip text={isViewable ? "Download resource" : "Only PDFs and images can be downloaded"}>
-                                            <button
-                                                onClick={() => isViewable && onDownloadResource(resource)}
-                                                className={`px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${!isViewable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                disabled={resourceLoading || !isViewable}
-                                            >
-                                                Download
-                                            </button>
-                                        </Tooltip>
-                                    </>
-                                )}
-                                {resource.resourceType === 'link' && (
+                            <p className="text-xs text-[var(--text-secondary)] mb-2">
+                                Subject: {resource.subject?.subjectName || 'N/A'}
+                            </p>
+                            <p className="text-xs text-[var(--text-secondary)] mb-2">
+                                Type: {resource.resourceType || 'N/A'}
+                            </p>
+                            <p className="text-xs text-[var(--text-secondary)] mb-2">
+                                {isLink ? 'Link' : 'File'}: {isLink ? resource.url : resource.fileName || 'N/A'}
+                            </p>
+                            <p className="text-xs text-[var(--text-secondary)] mb-2">
+                                Tags: {resource.tags?.join(', ') || 'None'}
+                            </p>
+                            <div className="mt-4 flex gap-2">
+                                {isLink ? (
                                     <Tooltip text="Open link in new tab">
                                         <a
                                             href={resource.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                            aria-label={`View ${resource.title} link`}
                                         >
-                                            Visit Link
+                                            View Link
                                         </a>
                                     </Tooltip>
+                                ) : (
+                                    <>
+                                        <Tooltip text="View resource">
+                                            <button
+                                                onClick={() => onViewResource(resource)}
+                                                disabled={resourceLoading}
+                                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                                aria-label={`View ${resource.title}`}
+                                            >
+                                                View
+                                            </button>
+                                        </Tooltip>
+                                        {!isVideo && (
+                                            <Tooltip text="Download resource">
+                                                <button
+                                                    onClick={() => onDownloadResource(resource)}
+                                                    disabled={resourceLoading}
+                                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                                    aria-label={`Download ${resource.title}`}
+                                                >
+                                                    Download
+                                                </button>
+                                            </Tooltip>
+                                        )}
+                                    </>
                                 )}
                             </div>
+                            {resourceLoading && !isLink && (
+                                <LoadingSpinner className="absolute -top-2 -right-2 h-5 w-5" />
+                            )}
                         </div>
                     );
                 })
-            ) : (
-                <p className="col-span-full text-[var(--text-secondary)] text-center">
-                    No resources available for the selected filters.
-                </p>
             )}
         </div>
     );
@@ -90,14 +101,16 @@ ResourcesList.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             title: PropTypes.string.isRequired,
+            description: PropTypes.string,
             subject: PropTypes.shape({
                 subjectName: PropTypes.string,
             }),
             year: PropTypes.string,
+            resourceType: PropTypes.string,
             fileName: PropTypes.string,
             fileType: PropTypes.string,
-            url: PropTypes.string.isRequired,
-            resourceType: PropTypes.oneOf(['file', 'link']).isRequired,
+            url: PropTypes.string,
+            tags: PropTypes.arrayOf(PropTypes.string),
         })
     ).isRequired,
     selectedSubject: PropTypes.string,

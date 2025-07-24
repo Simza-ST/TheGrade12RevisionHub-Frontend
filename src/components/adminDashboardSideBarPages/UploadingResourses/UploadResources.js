@@ -1,4 +1,3 @@
-/* src/components/admindashboard/uploadingResources/UploadResources.jsx */
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AdminSidebar from '../../common/AdminSidebar';
@@ -59,13 +58,11 @@ const UploadResources = ({ user, notifications, onLogout }) => {
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'video/mp4',
             'video/webm',
-            'audio/mpeg',
-            'audio/wav',
         ];
         if (selectedFile && allowedTypes.includes(selectedFile.type)) {
             setFile(selectedFile);
         } else {
-            alert('Please select a PDF, PNG, JPEG, DOCX, MP4, WebM, MP3, or WAV file.');
+            alert('Please select a PDF, PNG, JPEG, DOCX, MP4, or WebM file.');
             setFile(null);
         }
     };
@@ -202,7 +199,7 @@ const UploadResources = ({ user, notifications, onLogout }) => {
                                         type="file"
                                         name="file"
                                         id="fileUpload"
-                                        accept=".pdf,.png,.jpg,.jpeg,.docx,.mp4,.webm,.wav"
+                                        accept=".pdf,.png,.jpg,.jpeg,.docx,.mp4,.webm"
                                         onChange={handleFileChange}
                                         required
                                         className="w-full p-3 mb-3 border-2 border-[var(--border)] rounded-md text-base text-[var(--text-normal)] bg-[var(--bg-primary)]"

@@ -10,7 +10,8 @@ const useResources = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [resourceUrl, setResourceUrl] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showResourceModal, setShowResourceModal] = useState(false);
+    const [showVideoModal, setShowVideoModal] = useState(false);
     const [resourceLoading, setResourceLoading] = useState(false);
     const [currentResource, setCurrentResource] = useState(null);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
@@ -86,7 +87,6 @@ const useResources = () => {
 
     const getFileNameFromUrl = (url) => {
         if (!url) return null;
-        // Extract filename from url (e.g., '/Uploads/timestamp-filename.pdf' -> 'timestamp-filename.pdf')
         return url.split('/').pop();
     };
 
@@ -100,9 +100,9 @@ const useResources = () => {
         const fileType = resource.fileType;
         const fileName = getFileNameFromUrl(resource.url);
         console.log('Viewing resource:', { id: resource.id, fileName: resource.fileName, fileType, url: resource.url, serverFileName: fileName });
-        if (!['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) ||
-            (fileType && !['application/pdf', 'image/png', 'image/jpeg'].includes(fileType))) {
-            setError('Only PDF and image (PNG, JPEG) resources are supported for viewing.');
+        if (!['pdf', 'png', 'jpg', 'jpeg', 'mp4', 'webm'].includes(fileExtension) ||
+            (fileType && !['application/pdf', 'image/png', 'image/jpeg', 'video/mp4', 'video/webm'].includes(fileType))) {
+            setError('Only PDF, image (PNG, JPEG), and video (MP4, WebM) resources are supported for viewing.');
             return;
         }
 
@@ -123,14 +123,18 @@ const useResources = () => {
                 throw new Error(`Failed to view ${resource.fileName}: HTTP ${response.status}`);
             }
             const contentType = response.headers.get('Content-Type');
-            const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+            const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'video/mp4', 'video/webm'];
             if (!validTypes.includes(contentType)) {
-                throw new Error(`Expected PDF or image, got ${contentType}`);
+                throw new Error(`Expected PDF, image, or video, got ${contentType}`);
             }
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             setResourceUrl(blobUrl);
-            setShowModal(true);
+            if (['mp4', 'webm'].includes(fileExtension) || contentType.includes('video/')) {
+                setShowVideoModal(true);
+            } else {
+                setShowResourceModal(true);
+            }
         } catch (err) {
             setError(`Failed to view resource: ${err.message}`);
             if (err.message.includes('Please log in')) {
@@ -150,9 +154,9 @@ const useResources = () => {
         const fileType = resource.fileType;
         const fileName = getFileNameFromUrl(resource.url);
         console.log('Downloading resource:', { id: resource.id, fileName: resource.fileName, fileType, url: resource.url, serverFileName: fileName });
-        if (!['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) ||
-            (fileType && !['application/pdf', 'image/png', 'image/jpeg'].includes(fileType))) {
-            setError('Only PDF and image (PNG, JPEG) resources can be downloaded.');
+        if (!['pdf', 'png', 'jpg', 'jpeg', 'docx'].includes(fileExtension) ||
+            (fileType && !['application/pdf', 'image/png', 'image/jpeg', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(fileType))) {
+            setError('Only PDF, image (PNG, JPEG), and DOCX resources can be downloaded.');
             return;
         }
 
@@ -170,9 +174,9 @@ const useResources = () => {
                 throw new Error(`Failed to download ${resource.fileName}: HTTP ${response.status}`);
             }
             const contentType = response.headers.get('Content-Type');
-            const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+            const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
             if (!validTypes.includes(contentType)) {
-                throw new Error(`Expected PDF or image, got ${contentType}`);
+                throw new Error(`Expected PDF, image, or DOCX, got ${contentType}`);
             }
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -204,8 +208,10 @@ const useResources = () => {
         error,
         resetError,
         resourceUrl,
-        showModal,
-        setShowModal,
+        showResourceModal,
+        setShowResourceModal,
+        showVideoModal,
+        setShowVideoModal,
         resourceLoading,
         currentResource,
         viewResource,
