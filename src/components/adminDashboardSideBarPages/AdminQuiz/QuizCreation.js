@@ -81,6 +81,7 @@ const CreateQuiz = ({ user, notifications, onLogout }) => {
             const response = await fetch(`${API_BASE_URL}/quizzes`, {
                 method: 'POST',
                 headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(quiz),
