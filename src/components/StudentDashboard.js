@@ -166,8 +166,8 @@ return (
                     isCollapsed={isCollapsed}
                     darkMode={darkMode}
                     setDarkMode={setDarkMode}
-                    tabDescription="StudentDashboard"
-                    userMessage="Welcome"
+                    tabDescription="Student Dashboard"
+                    userMessage="Welcome to the Revision Hub Application"
                 />
                 <div
                     className={`
