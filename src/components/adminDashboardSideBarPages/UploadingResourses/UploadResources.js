@@ -93,7 +93,7 @@ const UploadResources = ({ user, notifications, onLogout }) => {
         try {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('No authentication token found. Please log in.');
-            const response = await fetch('http://localhost:6262/api/upload-resource', {
+            const response = await fetch('http://localhost:6262/api/admin/upload-resource', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

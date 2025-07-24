@@ -11,13 +11,13 @@ const useResources = () => {
     const [showModal, setShowModal] = useState(false);
     const [resourceLoading, setResourceLoading] = useState(false);
     const [currentResource, setCurrentResource] = useState(null);
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
     console.log('API_BASE_URL:', API_BASE_URL);
 
     const fetchData = async (url, setData, errorMessage) => {
         try {
             const headers = {
-                Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 'Content-Type': 'application/json',
             };
             const response = await fetch(url, { headers });
@@ -37,7 +37,7 @@ const useResources = () => {
         setError(null);
 
         fetchData(
-            `${API_BASE_URL}/user/enrolled-subjects`,
+            `${API_BASE_URL}/enrolled-subjects`,
             (data) => setSubjects(Array.isArray(data) ? data.map((s) => s.subjectName || s) : []),
             'Failed to fetch subjects'
         );
@@ -45,13 +45,13 @@ const useResources = () => {
         const fetchResources = async () => {
             try {
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 };
                 const query = new URLSearchParams();
                 if (selectedSubject) query.append('subject', selectedSubject);
                 if (selectedYear) query.append('year', selectedYear);
-                const url = `${API_BASE_URL}/api/resources${query.toString() ? `?${query}` : ''}`;
+                const url = `${API_BASE_URL}/resources${query.toString() ? `?${query}` : ''}`;
                 const response = await fetch(url, { headers });
                 const data = await response.json();
                 if (response.ok && data.success) {
@@ -76,7 +76,7 @@ const useResources = () => {
         setCurrentResource(resource);
 
         try {
-            const token = localStorage.getItem('jwt');
+            const token = sessionStorage.getItem('jwt');
             if (!token) {
                 throw new Error('No authentication token found. Please log in.');
             }
@@ -107,7 +107,7 @@ const useResources = () => {
         if (resource.resourceType === 'file') {
             try {
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 };
                 const response = await fetch(`${API_BASE_URL}${resource.url}?download=true`, { headers });
 

@@ -27,7 +27,7 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
         if (resourceUrl && showModal) {
             fetch(resourceUrl, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                 },
             })
                 .then((response) => {
