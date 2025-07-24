@@ -387,7 +387,7 @@ const App = () => {
                         path="/digitized-question-papers/:id"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
-                                <QuestionPaperView {...commonProps} />
+                                <DigitizedQuestionPaperView {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
@@ -397,13 +397,5 @@ const App = () => {
         </div>
     );
 };
-
-function QuestionPaperView({ darkMode, setDarkMode, notifications, ...rest }) {
-    const { id } = useParams();
-    if (id === '1') {
-        return <EnglishFALP12020 darkMode={darkMode} setDarkMode={setDarkMode} notifications={notifications} />;
-    }
-    return <div>Paper not found</div>;
-}
 
 export default App;

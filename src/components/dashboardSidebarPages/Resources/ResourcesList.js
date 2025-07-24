@@ -11,64 +11,71 @@ const ResourcesList = ({ resources, selectedSubject, selectedYear, resourceLoadi
     return (
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {filteredResources.length > 0 ? (
-                filteredResources.map((resource) => (
-                    <div key={resource.id} className="service-card">
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-lg font-medium text-[var(--text-primary)]">
-                                {resource.title}
-                            </h3>
-                        </div>
-                        <p className="text-sm text-[var(--text-secondary)] mb-2">
-                            Subject: {resource.subject?.subjectName || 'Unknown'}
-                        </p>
-                        {resource.resourceType === 'file' && resource.fileName && (
-                            <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                File: {resource.fileName}
+                filteredResources.map((resource) => {
+                    const fileExtension = resource.fileName?.split('.').pop()?.toLowerCase();
+                    const isViewable = ['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) &&
+                        (resource.fileType?.includes('application/pdf') ||
+                            resource.fileType?.includes('image/png') ||
+                            resource.fileType?.includes('image/jpeg'));
+                    return (
+                        <div key={resource.id} className="service-card">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="text-lg font-medium text-[var(--text-primary)]">
+                                    {resource.title}
+                                </h3>
+                            </div>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">
+                                Subject: {resource.subject?.subjectName || 'Unknown'}
                             </p>
-                        )}
-                        {resource.resourceType === 'link' && resource.url && (
-                            <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                Link: <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{resource.url}</a>
-                            </p>
-                        )}
-                        <div className="flex gap-2">
-                            {resource.resourceType === 'file' && (
-                                <>
-                                    <Tooltip text="Preview in browser">
-                                        <button
-                                            onClick={() => onViewResource(resource)}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            disabled={resourceLoading}
-                                        >
-                                            View
-                                        </button>
-                                    </Tooltip>
-                                    <Tooltip text="Download resource">
-                                        <button
-                                            onClick={() => onDownloadResource(resource)}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                            disabled={resourceLoading}
-                                        >
-                                            Download
-                                        </button>
-                                    </Tooltip>
-                                </>
+                            {resource.resourceType === 'file' && resource.fileName && (
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    File: {resource.fileName}
+                                </p>
                             )}
-                            {resource.resourceType === 'link' && (
-                                <Tooltip text="Open link in new tab">
-                                    <a
-                                        href={resource.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                    >
-                                        Visit Link
-                                    </a>
-                                </Tooltip>
+                            {resource.resourceType === 'link' && resource.url && (
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Link: <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{resource.url}</a>
+                                </p>
                             )}
+                            <div className="flex gap-2">
+                                {resource.resourceType === 'file' && (
+                                    <>
+                                        <Tooltip text={isViewable ? "Preview in browser" : "Only PDFs and images can be viewed"}>
+                                            <button
+                                                onClick={() => isViewable && onViewResource(resource)}
+                                                className={`px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${!isViewable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                disabled={resourceLoading || !isViewable}
+                                            >
+                                                View
+                                            </button>
+                                        </Tooltip>
+                                        <Tooltip text={isViewable ? "Download resource" : "Only PDFs and images can be downloaded"}>
+                                            <button
+                                                onClick={() => isViewable && onDownloadResource(resource)}
+                                                className={`px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${!isViewable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                disabled={resourceLoading || !isViewable}
+                                            >
+                                                Download
+                                            </button>
+                                        </Tooltip>
+                                    </>
+                                )}
+                                {resource.resourceType === 'link' && (
+                                    <Tooltip text="Open link in new tab">
+                                        <a
+                                            href={resource.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        >
+                                            Visit Link
+                                        </a>
+                                    </Tooltip>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))
+                    );
+                })
             ) : (
                 <p className="col-span-full text-[var(--text-secondary)] text-center">
                     No resources available for the selected filters.

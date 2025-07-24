@@ -25,9 +25,15 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
 
     useEffect(() => {
         if (resourceUrl && showModal) {
+            const token = sessionStorage.getItem('jwt');
+            if (!token) {
+                setResourceError('No authentication token found. Please log in.');
+                return;
+            }
             fetch(resourceUrl, {
                 headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
             })
                 .then((response) => {
@@ -39,20 +45,20 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                         throw new Error(`Invalid content type received: ${contentType}`);
                     }
                     setResourceError(null);
+                    setContentLoaded(true);
                 })
                 .catch((error) => {
                     console.error('Failed to fetch resourceUrl:', error);
                     setResourceError(`Failed to load ${currentResource?.title || 'resource'}: ${error.message}`);
                 });
         }
-    }, [resourceUrl, showModal, currentResource]);
+        }, [resourceUrl, showModal, currentResource]);
 
     if (!showModal) return null;
 
-    // Determine file type based on fileName or fileType
     const fileExtension = currentResource?.fileName?.split('.').pop()?.toLowerCase();
-    const isImage = fileExtension === 'png' || fileExtension === 'jpg' || fileExtension === 'jpeg' ||
-                    currentResource?.fileType?.includes('image/');
+    const isImage = ['png', 'jpg', 'jpeg'].includes(fileExtension) ||
+        currentResource?.fileType?.includes('image/');
 
     return (
         <div
@@ -92,7 +98,6 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                                     console.error('Image error:', e);
                                     setResourceError('Failed to display image. Please try downloading instead.');
                                 }}
-                                style={{ display: contentLoaded ? 'block' : 'none' }}
                             />
                         ) : (
                             <object
@@ -101,15 +106,6 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                                 className="w-full h-[60vh] rounded"
                                 title={currentResource?.title || 'Resource Viewer'}
                             >
-                                {currentResource && contentLoaded && (
-                                    <button
-                                        onClick={() => onDownloadResource(currentResource)}
-                                        className="mt-3 text-[var(--accent-primary)] hover:underline px-2 py-1"
-                                        aria-label={`Download ${currentResource?.title || 'resource'}`}
-                                    >
-                                        Download Resource
-                                    </button>
-                                )}
                                 <p className="text-[var(--text-secondary)]">
                                     Unable to display PDF.{' '}
                                     <a
@@ -122,25 +118,20 @@ const ResourceModal = ({ showModal, onClose, resourceUrl, currentResource, resou
                                 </p>
                             </object>
                         )}
-                        {/*{!contentLoaded && !resourceLoading && (*/}
-                        {/*    <div className="h-[60vh] flex items-center justify-center">*/}
-                        {/*        <p className="text-[var(--text-secondary)]">Loading resource...</p>*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
+                        {contentLoaded && (
+                            <button
+                                onClick={() => onDownloadResource(currentResource)}
+                                className="mt-3 text-[var(--accent-primary)] hover:underline px-2 py-1"
+                                aria-label={`Download ${currentResource?.title || 'resource'}`}
+                            >
+                                Download Resource
+                            </button>
+                        )}
                     </>
                 ) : (
                     <div className="text-center text-sm text-[var(--text-secondary)]">
                         No resource URL provided
                     </div>
-                )}
-                {currentResource && contentLoaded && (
-                    <button
-                        onClick={() => onDownloadResource(currentResource)}
-                        className="mt-3 text-[var(--accent-primary)] hover:underline px-2 py-1"
-                        aria-label={`Download ${currentResource?.title || 'resource'}`}
-                    >
-                        Download Resource
-                    </button>
                 )}
             </div>
         </div>

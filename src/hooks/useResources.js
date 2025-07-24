@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 
 const useResources = () => {
+    const navigate = useNavigate();
     const [resources, setResources] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -11,13 +13,16 @@ const useResources = () => {
     const [showModal, setShowModal] = useState(false);
     const [resourceLoading, setResourceLoading] = useState(false);
     const [currentResource, setCurrentResource] = useState(null);
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
-    console.log('API_BASE_URL:', API_BASE_URL);
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
     const fetchData = async (url, setData, errorMessage) => {
         try {
+            const token = sessionStorage.getItem('jwt');
+            if (!token) {
+                throw new Error('No authentication token found. Please log in.');
+            }
             const headers = {
-                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
             };
             const response = await fetch(url, { headers });
@@ -29,6 +34,9 @@ const useResources = () => {
             }
         } catch (err) {
             setError(err.message);
+            if (err.message.includes('Please log in')) {
+                navigate('/login');
+            }
         }
     };
 
@@ -37,21 +45,25 @@ const useResources = () => {
         setError(null);
 
         fetchData(
-            `${API_BASE_URL}/enrolled-subjects`,
+            `${API_BASE_URL}/user/enrolled-subjects`,
             (data) => setSubjects(Array.isArray(data) ? data.map((s) => s.subjectName || s) : []),
             'Failed to fetch subjects'
         );
 
         const fetchResources = async () => {
             try {
+                const token = sessionStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('No authentication token found. Please log in.');
+                }
                 const headers = {
-                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 };
                 const query = new URLSearchParams();
                 if (selectedSubject) query.append('subject', selectedSubject);
                 if (selectedYear) query.append('year', selectedYear);
-                const url = `${API_BASE_URL}/resources${query.toString() ? `?${query}` : ''}`;
+                const url = `${API_BASE_URL}/user/resources${query.toString() ? `?${query}` : ''}`;
                 const response = await fetch(url, { headers });
                 const data = await response.json();
                 if (response.ok && data.success) {
@@ -61,16 +73,38 @@ const useResources = () => {
                 }
             } catch (err) {
                 setError(err.message);
+                if (err.message.includes('Please log in')) {
+                    navigate('/login');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchResources();
-    }, [selectedSubject, selectedYear]);
+    }, [selectedSubject, selectedYear, navigate]);
+
+    const getFileNameFromUrl = (url) => {
+        if (!url) return null;
+        // Extract filename from url (e.g., '/Uploads/timestamp-filename.pdf' -> 'timestamp-filename.pdf')
+        return url.split('/').pop();
+    };
 
     const viewResource = async (resource) => {
-        if (resource.resourceType !== 'file') return;
+        if (resource.resourceType !== 'file') {
+            setError('Only file resources can be viewed.');
+            return;
+        }
+
+        const fileExtension = resource.fileName?.split('.').pop()?.toLowerCase();
+        const fileType = resource.fileType;
+        const fileName = getFileNameFromUrl(resource.url);
+        console.log('Viewing resource:', { id: resource.id, fileName: resource.fileName, fileType, url: resource.url, serverFileName: fileName });
+        if (!['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) ||
+            (fileType && !['application/pdf', 'image/png', 'image/jpeg'].includes(fileType))) {
+            setError('Only PDF and image (PNG, JPEG) resources are supported for viewing.');
+            return;
+        }
 
         setResourceLoading(true);
         setCurrentResource(resource);
@@ -80,13 +114,14 @@ const useResources = () => {
             if (!token) {
                 throw new Error('No authentication token found. Please log in.');
             }
-            const response = await fetch(`${API_BASE_URL}${resource.url}`, {
+            const response = await fetch(`${API_BASE_URL}/user/Uploads/view/${encodeURIComponent(fileName)}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-            console.log('Response headers:', response.headers);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`Failed to view ${resource.fileName}: HTTP ${response.status}`);
+            }
             const contentType = response.headers.get('Content-Type');
             const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
             if (!validTypes.includes(contentType)) {
@@ -97,33 +132,61 @@ const useResources = () => {
             setResourceUrl(blobUrl);
             setShowModal(true);
         } catch (err) {
-            setError(`Failed to load resource: ${err.message}`);
+            setError(`Failed to view resource: ${err.message}`);
+            if (err.message.includes('Please log in')) {
+                navigate('/login');
+            }
         } finally {
             setResourceLoading(false);
         }
     };
 
     const downloadResource = async (resource) => {
-        if (resource.resourceType === 'file') {
-            try {
-                const headers = {
-                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
-                };
-                const response = await fetch(`${API_BASE_URL}${resource.url}?download=true`, { headers });
+        if (resource.resourceType !== 'file') {
+            setError('Only file resources can be downloaded.');
+            return;
+        }
+        const fileExtension = resource.fileName?.split('.').pop()?.toLowerCase();
+        const fileType = resource.fileType;
+        const fileName = getFileNameFromUrl(resource.url);
+        console.log('Downloading resource:', { id: resource.id, fileName: resource.fileName, fileType, url: resource.url, serverFileName: fileName });
+        if (!['pdf', 'png', 'jpg', 'jpeg'].includes(fileExtension) ||
+            (fileType && !['application/pdf', 'image/png', 'image/jpeg'].includes(fileType))) {
+            setError('Only PDF and image (PNG, JPEG) resources can be downloaded.');
+            return;
+        }
 
-                if (!response.ok) throw new Error(`Failed to download ${resource.fileName}`);
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = resource.fileName || 'resource';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                setError(`Failed to download: ${err.message}`);
+        try {
+            const token = sessionStorage.getItem('jwt');
+            if (!token) {
+                throw new Error('No authentication token found. Please log in.');
+            }
+            const response = await fetch(`${API_BASE_URL}/user/Uploads/download/${encodeURIComponent(fileName)}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to download ${resource.fileName}: HTTP ${response.status}`);
+            }
+            const contentType = response.headers.get('Content-Type');
+            const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+            if (!validTypes.includes(contentType)) {
+                throw new Error(`Expected PDF or image, got ${contentType}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = resource.fileName || 'resource';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            setError(`Failed to download: ${err.message}`);
+            if (err.message.includes('Please log in')) {
+                navigate('/login');
             }
         }
     };
