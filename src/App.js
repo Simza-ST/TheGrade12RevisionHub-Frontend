@@ -384,7 +384,7 @@ const App = () => {
                         }
                     />
                     <Route
-                        path="/digitized-question-papers/:id"
+                        path="/digitized-question-papers/:fileName"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
                                 <DigitizedQuestionPaperView {...commonProps} />

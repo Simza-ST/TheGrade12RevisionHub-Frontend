@@ -78,14 +78,14 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     }, [fetchData]);
 
     const handleViewPaper = (paper) => {
-        // Get the component based on paper ID
-        const component = getPaperComponent(paper.id);
+        // Ensure we're using the correct file name
+        const fileName = encodeURIComponent(paper.fileName);
+        const component = getPaperComponent(fileName);
 
         if (!component) {
             setError('No interactive viewer available for this paper');
             return;
         }
-
         setNotifications([
             ...notifications,
             {
@@ -96,7 +96,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
             },
         ]);
 
-        navigate(`/digitized-question-papers/${paper.id}`);
+        navigate(`/digitized-question-papers/${fileName}`);
     };
 
     const handleRetry = () => {

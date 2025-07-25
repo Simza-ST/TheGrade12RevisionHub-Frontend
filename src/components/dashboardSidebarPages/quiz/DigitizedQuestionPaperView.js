@@ -5,61 +5,49 @@ import { getPaperComponent } from '../../../utils/paperMapper';
 import paperData from "sockjs-client/lib/transport/receiver/jsonp";
 
 const DigitizedQuestionPaperView = ({ darkMode }) => {
-    const { id } = useParams();
+    const { fileName } = useParams();
     const navigate = useNavigate();
     const [paper, setPaper] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [PaperComponent, setPaperComponent] = useState(null);
 
+    // Remove this incorrect import (it was causing confusion)
+// import paperData from "sockjs-client/lib/transport/receiver/jsonp";
+
+// In your fetch function, simplify since we only need to validate the filename exists
     useEffect(() => {
         const fetchPaper = async () => {
             try {
                 setLoading(true);
 
-                // CORRECTED: Fetch a single paper by ID
-                const response = await fetch(`${API_BASE_URL}/user/digitized/${id}`, {
+                // Just validate the paper exists (optional - can remove if not needed)
+                const response = await fetch(`${API_BASE_URL}/user/digitized/${encodeURIComponent(fileName)}`, {
                     headers: getAuthHeaders(),
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+                    throw new Error('Paper not found in system');
                 }
 
-                const data = await response.json();
-
-                if (!data.success || !data.data) {
-                    throw new Error(data.message || 'Failed to fetch paper data');
-                }
-
-                const paperData = data.data;
-                console.log("Fetched paper data:", paperData); // Debugging log
-                setPaper(paperData);
-
-                // Check if paper ID exists
-                if (!paperData.id) {
-                    throw new Error("Paper ID is missing in API response");
-                }
-
-                setPaper(paperData);
-                const component = getPaperComponent(paperData.id);
-
+                // Get the component for this filename
+                const component = getPaperComponent(fileName);
                 if (!component) {
                     throw new Error('No interactive viewer available');
                 }
 
+                setPaper({ fileName }); // Just store basic info
                 setPaperComponent(() => component);
                 setLoading(false);
             } catch (err) {
-                console.error('Paper fetch error:', err);
-                setError(`Error: ${err.message}`);
+                console.error('Error:', err);
+                setError(err.message);
                 setLoading(false);
             }
         };
 
         fetchPaper();
-    }, [id, navigate]);
+    }, [fileName]);
 
     if (loading) {
         return (
@@ -101,7 +89,7 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
                     {PaperComponent && (
                         <PaperComponent
                             darkMode={darkMode}
-                            paperId={paper.id} // Ensure this is passed
+                            fileName={paper.fileName} // Ensure this is passed
                         />
                     )}
                 </div>
