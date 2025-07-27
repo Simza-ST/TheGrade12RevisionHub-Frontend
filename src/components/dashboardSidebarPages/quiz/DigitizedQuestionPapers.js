@@ -78,14 +78,14 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     }, [fetchData]);
 
     const handleViewPaper = (paper) => {
-        // Get the component based on paper ID
-        const component = getPaperComponent(paper.id);
+        // Ensure we're using the correct file name
+        const fileName = encodeURIComponent(paper.fileName);
+        const component = getPaperComponent(fileName);
 
         if (!component) {
             setError('No interactive viewer available for this paper');
             return;
         }
-
         setNotifications([
             ...notifications,
             {
@@ -96,7 +96,7 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
             },
         ]);
 
-        navigate(`/digitized-question-papers/${paper.id}`);
+        navigate(`/digitized-question-papers/${fileName}`);
     };
 
     const handleRetry = () => {
@@ -354,86 +354,86 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                         tabDescription="Digitized Question Papers"
                         userMessage="Access digitized past papers"
                     />
-                <div
-                    className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
-                >
-                    <div className="paper-section">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Digitized Question Papers</h2>
-                        </div>
-                        <div className="mb-6">
-                            <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                Filter by subject to access digitized question papers for exam practice!
-                            </p>
-                            <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
-                                <strong>NB:</strong> Past question papers are essential for effective exam preparation.
-                            </p>
-                            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
-                            <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
-                                <li>Filter by subject and year to find relevant question papers.</li>
-                                <li>Preview papers using the <strong>View Paper</strong> button.</li>
-                                <li>Check resource details for more information.</li>
-                            </ul>
-                        </div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Digitized Question Papers</h2>
-                        </div>
-                        {error && (
-                            <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
-                                <span>{error}</span>
-                                <button
-                                    onClick={handleRetry}
-                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                >
-                                    Retry
-                                </button>
+                    <div
+                        className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}
+                    >
+                        <div className="paper-section">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Digitized Question Papers</h2>
                             </div>
-                        )}
-                        {!error && (
-                            <>
-                                <div className="mb-6">
-                                    <label htmlFor="filterSubject" className="form-label">
-                                        Filter by Subject
-                                    </label>
-                                    <select
-                                        id="filterSubject"
-                                        value={filterSubject}
-                                        onChange={(e) => setFilterSubject(e.target.value)}
-                                        className="form-input"
+                            <div className="mb-6">
+                                <p className="text-sm text-[var(--text-secondary)] mb-4">
+                                    Filter by subject to access digitized question papers for exam practice!
+                                </p>
+                                <p className="bg-[var(--bg-tertiary)] p-3 rounded-md text-sm text-[var(--text-secondary)] mb-4">
+                                    <strong>NB:</strong> Past question papers are essential for effective exam preparation.
+                                </p>
+                                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
+                                <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
+                                    <li>Filter by subject and year to find relevant question papers.</li>
+                                    <li>Preview papers using the <strong>View Paper</strong> button.</li>
+                                    <li>Check resource details for more information.</li>
+                                </ul>
+                            </div>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Available Digitized Question Papers</h2>
+                            </div>
+                            {error && (
+                                <div className="p-4 mb-4 rounded-lg bg-[var(--accent-secondary)] text-white flex justify-between items-center">
+                                    <span>{error}</span>
+                                    <button
+                                        onClick={handleRetry}
+                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     >
-                                        <option value="">All Subjects</option>
-                                        {subjects.map((subject, index) => (
-                                            <option key={subject || index} value={subject}>
-                                                {subject}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        Retry
+                                    </button>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                    {questionPapers.length > 0 ? (
-                                        questionPapers.map((paper, index) => (
-                                            <div
-                                                key={paper.id || `paper-${index}`}
-                                                className="service-card hover:shadow-lg"
-                                            >
-                                                <DigitizedQuestionPaperCard
-                                                    paper={paper}
-                                                    onView={handleViewPaper}
-                                                    darkMode={darkMode}
-                                                />
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-[var(--text-secondary)] col-span-full">
-                                            No digitized question papers available{filterSubject ? ` for ${filterSubject}` : ''}.
-                                        </p>
-                                    )}
-                                </div>
-                            </>
-                        )}
+                            )}
+                            {!error && (
+                                <>
+                                    <div className="mb-6">
+                                        <label htmlFor="filterSubject" className="form-label">
+                                            Filter by Subject
+                                        </label>
+                                        <select
+                                            id="filterSubject"
+                                            value={filterSubject}
+                                            onChange={(e) => setFilterSubject(e.target.value)}
+                                            className="form-input"
+                                        >
+                                            <option value="">All Subjects</option>
+                                            {subjects.map((subject, index) => (
+                                                <option key={subject || index} value={subject}>
+                                                    {subject}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {questionPapers.length > 0 ? (
+                                            questionPapers.map((paper, index) => (
+                                                <div
+                                                    key={paper.id || `paper-${index}`}
+                                                    className="service-card hover:shadow-lg"
+                                                >
+                                                    <DigitizedQuestionPaperCard
+                                                        paper={paper}
+                                                        onView={handleViewPaper}
+                                                        darkMode={darkMode}
+                                                    />
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-[var(--text-secondary)] col-span-full">
+                                                No digitized question papers available{filterSubject ? ` for ${filterSubject}` : ''}.
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     );

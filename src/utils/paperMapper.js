@@ -1,15 +1,21 @@
-import MathemathicsP1Nov2022Eng from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
-import EnglishFALP12020 from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020";
 
-// Map paper IDs directly to components
+import EnglishFALP12020 from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020";
+import MathematicsP1Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+import MathematicsP2Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP2Nov2022Eng";
+
 const paperComponents = {
-    156: MathemathicsP1Nov2022Eng,       // ID 1 = Maths paper
-    17: EnglishFALP12020,     // ID 2 = English paper
-    // Add more ID mappings as needed:
-    // 3: PhysicsP1May2023,
-    // 4: ChemistryP2Sep2022,
+    "Mathematics P1 Nov 2022 Eng": MathematicsP1Nov2022Eng,
+    "Mathematics P2 Nov 2022 Eng": MathematicsP2Nov2022Eng,
+    "English P2 Nov 2022 Eng": EnglishFALP12020,
+    // Add more mappings as needed
 };
 
-export const getPaperComponent = (paperId) => {
-    return paperComponents[paperId] || null;
+export const getPaperComponent = (fileName) => {
+    // Remove any file extensions and decode URI components
+    const baseName = decodeURIComponent(fileName)
+        .replace(/\.[^/.]+$/, ""); // Remove extension if present
+
+    return paperComponents[baseName] || null;
 };
