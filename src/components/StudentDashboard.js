@@ -36,15 +36,15 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
-    const [courses, setCourses] = useState([]); // For ProgressOverview
-    const [completedTasks, setCompletedTasks] = useState(0); // For dynamic completed tasks count
+    const [courses, setCourses] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState(0);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     const [stats, setStats] = useState({
         performance: '90%',
         attendance: '97.2%',
         achievements: '18',
-        completedTasks: 0, // Initialize to 0, updated after fetch
+        completedTasks: 0,
     });
     const [schedule, setSchedule] = useState([]);
     const [activities, setActivities] = useState([]);
@@ -53,7 +53,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [quote, setQuote] = useState({ text: '', author: '' });
 
     useEffect(() => {
-        // Initialize theme from sessionStorage or system preference
+        // Initialize theme
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
@@ -93,16 +93,20 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(tasksData.message || 'Failed to fetch completed tasks count');
                 }
 
+                // Fetch course progress
+                const coursesResponse = await fetch(`${API_BASE_URL}/api/user/courses`, { headers });
+                const coursesData = await coursesResponse.json();
+                if (coursesResponse.ok && coursesData.success) {
+                    setCourses(coursesData.data.map(course => ({
+                        name: course.subjectName,
+                        progress: course.progress
+                    })));
+                } else {
+                    console.error(coursesData.message || 'Failed to fetch course progress');
+                }
+
                 // Mock data for other components
                 setTimeout(() => {
-                    setCourses([
-                        { name: 'Advanced Calculus', progress: 100 },
-                        { name: 'Physical Sciences', progress: 80 },
-                        { name: 'Mathematics', progress: 85 },
-                        { name: 'Information Technology', progress: 50 },
-                        { name: 'History', progress: 100 },
-                        { name: 'Chemistry', progress: 92 },
-                    ]);
                     setSchedule([
                         { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
                         { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
@@ -200,25 +204,25 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                            <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
+                            <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} courses={courses} />
                             <Schedule schedule={schedule} />
                             <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                             <RecentActivity activities={activities} />
-                            <UpcomingDeadlines deadlines={deadlines} />
+                            <MotivationalQuote quote={quote} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <RecommendedResources resources={resources} />
+                           {/* <RecommendedResources resources={resources} />*/}
+                            <StudyTimer onTimerFinish={handleTimerFinish} />
                             <NotificationsWidget notifications={notifications} />
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                             <StudyTimer onTimerFinish={handleTimerFinish} />
-                            <MotivationalQuote quote={quote} />
-                        </div>
+                        </div>*/}
                     </div>
                 </div>
                 {showPopup && (
