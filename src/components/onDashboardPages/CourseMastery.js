@@ -54,22 +54,28 @@ const CourseMastery = ({ enrolledSubjects, darkMode, courses }) => {
                 </div>
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto">
-                {sortedCourses.map((course) => (
-                    <div key={course.name} className="flex items-center space-x-4">
-                        <div className="w-1/3 text-[var(--text-primary)]">{course.name}</div>
-                        <div className="w-2/3">
-                            <div className="bg-[var(--border)] rounded-full h-4">
-                                <div
-                                    className="bg-[var(--accent-primary)] h-4 rounded-full transition-all duration-500"
-                                    style={{ width: `${Math.round(course.progress)}%` }}
-                                ></div>
+                {sortedCourses.length > 0 ? (
+                    sortedCourses.map((course) => (
+                        <div key={course.name} className="flex items-center space-x-4">
+                            <div className="w-1/3 text-[var(--text-primary)]">{course.name}</div>
+                            <div className="w-2/3">
+                                <div className="bg-[var(--border)] rounded-full h-4">
+                                    <div
+                                        className="bg-[var(--accent-primary)] h-4 rounded-full transition-all duration-500"
+                                        style={{ width: `${Math.round(course.progress)}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-sm text-[var(--text-secondary)]">
+                                    {Math.round(course.progress)}%
+                                </span>
                             </div>
-                            <span className="text-sm text-[var(--text-secondary)]">
-                                {Math.round(course.progress)}%
-                            </span>
                         </div>
+                    ))
+                ) : (
+                    <div className="text-center py-10 text-[var(--text-normal)]">
+                        No activity completed yet
                     </div>
-                ))}
+                )}
             </div>
         </div>
     );

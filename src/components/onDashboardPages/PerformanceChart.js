@@ -7,7 +7,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262' }) => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     const textColor = useMemo(() => (darkMode ? '#e2e8f0' : '#1A202C'), [darkMode]);
     const barColor = useMemo(() => (darkMode ? '#5EEAD4' : '#2DD4BF'), [darkMode]);
@@ -15,11 +14,11 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
     useEffect(() => {
         const fetchPerformanceData = async () => {
             setLoading(true);
-            setError(null);
             try {
                 const jwt = sessionStorage.getItem('jwt');
                 if (!jwt) {
-                    setError('No JWT token found in sessionStorage');
+                    console.error('No JWT token found in sessionStorage');
+                    setCourses([]);
                     return;
                 }
                 const headers = {
@@ -37,16 +36,19 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
                     if (response.ok && data.success) {
                         setCourses(data.data.map(item => ({
                             subjectName: item.subjectName,
-                            progress: Math.round(item.progress) // Round to whole number
+                            progress: Math.round(item.progress)
                         })));
                     } else {
-                        setError(data.message || 'Failed to fetch subject mastery data');
+                        console.error(data.message || 'No mastery data available');
+                        setCourses([]);
                     }
                 } catch (jsonError) {
-                    setError(`JSON parse error: ${jsonError.message}, Raw response: ${text}`);
+                    console.error(`JSON parse error: ${jsonError.message}, Raw response: ${text}`);
+                    setCourses([]);
                 }
             } catch (error) {
-                setError(`Error fetching subject mastery data: ${error.message}`);
+                console.error(`Error fetching subject mastery data: ${error.message}`);
+                setCourses([]);
             } finally {
                 setLoading(false);
             }
@@ -66,11 +68,11 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
     }), [sortedCourses]);
 
     const data = useMemo(() => ({
-        labels: shortLabels,
+        labels: sortedCourses.length > 0 ? shortLabels : [],
         datasets: [
             {
                 label: 'Progress (%)',
-                data: sortedCourses.map((course) => course.progress),
+                data: sortedCourses.length > 0 ? sortedCourses.map((course) => course.progress) : [],
                 backgroundColor: barColor,
                 borderColor: barColor,
                 borderWidth: 1,
@@ -100,8 +102,9 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
             tooltip: {
                 titleColor: textColor,
                 bodyColor: textColor,
+                enabled: sortedCourses.length > 0,
                 callbacks: {
-                    label: (context) => `${context.dataset.label}: ${Math.round(context.raw)}%`, // Whole number in tooltip
+                    label: (context) => `${context.dataset.label}: ${Math.round(context.raw)}%`,
                 },
             },
             datalabels: {
@@ -112,7 +115,7 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
                     size: 10,
                     weight: 'bold',
                 },
-                formatter: (value) => `${Math.round(value)}%`, // Whole number for data labels
+                formatter: (value) => sortedCourses.length > 0 ? `${Math.round(value)}%` : '',
             },
         },
         scales: {
@@ -124,6 +127,7 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
                     padding: 10,
                 },
                 grid: { color: 'var(--border)' },
+                display: true,
             },
             y: {
                 min: 0,
@@ -133,15 +137,14 @@ const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_U
                     stepSize: 10,
                     count: 10,
                     autoSkip: false,
-                    callback: (value) => `${Math.round(value)}%`, // Whole number for y-axis ticks
+                    callback: (value) => `${Math.round(value)}%`,
                 },
                 grid: { color: 'var(--border)' },
             },
         },
-    }), [textColor]);
+    }), [textColor, sortedCourses]);
 
     if (loading) return <div className="text-center py-10 text-[var(--text-normal)]">Loading chart data...</div>;
-    if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-[500px] flex flex-col">

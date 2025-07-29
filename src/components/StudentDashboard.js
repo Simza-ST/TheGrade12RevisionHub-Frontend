@@ -5,8 +5,6 @@ import Sidebar from './common/Sidebar';
 import CourseMastery from './onDashboardPages/CourseMastery';
 import Schedule from './onDashboardPages/Schedule';
 import RecentActivity from './onDashboardPages/RecentActivity';
-import UpcomingDeadlines from './onDashboardPages/UpcomingDeadlines';
-import RecommendedResources from './onDashboardPages/RecommendedResources';
 import NotificationsWidget from './onDashboardPages/NotificationsWidget';
 import StudyTimer from './onDashboardPages/StudyTimer';
 import MotivationalQuote from './onDashboardPages/MotivationalQuote';
@@ -42,14 +40,12 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
 
     const [stats, setStats] = useState({
         performance: '90%',
-        attendance: '97.2%',
+        attendance: '0%',
         achievements: '18',
         completedTasks: 0,
     });
     const [schedule, setSchedule] = useState([]);
     const [activities, setActivities] = useState([]);
-    const [deadlines, setDeadlines] = useState([]);
-    const [resources, setResources] = useState([]);
     const [quote, setQuote] = useState({ text: '', author: '' });
 
     useEffect(() => {
@@ -105,6 +101,16 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(coursesData.message || 'Failed to fetch course progress');
                 }
 
+                // Fetch attendance percentage
+                const attendanceResponse = await fetch(`${API_BASE_URL}/api/user/attendance`, { headers });
+                const attendanceData = await attendanceResponse.json();
+                if (attendanceResponse.ok && attendanceData.success) {
+                    setStats(prev => ({ ...prev, attendance: `${attendanceData.data}%` }));
+                } else {
+                    console.error(attendanceData.message || 'Failed to fetch attendance percentage');
+                }
+
+
                 // Mock data for other components
                 setTimeout(() => {
                     setSchedule([
@@ -119,16 +125,8 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                         { id: 3, description: 'Joined study group for Chemistry', date: '2025-05-18T19:00:00Z' },
                         { id: 4, description: 'Reviewed History notes', date: '2025-05-17T09:00:00Z' },
                     ]);
-                    setDeadlines([
-                        { id: 1, title: 'Mathematics Quiz 2', dueDate: '2025-06-23' },
-                        { id: 2, title: 'Physics Assignment', dueDate: '2025-06-25' },
-                        { id: 3, title: 'History Essay', dueDate: '2025-06-27' },
-                    ]);
-                    setResources([
-                        { id: 1, title: 'Khan Academy Calculus', url: 'https://khanacademy.org', description: 'Interactive calculus lessons' },
-                        { id: 2, title: 'Crash Course Chemistry', url: 'https://youtube.com', description: 'Video series on chemistry concepts' },
-                        { id: 3, title: 'History.com', url: 'https://history.com', description: 'Articles on historical events' },
-                    ]);
+
+
                     setQuote({
                         text: 'Education is the most powerful weapon you can use to change the world.',
                         author: 'Nelson Mandela',
