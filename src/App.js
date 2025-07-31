@@ -138,12 +138,9 @@ function ProtectedRoute({ children }) {
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, message: 'New quiz available in Mathematics', date: '2025-05-20', read: false },
-        { id: 2, message: 'Assignment due in Physics', date: '2025-05-21', read: false },
-        { id: 3, message: 'Study group meeting scheduled', date: '2025-05-19', read: true },
-    ]);
+
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [notifications, setNotifications] = useState([]); // Added state for notifications
 
     useEffect(() => {
         const validateToken = async () => {

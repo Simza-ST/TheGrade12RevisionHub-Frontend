@@ -19,15 +19,44 @@ const MotivationalQuote = () => {
     const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentQuoteIndex((prevIndex) => (prevIndex + 1) % quotes.length);
-        }, 10000); // Change every 10 seconds
-        return () => clearInterval(interval);
+        // Get today's date as a string (YYYY-MM-DD) to use as a key
+        const today = new Date().toISOString().split('T')[0];
+
+        // Check local storage for the quote index and date
+        const storedDate = localStorage.getItem('quoteDate');
+        let storedIndex = localStorage.getItem('quoteIndex');
+
+        if (storedDate === today && storedIndex !== null) {
+            // If the stored date is today, use the stored quote index
+            setCurrentQuoteIndex(parseInt(storedIndex, 10));
+        } else {
+            // Generate a new index based on the current date
+            const date = new Date();
+            const dayOfYear = Math.floor(
+                (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
+            );
+            const newIndex = dayOfYear % quotes.length;
+
+            // Store the new index and date in local storage
+            localStorage.setItem('quoteIndex', newIndex);
+            localStorage.setItem('quoteDate', today);
+
+            setCurrentQuoteIndex(newIndex);
+        }
     }, [quotes.length]);
 
+    const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+
     return (
-        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-            <p className="text-lg font-semibold text-[var(--text-normal)]">"{quotes[currentQuoteIndex].text}"</p>
+        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl text-center ">
+            <h1 className="text-lg font-semibold text-[var(--text-normal)]">Daily Quote</h1>
+            <span className="text-sm mt-2 text-[var(--text-normal)]">{currentDate}</span>
+            <p className="text-lg font-semibold text-[var(--text-normal)] mt-10">"{quotes[currentQuoteIndex].text}"</p>
             <p className="text-sm mt-2 text-[var(--text-normal)]">— {quotes[currentQuoteIndex].author}</p>
         </div>
     );
