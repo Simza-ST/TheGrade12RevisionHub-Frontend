@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 const NotificationsWidget = ({ notifications }) => (
     <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-        <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Notifications</h2>
+        <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)] text-center">Notifications</h2>
         <ul className="space-y-2 max-h-80 overflow-y-auto">
             {notifications.length > 0 ? (
                 notifications.slice(0, 5).map((notification) => (

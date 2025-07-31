@@ -35,7 +35,10 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [showPopup, setShowPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [courses, setCourses] = useState([]);
-    const [completedTasks, setCompletedTasks] = useState(0);
+    const [completedTasks, setCompletedTasks] = useState(0); // Used to update stats
+    const [activities, setActivities] = useState([]);
+    const [quote, setQuote] = useState({ text: '', author: '' });
+    const [schedule, setSchedule] = useState([]);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     const [stats, setStats] = useState({
@@ -44,12 +47,8 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
         achievements: '18',
         completedTasks: 0,
     });
-    const [schedule, setSchedule] = useState([]);
-    const [activities, setActivities] = useState([]);
-    const [quote, setQuote] = useState({ text: '', author: '' });
 
     useEffect(() => {
-        // Initialize theme
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
@@ -69,7 +68,6 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     'Content-Type': 'application/json',
                 };
 
-                // Fetch enrolled subjects
                 const enrolledResponse = await fetch(`${API_BASE_URL}/api/user/enrolled-subjects`, { headers });
                 const enrolledData = await enrolledResponse.json();
                 if (enrolledResponse.ok && enrolledData.success) {
@@ -79,7 +77,6 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(enrolledData.message || 'Failed to fetch enrolled subjects');
                 }
 
-                // Fetch completed tasks count
                 const tasksResponse = await fetch(`${API_BASE_URL}/api/user/completed-tasks`, { headers });
                 const tasksData = await tasksResponse.json();
                 if (tasksResponse.ok && tasksData.success) {
@@ -89,7 +86,6 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(tasksData.message || 'Failed to fetch completed tasks count');
                 }
 
-                // Fetch course progress
                 const coursesResponse = await fetch(`${API_BASE_URL}/api/user/courses`, { headers });
                 const coursesData = await coursesResponse.json();
                 if (coursesResponse.ok && coursesData.success) {
@@ -101,7 +97,6 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(coursesData.message || 'Failed to fetch course progress');
                 }
 
-                // Fetch attendance percentage
                 const attendanceResponse = await fetch(`${API_BASE_URL}/api/user/attendance`, { headers });
                 const attendanceData = await attendanceResponse.json();
                 if (attendanceResponse.ok && attendanceData.success) {
@@ -110,28 +105,29 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(attendanceData.message || 'Failed to fetch attendance percentage');
                 }
 
+                const activitiesResponse = await fetch(`${API_BASE_URL}/api/user/activities`, { headers });
+                const activitiesData = await activitiesResponse.json();
+                if (activitiesResponse.ok && activitiesData.success) {
+                    setActivities(activitiesData.data.map(activity => ({
+                        id: activity.id,
+                        description: activity.description,
+                        date: activity.date
+                    })));
+                } else {
+                    console.error(activitiesData.message || 'Failed to fetch activities');
+                }
 
-                // Mock data for other components
-                setTimeout(() => {
-                    setSchedule([
-                        { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
-                        { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
-                        { day: 'T', course: 'Physical Sciences', time: '10:00-11:00', location: 'Lab A' },
-                        { day: 'W', course: 'History', time: '09:00-10:30', location: 'Room 303' },
-                    ]);
-                    setActivities([
-                        { id: 1, description: 'Completed Quiz 1 in Mathematics', date: '2025-05-20T10:18:00Z' },
-                        { id: 2, description: 'Submitted Assignment for Physical Sciences', date: '2025-05-19T15:30:00Z' },
-                        { id: 3, description: 'Joined study group for Chemistry', date: '2025-05-18T19:00:00Z' },
-                        { id: 4, description: 'Reviewed History notes', date: '2025-05-17T09:00:00Z' },
-                    ]);
+                setSchedule([
+                    { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
+                    { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
+                    { day: 'T', course: 'Physical Sciences', time: '10:00-11:00', location: 'Lab A' },
+                    { day: 'W', course: 'History', time: '09:00-10:30', location: 'Room 303' },
+                ]);
 
-
-                    setQuote({
-                        text: 'Education is the most powerful weapon you can use to change the world.',
-                        author: 'Nelson Mandela',
-                    });
-                }, 25);
+                setQuote({
+                    text: 'Education is the most powerful weapon you can use to change the world.',
+                    author: 'Nelson Mandela',
+                });
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -154,6 +150,32 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
         setShowPopup(false);
     };
 
+    const handleRecordActivity = async (description) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(`${API_BASE_URL}/api/user/activities`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(description)
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                setActivities(prev => [{
+                    id: data.data.id,
+                    description: data.data.description,
+                    date: data.data.date
+                }, ...prev.slice(0, 9)]);
+            } else {
+                console.error(data.message || 'Failed to save activity');
+            }
+        } catch (error) {
+            console.error('Error saving activity:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex min-h-screen justify-center items-center">
@@ -171,6 +193,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
+                    onActivity={handleRecordActivity}
                 />
                 <div className="flex-1">
                     <Header
@@ -207,20 +230,15 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                             <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 ">
                             <RecentActivity activities={activities} />
                             <MotivationalQuote quote={quote} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                           {/* <RecommendedResources resources={resources} />*/}
                             <StudyTimer onTimerFinish={handleTimerFinish} />
-                            <NotificationsWidget notifications={notifications} />
+                            <NotificationsWidget notifications={notifications} setNotifications={setNotifications} onActivity={handleRecordActivity} />
                         </div>
-
-                        {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <StudyTimer onTimerFinish={handleTimerFinish} />
-                        </div>*/}
                     </div>
                 </div>
                 {showPopup && (

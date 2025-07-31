@@ -53,7 +53,7 @@ const MotivationalQuote = () => {
     });
 
     return (
-        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl text-center">
+        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl text-center ">
             <h1 className="text-lg font-semibold text-[var(--text-normal)]">Daily Quote</h1>
             <span className="text-sm mt-2 text-[var(--text-normal)]">{currentDate}</span>
             <p className="text-lg font-semibold text-[var(--text-normal)] mt-10">"{quotes[currentQuoteIndex].text}"</p>

@@ -44,19 +44,21 @@ UserProfile.propTypes = {
     onLogout: PropTypes.func.isRequired,
 };
 
-const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger }) => {
-    const navItems = [
+const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger ,onActivity}) => {
+        const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-        { name: 'Subjects', path: '/subjects', icon: '📚' },
-        { name: 'Quizzes', path: '/quizzes', icon: '❓' },
-        { name: 'Question Papers', path: '/question-papers/list', icon: '📝' },
-        { name: 'Resources', path: '/resources', icon: '🔗' },
-        { name: 'Performance', path: '/performance', icon: '📊' },
-        { name: 'Notifications', path: '/notifications', icon: '🔔' },
-        { name: 'Chatroom', path: '/chatroom', icon: '💬' },
-        { name: 'Settings', path: '/settings', icon: '⚙️' },
+        { name: 'Subjects', path: '/subjects', icon: '📚', onClick: () => onActivity && onActivity('Viewed Subjects') },
+        { name: 'Quizzes', path: '/quizzes', icon: '❓', onClick: () => onActivity && onActivity('Viewed Quizzes') },
+        { name: 'Question Papers', path: '/question-papers/list', icon: '📝', onClick: () => onActivity && onActivity('Viewed pdf Question papers') },
+        { name: 'Resources', path: '/resources', icon: '🔗', onClick: () => onActivity && onActivity('Viewed Resources') },
+        { name: 'Performance', path: '/performance', icon: '📊', onClick: () => onActivity && onActivity('Viewed Performances') },
+        { name: 'Notifications', path: '/notifications', icon: '🔔', onClick: () => onActivity && onActivity('Viewed Notifications') },
+        { name: 'Chatroom', path: '/chatroom', icon: '💬', onClick: () => onActivity && onActivity('Visited Chatroom') },
+        { name: 'Settings', path: '/settings', icon: '⚙️', onClick: () => onActivity && onActivity('Visited Settings') },
         { name: 'Logout', path: '/', icon: '🚪', onClick: onLogout },
     ];
+
+
 
     return (
         <nav
@@ -137,6 +139,7 @@ Sidebar.propTypes = {
     setIsCollapsed: PropTypes.func,
     darkMode: PropTypes.bool.isRequired,
     disableHamburger: PropTypes.bool,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

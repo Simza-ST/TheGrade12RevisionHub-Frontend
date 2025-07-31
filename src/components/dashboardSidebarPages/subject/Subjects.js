@@ -55,6 +55,27 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
         return () => clearTimeout(timeoutId);
     }, [message]);
 
+    //for activity recording
+    const handleRecordActivity = async (description) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(`${API_BASE_URL}/activities`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(description) // Send plain string
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                console.error(data.message || 'Failed to save activity');
+            }
+        } catch (error) {
+            console.error('Error saving activity:', error);
+        }
+    };
+
     const handleAddSubject = async (e) => {
         e.preventDefault();
         if (!selectedSubject) {
@@ -78,6 +99,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     setEnrolledSubjects(subjectNames);
                 });
                 setMessage({ text: data.message, type: 'success' });
+                await handleRecordActivity(`Added subject: ${selectedSubject}`);
                 setSelectedSubject('');
                 setIsAdding(false);
             } else {
@@ -105,6 +127,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     setEnrolledSubjects(subjectNames);
                 });
                 setMessage({ text: data.message, type: 'success' });
+                await handleRecordActivity(`Removed subject: ${subjectName}`);
             } else {
                 setMessage({ text: data.message || 'Failed to remove subject', type: 'error' });
             }
@@ -355,6 +378,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
+                    onActivity={handleRecordActivity}
                 />
                 <div className="flex-1">
                     <Header
