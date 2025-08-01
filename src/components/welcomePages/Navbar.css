@@ -1,5 +1,4 @@
 /* Navbar styles with teal color scheme */
-
 .sticky {
     position: sticky;
     top: 0;
@@ -9,20 +8,34 @@
 
 .navbar {
     background: #f8fafc; /* Light grayish-white background */
-    padding: 15px 0;
+    padding: 15px 20px; /* Adjusted padding for consistency */
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Gap between logo image and text */
+    margin-left: 20px; /* Consistent with original logo margin */
+}
+
+.logo-image {
+    height: 28px; /* Matches h-7 (1.75rem) from original code */
+    width: auto;
+}
+
 .logo {
-    margin-left: 20px;
+    display: flex;
+    align-items: center;
 }
 
 .TheRevisionHub-text {
     color: #26A69A; /* Darker teal for logo text */
     font-size: 24px;
     font-weight: bold;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .menu {
@@ -63,6 +76,7 @@
     .menu {
         display: none;
     }
+
     .menu.active {
         display: block;
         position: absolute;
@@ -72,9 +86,11 @@
         background: #f8fafc; /* Light grayish-white for mobile menu */
         padding: 20px;
     }
+
     .menu li {
         margin: 10px 0;
     }
+
     .menu-btn {
         display: block;
         color: #2DD4BF; /* Teal */
@@ -82,6 +98,7 @@
         margin-right: 20px;
         cursor: pointer;
     }
+
     .cancel-btn {
         display: block;
         color: #2DD4BF; /* Teal */
@@ -90,5 +107,17 @@
         top: 20px;
         right: 20px;
         cursor: pointer;
+    }
+
+    .logo-container {
+        gap: 8px; /* Slightly smaller gap on mobile */
+    }
+
+    .logo-image {
+        height: 24px; /* Slightly smaller logo on mobile */
+    }
+
+    .TheRevisionHub-text {
+        font-size: 20px; /* Slightly smaller text on mobile */
     }
 }
