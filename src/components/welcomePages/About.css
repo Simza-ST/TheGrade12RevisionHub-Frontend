@@ -1,5 +1,7 @@
+/* About page styles with teal color scheme */
+
 section {
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    background: #f8fafc; /* Light grayish-white background */
     padding: 0;
 }
 
@@ -23,7 +25,7 @@ section {
 }
 
 .title span {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 30px;
     font-weight: 600;
     position: relative;
@@ -37,7 +39,7 @@ section {
     position: absolute;
     height: 3px;
     width: 100%;
-    background: #f87171;
+    background: #2DD4BF; /* Teal for underlines */
     left: 0;
     bottom: 0;
 }
@@ -68,7 +70,7 @@ section {
 }
 
 .topic {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 10px;
@@ -77,7 +79,7 @@ section {
 
 .right p {
     text-align: justify;
-    color: #e5e7eb;
+    color: #333; /* Dark gray for primary text */
     font-size: 1em;
     line-height: 1.6;
     margin-top: 0;

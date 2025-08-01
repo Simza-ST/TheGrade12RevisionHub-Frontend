@@ -1,8 +1,10 @@
+/* Skills page styles with teal color scheme */
+
 .skills {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    background: #f8fafc; /* Light grayish-white background */
     gap: 10px;
     font-family: 'Inter', sans-serif;
 }
@@ -24,7 +26,7 @@
     position: absolute;
     height: 3px;
     width: 100%;
-    background: #f87171;
+    background: #2DD4BF; /* Teal for underlines */
     left: 0;
     bottom: 0;
 }
@@ -38,7 +40,7 @@
 
 .skills .left p {
     text-align: justify;
-    color: #e5e7eb;
+    color: #333; /* Dark gray for primary text */
     font-size: 1em;
     line-height: 1.6;
     margin-top: 0;

@@ -1,8 +1,9 @@
+/* Home page styles with teal color scheme */
+
 .home {
     min-height: 100vh;
     width: 100%;
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
-    background-size: cover;
+    background: #f8fafc; /* Light grayish-white background */
     position: relative;
     z-index: 1;
     margin: 0;
@@ -25,12 +26,12 @@
 
 .text-one {
     font-size: 25px;
-    color: #fff;
+    color: #26A69A; /* Darker teal */
     font-family: 'Inter', sans-serif;
 }
 
 .text-two {
-    color: #fff;
+    color: #26A69A; /* Darker teal */
     font-size: 75px;
     font-weight: 600;
     margin-left: -3px;
@@ -40,21 +41,21 @@
 .text-three {
     font-size: 40px;
     margin: 5px 0;
-    color: #f87171;
+    color: #2DD4BF; /* Teal */
     font-family: 'Inter', sans-serif;
 }
 
 .text-four {
     font-size: 23px;
     margin: 5px 0;
-    color: #e5e7eb;
+    color: #333; /* Dark gray for contrast */
     font-family: 'Inter', sans-serif;
 }
 
 .text-five {
     font-size: 18px;
     margin: 10px 0;
-    color: #d1d5db;
+    color: #666; /* Medium gray */
     font-family: 'Inter', sans-serif;
 }
 
@@ -77,30 +78,30 @@
 }
 
 .btn-primary {
-    background: linear-gradient(to right, #0d9488, #dc2626);
+    background: #2DD4BF; /* Teal */
     color: #fff;
 }
 
 .btn-primary:hover {
-    border-color: #f87171;
+    border-color: #26A69A; /* Darker teal */
     background: #fff;
-    color: #f87171;
+    color: #26A69A;
 }
 
 .btn-secondary {
     background: #fff;
-    color: #f87171;
+    color: #2DD4BF;
 }
 
 .btn-secondary:hover {
-    border-color: #0d9488;
-    background: #f87171;
+    border-color: #2DD4BF;
+    background: #26A69A;
     color: #fff;
 }
 
 .highlights {
     margin: 20px 0;
-    color: #e5e7eb;
+    color: #333;
     font-family: 'Inter', sans-serif;
 }
 
@@ -118,7 +119,7 @@
 
 .highlights li:before {
     content: "✔";
-    color: #f87171;
+    color: #2DD4BF; /* Teal */
     position: absolute;
     left: 0;
     font-size: 16px;
@@ -130,7 +131,7 @@
     height: auto;
     border-radius: 10px;
     margin: 20px 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Softer shadow */
 }
 
 .support {
@@ -138,14 +139,14 @@
 }
 
 .support-link {
-    color: #e5e7eb;
+    color: #2DD4BF; /* Teal */
     font-size: 14px;
     text-decoration: none;
     font-family: 'Inter', sans-serif;
 }
 
 .support-link:hover {
-    color: #f87171;
+    color: #26A69A; /* Darker teal */
     text-decoration: underline;
 }
 
@@ -154,37 +155,29 @@
     .text-one {
         font-size: 20px;
     }
-
     .text-two {
         font-size: 50px;
     }
-
     .text-three {
         font-size: 30px;
     }
-
     .text-four {
         font-size: 18px;
     }
-
     .text-five {
         font-size: 16px;
     }
-
     .btn-primary, .btn-secondary {
         font-size: 20px;
         padding: 6px 12px;
     }
-
     .button-group {
         flex-direction: column;
         gap: 10px;
     }
-
     .highlights li {
         font-size: 14px;
     }
-
     .image-placeholder img {
         max-width: 90%;
     }
@@ -194,15 +187,12 @@
     .text-two {
         font-size: 40px;
     }
-
     .text-three {
         font-size: 24px;
     }
-
     .text-four {
         font-size: 16px;
     }
-
     .text-five {
         font-size: 14px;
     }

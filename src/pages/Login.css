@@ -1,54 +1,170 @@
-.login .content {
-    width: 80%;
-    margin: 40px auto;
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
+/* Login page styles with updated color scheme */
+
+.bg-gradient-to-br {
+    background: #f8fafc; /* Light grayish-white background */
 }
 
-.login h2 {
-    color: #0e2431;
-    font-size: 30px;
-    margin-bottom: 20px;
+.max-w-6xl {
+    background: #fff; /* White form background */
+    border: 1px solid #d1d5db; /* Light gray border */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Softer shadow */
 }
 
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
+.w-1\/2.bg-teal-800 {
+    background: #fff; /* Override teal background for form section */
 }
 
-.form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.form-control {
+.form-input {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #d1d5db; /* Light gray border */
     border-radius: 6px;
     font-size: 16px;
     outline: none;
-    transition: border 0.3s;
+    transition: border 0.3s, box-shadow 0.3s;
+    background-color: #fff; /* White input background */
+    color: #333;
 }
 
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+.form-input:focus {
+    border-color: #2DD4BFFF; /* Progress bar color for focus */
+    box-shadow: 0 0 5px rgba(45, 212, 191, 0.2);
+    outline: none;
 }
 
-.btn-submit {
-    background: #007bff;
-    color: white;
+.form-input.bg-teal-700 {
+    background-color: #fff; /* Override teal input background */
+}
+
+.form-input.border-gray-600 {
+    border-color: #d1d5db; /* Override gray-600 with light gray */
+}
+
+.form-input:focus.focus\:ring-2.focus\:ring-teal-400.focus\:border-teal-400 {
+    border-color: #2DD4BFFF; /* Override teal focus ring with progress bar color */
+    box-shadow: 0 0 5px rgba(45, 212, 191, 0.2);
+}
+
+.form-label {
+    color: #333; /* Dark gray for labels */
+    font-family: 'Inter', sans-serif;
+}
+
+.form-label.text-gray-300 {
+    color: #333; /* Override gray-300 with dark gray */
+}
+
+button.btn-submit {
+    background: #2DD4BFFF !important; /* Progress bar color button, force override */
+    color: white !important;
     border: none;
     padding: 12px 18px;
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.3s;
+    font-family: 'Inter', sans-serif;
 }
 
-.btn-submit:hover {
-    background: #0056b3;
+button.btn-submit.bg-gradient-to-r.from-teal-600.to-red-600 {
+    background: #2DD4BFFF !important; /* Override gradient with solid progress bar color */
+    color: white !important;
+}
+
+button.btn-submit:hover {
+    background: #1A8A7A !important; /* Darker progress bar color on hover */
+}
+
+button.btn-submit:hover.bg-gradient-to-r.from-teal-600.to-red-600 {
+    background: #1A8A7A !important; /* Ensure hover overrides gradient */
+}
+
+button.btn-submit:hover:hover\:from-teal-700:hover\:to-red-700 {
+    background: #1A8A7A !important; /* Override hover gradient with solid darker progress bar color */
+}
+
+button.btn-submit.focus\:ring-2.focus\:ring-offset-2.focus\:ring-teal-400 {
+    box-shadow: 0 0 5px rgba(45, 212, 191, 0.2) !important; /* Override teal focus ring */
+}
+
+.text-teal-400 {
+    color: #2DD4BFFF; /* Progress bar color for links */
+}
+
+.text-teal-400:hover {
+    color: #1A8A7A; /* Darker progress bar color on hover */
+}
+
+.text-gray-300 {
+    color: #666; /* Medium gray for secondary text */
+}
+
+h2 {
+    color: #1A8A7A; /* Darker progress bar color for headings */
+    font-size: 30px;
+    margin-bottom: 20px;
+    font-family: 'Inter', sans-serif;
+}
+
+h2.text-white {
+    color: #1A8A7A; /* Override white heading with darker progress bar color */
+}
+
+.text-red-400 {
+    color: #dc2626; /* Keep error messages red for visibility */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+}
+
+.form-input[type="password"] {
+    padding-right: 40px;
+}
+
+.w-1\/2.bg-gradient-to-b.from-teal-600.to-red-600 {
+    background: #f8fafc; /* Override right-side gradient with light grayish-white */
+}
+
+h3.text-white {
+    color: #1A8A7A; /* Override white heading with darker progress bar color */
+}
+
+.service-card {
+    background: #e1e7ff; /* Light blue for service cards */
+    color: #333; /* Dark gray text for readability */
+}
+
+.service-card.bg-red-900.bg-opacity-70.backdrop-blur-md {
+    background: #e1e7ff; /* Override red service card with light blue */
+    color: #333;
+}
+
+.service-card h4 {
+    color: #1A8A7A; /* Darker progress bar color for service card headings */
+}
+
+.service-card p {
+    color: #666; /* Medium gray for service card text */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .max-w-6xl {
+        margin: 20px;
+    }
+
+    .form-input {
+        font-size: 14px;
+    }
+
+    button.btn-submit {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
 }

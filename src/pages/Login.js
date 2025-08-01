@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import './Login.css';
 
 const Login = ({ setIsAuthenticated }) => {
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
@@ -20,10 +22,6 @@ const Login = ({ setIsAuthenticated }) => {
             setError('Please enter a valid email address.');
             return;
         }
-        // if (password.length < 8) {
-        //     setError('Password must be at least 8 characters long.');
-        //     return;
-        // }
 
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -37,30 +35,31 @@ const Login = ({ setIsAuthenticated }) => {
                 }),
             });
 
-            const { token, message, role} = await response.json();
+            const { token, message, role } = await response.json();
 
             if (!response.ok) {
                 throw new Error(message || `HTTP error! Status: ${response.status}`);
             }
 
             sessionStorage.setItem('jwt', token);
-            setIsAuthenticated(true); // Update authentication state
+            setIsAuthenticated(true);
             console.log('Success:', message);
             alert('Login successful! Welcome back to Revision App.');
             form.reset();
             setError('');
-            //navigate('/dashboard');
-            //navigate('/admin-Dashboard');
             if (role.toString().toUpperCase() === "ADMIN") {
                 navigate('/admin-Dashboard');
-            }
-            else {
+            } else {
                 navigate('/dashboard');
             }
         } catch (error) {
             console.error('Fetch error:', error);
             setError(error.message || 'An error occurred during login. Please try again.');
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     return (
@@ -95,11 +94,11 @@ const Login = ({ setIsAuthenticated }) => {
                         </div>
                         <div className="relative">
                             <input
-                                type="password"
+                                // type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 name="password"
                                 required
-                                className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                 placeholder="Password"
                             />
                             <label
@@ -111,17 +110,27 @@ const Login = ({ setIsAuthenticated }) => {
                             >
                                 Password
                             </label>
+                            <button
+                                type="button"
+                                className="absolute right-3 top-3 text-gray-300 hover:text-teal-400 focus:outline-none"
+                                onClick={togglePasswordVisibility}
+                            >
+                                {showPassword ? '👁️' : '👁️‍🗨️'}
+                            </button>
                         </div>
                         <div className="text-right">
                             <Link to="/forgot-password" className="text-sm text-teal-400 hover:underline">
                                 Forgot Password?
                             </Link>
                         </div>
-                        <button
-                            type="submit"
-                            className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"
-                        >
-                            Log In
+                        {/*<button*/}
+                        {/*    type="submit"*/}
+                        {/*    className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"*/}
+                        {/*>*/}
+                        {/*    Log In*/}
+                        {/*</button>*/}
+                        <button type="submit" className="btn-submit w-full">
+                            Login
                         </button>
                     </form>
                     {error && (

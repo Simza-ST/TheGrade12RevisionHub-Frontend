@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
-import QuizCard from './QuizCard'; // Import QuizCard
+import QuizCard from './QuizCard';
 
 const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
     const navigate = useNavigate();
@@ -270,8 +269,8 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 }
 .quiz-section {
     background: ${darkMode
-        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
-        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
     background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
     border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -353,6 +352,13 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         <div className="quiz-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Quizzes</h2>
+                                <button
+                                    onClick={handleViewQuestionPapers}
+                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                    aria-label="View digitized question papers"
+                                >
+                                    View Digitized Question Papers
+                                </button>
                             </div>
                             <div className="mb-6">
                                 <p className="text-sm text-[var(--text-secondary)] mb-4">
@@ -364,7 +370,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Quick Tips</h3>
                                 <ul className="list-disc list-inside text-sm text-[var(--text-secondary)] space-y-1">
                                     <li>Filter by subject and year to find relevant quizzes.</li>
-                                    <li>Access online quizzes with the <strong>View</strong> button in a new tab.</li>
+                                    <li>Access online quizzes with the <strong>Start Quiz</strong> button.</li>
                                     <li>Check quiz details for more information.</li>
                                 </ul>
                             </div>
@@ -381,15 +387,6 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                                     )}
                                 </div>
                             )}
-                            <div className="mb-4">
-                                <button
-                                    onClick={handleViewQuestionPapers}
-                                    className="px-4 py-3 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                    aria-label="View question papers"
-                                >
-                                    View Digitized Question Papers
-                                </button>
-                            </div>
                             <div className="mb-6 flex gap-4">
                                 <div>
                                     <label htmlFor="filterSubject" className="form-label">

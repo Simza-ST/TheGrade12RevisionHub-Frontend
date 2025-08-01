@@ -4,6 +4,8 @@ import './Signup.css';
 
 const Signup = () => {
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
@@ -18,6 +20,7 @@ const Signup = () => {
         const phoneNumber = formData.get('phoneNumber');
         const email = formData.get('email');
         const password = formData.get('password');
+        const confirmPassword = formData.get('confirmPassword');
         const role = formData.get('role') || 'STUDENT';
         const profilePicture = formData.get('profilePicture');
 
@@ -28,6 +31,10 @@ const Signup = () => {
         }
         if (password.length < 8) {
             setError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError('Passwords do not match.');
             return;
         }
         if (!/^\+?\d{10,15}$/.test(phoneNumber)) {
@@ -84,6 +91,14 @@ const Signup = () => {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden">
@@ -93,7 +108,7 @@ const Signup = () => {
                         <div className="flex justify-center mb-6">
                             <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                         </div>
-                        <h2>Join Revision App</h2>
+                        <h2 className="text-3xl font-bold text-white text-center mb-2">Join Revision App</h2>
                         <p className="text-gray-300 text-center mb-6">Start your study journey today!</p>
                         <form id="signupForm" encType="multipart/form-data" className="space-y-5" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-4">
@@ -106,12 +121,6 @@ const Signup = () => {
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="First Name"
                                     />
-                                    {/*<label
-                                        htmlFor="firstName"
-                                        className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
-                                    >
-                                        First Name
-                                    </label>*/}
                                     <label
                                         htmlFor="firstName"
                                         className="form-label absolute left-4 top-3 text-gray-300 transition-all
@@ -201,11 +210,11 @@ const Signup = () => {
                             </div>
                             <div className="relative">
                                 <input
-                                    type="password"
+                                    // type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     name="password"
                                     required
-                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                     placeholder="Password"
                                 />
                                 <label
@@ -217,38 +226,40 @@ const Signup = () => {
                                 >
                                     Password
                                 </label>
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-3 text-gray-300 hover:text-teal-400 focus:outline-none"
+                                    onClick={togglePasswordVisibility}
+                                >
+                                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                                </button>
                             </div>
-                            {/*/*<div>
-                                <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Profile Picture
-                                </label>
+                            <div className="relative">
                                 <input
-                                    type="file"
-                                    id="profilePicture"
-                                    name="profilePicture"
-                                    accept="image/*"
-                                    className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-red-800 file:text-red-200 hover:file:bg-red-700"
-                                />
-                            </div>**/}
-                            {/*<div className="relative">
-                                <select
-                                    id="role"
-                                    name="role"
+                                    // type={showConfirmPassword ? 'text' : 'password'}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
                                     required
-                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white appearance-none"
-                                    placeholder="Role"
-                                >
-                                    <option value="" disabled selected hidden></option>
-                                    <option value="STUDENT">Student</option>
-                                    <option value="TEACHER">Teacher</option>
-                                </select>
+                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
+                                    placeholder="Confirm Password"
+                                />
                                 <label
-                                    htmlFor="role"
-                                    className="form-label absolute left-4 top-3 text-gray-300 peer-focus:-translate-y-6 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 transition-all"
+                                    htmlFor="confirmPassword"
+                                    className="form-label absolute left-4 top-3 text-gray-300 transition-all
+                                         peer-focus:-translate-y-8 peer-focus:text-sm peer-focus:text-gray-400
+                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
-                                    Role
+                                    Confirm Password
                                 </label>
-                            </div>*/}
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-3 text-gray-300 hover:text-teal-400 focus:outline-none"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                >
+                                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                </button>
+                            </div>
                             <button type="submit" className="btn-submit w-full">
                                 Sign Up
                             </button>

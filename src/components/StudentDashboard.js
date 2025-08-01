@@ -35,21 +35,21 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [showPopup, setShowPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [courses, setCourses] = useState([]);
-    const [completedTasks, setCompletedTasks] = useState(0); // Used to update stats
+    const [completedTasks, setCompletedTasks] = useState(0);
+    const [numberOfSubjects, setNumberOfSubjects] = useState(0);
     const [activities, setActivities] = useState([]);
     const [quote, setQuote] = useState({ text: '', author: '' });
     const [schedule, setSchedule] = useState([]);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
 
     const [stats, setStats] = useState({
-        performance: '90%',
+        numberOfSubjects: 0,
         attendance: '0%',
         achievements: '18',
         completedTasks: 0,
     });
 
     useEffect(() => {
-        // Initialize theme from sessionStorage or system preference
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
@@ -59,6 +59,36 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
         sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
+
+    // Sample function to enroll a subject (for testing)
+    const enrollSubject = async (subjectId) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const response = await fetch(`${API_BASE_URL}/api/user/enroll-subject`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ subjectId }),
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                console.log('Subject enrolled:', data.message);
+                // Re-fetch subjects to update UI
+                const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
+                const subjectsData = await subjectsResponse.json();
+                if (subjectsResponse.ok && subjectsData.success) {
+                    setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
+                    setNumberOfSubjects(subjectsData.data);
+                }
+            } else {
+                console.error(data.message || 'Failed to enroll subject');
+            }
+        } catch (error) {
+            console.error('Error enrolling subject:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -74,6 +104,8 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                 if (enrolledResponse.ok && enrolledData.success) {
                     const subjectNames = Array.isArray(enrolledData.data) ? enrolledData.data.map(s => s.subjectName || s) : [];
                     setEnrolledSubjects(subjectNames);
+                    // Sync stats with enrolled subjects count as fallback
+                    setStats(prev => ({ ...prev, numberOfSubjects: subjectNames.length }));
                 } else {
                     console.error(enrolledData.message || 'Failed to fetch enrolled subjects');
                 }
@@ -118,6 +150,16 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(activitiesData.message || 'Failed to fetch activities');
                 }
 
+                const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
+                const subjectsData = await subjectsResponse.json();
+                console.log('Count Subjects Response:', subjectsData); // Debug log
+                if (subjectsResponse.ok && subjectsData.success) {
+                    setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
+                    setNumberOfSubjects(subjectsData.data);
+                } else {
+                    console.error(subjectsData.message || 'Failed to fetch number of subjects');
+                }
+
                 setSchedule([
                     { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
                     { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
@@ -129,6 +171,9 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     text: 'Education is the most powerful weapon you can use to change the world.',
                     author: 'Nelson Mandela',
                 });
+
+                // Test enrollment (uncomment to enroll a subject with ID 1)
+                // await enrollSubject(1);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -204,8 +249,8 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                         isCollapsed={isCollapsed}
                         darkMode={darkMode}
                         setDarkMode={setDarkMode}
-                        tabDescription="StudentDashboard"
-                        userMessage="Welcome"
+                        tabDescription="Student Dashboard"
+                        userMessage="Welcome to dashboard"
                     />
                     <div
                         className={`
@@ -215,7 +260,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     >
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                             <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
-                                <StatsCard title="Performance" value={stats.performance} icon="📊" />
+                                <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊" />
                                 <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
                                 <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
                                 <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />

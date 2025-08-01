@@ -1,3 +1,5 @@
+/* Navbar styles with teal color scheme */
+
 .sticky {
     position: sticky;
     top: 0;
@@ -6,7 +8,7 @@
 }
 
 .navbar {
-    background: #1a4543;
+    background: #f8fafc; /* Light grayish-white background */
     padding: 15px 0;
     display: flex;
     align-items: center;
@@ -18,7 +20,7 @@
 }
 
 .TheRevisionHub-text {
-    color: white;
+    color: #26A69A; /* Darker teal for logo text */
     font-size: 24px;
     font-weight: bold;
 }
@@ -38,7 +40,7 @@
 
 .menu a,
 .menu .nav-link {
-    color: white;
+    color: #2DD4BF; /* Teal for links */
     text-decoration: none;
     font-size: 18px;
     background: none;
@@ -49,7 +51,7 @@
 
 .menu a:hover,
 .menu .nav-link:hover {
-    color: #f87171;
+    color: #26A69A; /* Darker teal on hover */
 }
 
 .menu-btn,
@@ -61,32 +63,28 @@
     .menu {
         display: none;
     }
-
     .menu.active {
         display: block;
         position: absolute;
         top: 60px;
         left: 0;
         right: 0;
-        background: #1a4543;
+        background: #f8fafc; /* Light grayish-white for mobile menu */
         padding: 20px;
     }
-
     .menu li {
         margin: 10px 0;
     }
-
     .menu-btn {
         display: block;
-        color: white;
+        color: #2DD4BF; /* Teal */
         font-size: 24px;
         margin-right: 20px;
         cursor: pointer;
     }
-
     .cancel-btn {
         display: block;
-        color: white;
+        color: #2DD4BF; /* Teal */
         font-size: 24px;
         position: absolute;
         top: 20px;
