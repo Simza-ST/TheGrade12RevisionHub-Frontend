@@ -94,7 +94,7 @@ const Login = ({ setIsAuthenticated }) => {
                         </div>
                         <div className="relative">
                             <input
-                                // type={showPassword ? 'text' : 'password'}
+                                type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 name="password"
                                 required
