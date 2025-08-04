@@ -1,15 +1,15 @@
 import MathemathicsP1Nov2022Eng from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
 import EnglishFALP12020 from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020";
 
-// Map paper IDs directly to components
+// Map filenames to components
 const paperComponents = {
-    50: MathemathicsP1Nov2022Eng,       // ID 1 = Maths paper
-    17: EnglishFALP12020,     // ID 2 = English paper
-    // Add more ID mappings as needed:
-    // 3: PhysicsP1May2023,
-    // 4: ChemistryP2Sep2022,
+    "Mathematics P1 Nov 2022 Eng": MathemathicsP1Nov2022Eng,
+    "EnglishFALP12020": EnglishFALP12020,
+    // Add more filename mappings as needed:
+    // "PhysicsP1May2023": PhysicsP1May2023,
+    // "ChemistryP2Sep2022": ChemistryP2Sep2022,
 };
 
-export const getPaperComponent = (paperId) => {
-    return paperComponents[paperId] || null;
+export const getPaperComponent = (fileName) => {
+    return paperComponents[fileName] || null;
 };

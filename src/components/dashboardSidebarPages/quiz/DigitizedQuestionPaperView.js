@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_BASE_URL, getAuthHeaders } from '../../../utils/api';
 import { getPaperComponent } from '../../../utils/paperMapper';
-import paperData from "sockjs-client/lib/transport/receiver/jsonp";
 
 const DigitizedQuestionPaperView = ({ darkMode }) => {
     const { id } = useParams();
@@ -17,7 +16,6 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
             try {
                 setLoading(true);
 
-                // CORRECTED: Fetch a single paper by ID
                 const response = await fetch(`${API_BASE_URL}/user/digitized/${id}`, {
                     headers: getAuthHeaders(),
                 });
@@ -34,19 +32,18 @@ const DigitizedQuestionPaperView = ({ darkMode }) => {
                 }
 
                 const paperData = data.data;
-                console.log("Fetched paper data:", paperData); // Debugging log
                 setPaper(paperData);
 
-                // Check if paper ID exists
-                if (!paperData.id) {
-                    throw new Error("Paper ID is missing in API response");
+                // Check if filename exists
+                if (!paperData.fileName) {
+                    throw new Error("Filename is missing in API response");
                 }
 
-                setPaper(paperData);
-                const component = getPaperComponent(paperData.id);
+                // Get component based on filename
+                const component = getPaperComponent(paperData.fileName);
 
                 if (!component) {
-                    throw new Error('No interactive viewer available');
+                    throw new Error('No interactive viewer available for this paper');
                 }
 
                 setPaperComponent(() => component);

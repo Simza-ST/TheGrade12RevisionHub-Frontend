@@ -78,8 +78,8 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
     }, [fetchData]);
 
     const handleViewPaper = (paper) => {
-        // Get the component based on paper ID
-        const component = getPaperComponent(paper.id);
+        // Get the component based on paper filename
+        const component = getPaperComponent(paper.fileName);
 
         if (!component) {
             setError('No interactive viewer available for this paper');
