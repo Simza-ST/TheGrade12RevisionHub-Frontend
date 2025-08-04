@@ -692,7 +692,6 @@ const Notifications = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMod
                         isCollapsed={isCollapsed}
                         setIsCollapsed={setIsCollapsed}
                         darkMode={darkMode}
-                        disableHamburger={showSidebar && window.innerWidth <= 639}
                     />
                 </div>
                 <div className="flex-1">

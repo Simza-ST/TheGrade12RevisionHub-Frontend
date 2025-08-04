@@ -11,13 +11,23 @@ const UserProfile = ({ user, onLogout }) => {
         ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
         : user.email || 'User';
 
+    const getInitials = (firstName, lastName) => {
+        return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+    };
+
     return (
         <div className="user-profile flex items-center space-x-4 p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-lg">
-            <img
-                src={user.profilePicture || '/default-avatar.png'}
-                alt="Profile"
-                className="w-12 h-12 rounded-full border-2 border-[var(--accent-primary)] object-cover"
-            />
+            {user.profilePicture ? (
+                <img
+                    src={user.profilePicture}
+                    alt="Profile picture"
+                    className="w-12 h-12 rounded-full border-2 border-[var(--accent-primary)] object-cover"
+                />
+            ) : (
+                <div className="h-12 w-12 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center text-2xl text-[var(--text-primary)] border-2 border-[var(--accent-primary)]">
+                    {getInitials(user.firstName, user.lastName)}
+                </div>
+            )}
             <div className="user-profile-info flex-1">
                 <h2 className="text-base font-bold text-[var(--text-primary)]">
                     {displayName || 'Unknown User'}

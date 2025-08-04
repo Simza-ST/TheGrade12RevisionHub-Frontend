@@ -354,7 +354,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                                 <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Quizzes</h2>
                                 <button
                                     onClick={handleViewQuestionPapers}
-                                    className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                    className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label="View digitized question papers"
                                 >
                                     View Digitized Question Papers
