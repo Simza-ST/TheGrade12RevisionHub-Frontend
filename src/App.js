@@ -138,7 +138,6 @@ function ProtectedRoute({ children }) {
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
-
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [notifications, setNotifications] = useState([]); // Added state for notifications
 

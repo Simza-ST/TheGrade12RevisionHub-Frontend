@@ -30,21 +30,21 @@ const PerformanceTable = ({ performanceData, onSort, sortConfig }) => {
             <th onClick={() => onSort('score')} className="cursor-pointer">
               Score (%) {getSortIndicator('score')}
             </th>
-            <th onClick={() => onSort('maxScore')} className="cursor-pointer">
-              Max Score {getSortIndicator('maxScore')}
-            </th>
-            <th onClick={() => onSort('timeSpent')} className="cursor-pointer">
-              Time Spent (min) {getSortIndicator('timeSpent')}
-            </th>
-            <th onClick={() => onSort('difficulty')} className="cursor-pointer">
-              Difficulty Level {getSortIndicator('difficulty')}
-            </th>
-            <th onClick={() => onSort('status')} className="cursor-pointer">
-              Status {getSortIndicator('status')}
-            </th>
-            <th onClick={() => onSort('comments')} className="cursor-pointer">
-              Comments {getSortIndicator('comments')}
-            </th>
+            {/*<th onClick={() => onSort('maxScore')} className="cursor-pointer">*/}
+            {/*  Max Score {getSortIndicator('maxScore')}*/}
+            {/*</th>*/}
+            {/*<th onClick={() => onSort('timeSpent')} className="cursor-pointer">*/}
+            {/*  Time Spent (min) {getSortIndicator('timeSpent')}*/}
+            {/*</th>*/}
+            {/*<th onClick={() => onSort('difficulty')} className="cursor-pointer">*/}
+            {/*  Difficulty Level {getSortIndicator('difficulty')}*/}
+            {/*</th>*/}
+            {/*<th onClick={() => onSort('status')} className="cursor-pointer">*/}
+            {/*  Status {getSortIndicator('status')}*/}
+            {/*</th>*/}
+            {/*<th onClick={() => onSort('comments')} className="cursor-pointer">*/}
+            {/*  Comments {getSortIndicator('comments')}*/}
+            {/*</th>*/}
           </tr>
           </thead>
           <tbody>
@@ -58,11 +58,11 @@ const PerformanceTable = ({ performanceData, onSort, sortConfig }) => {
                       {data.date ? new Date(data.date).toLocaleDateString('en-CA') : 'N/A'}
                     </td>
                     <td>{data.score != null ? data.score : 'N/A'}</td>
-                    <td>{data.maxScore != null ? data.maxScore : 'N/A'}</td>
-                    <td>{data.timeSpent != null ? data.timeSpent : 'N/A'}</td>
-                    <td>{data.difficulty || 'N/A'}</td>
-                    <td>{data.status || 'N/A'}</td>
-                    <td>{data.comments || 'N/A'}</td>
+                    {/*<td>{data.maxScore != null ? data.maxScore : 'N/A'}</td>*/}
+                    {/*<td>{data.timeSpent != null ? data.timeSpent : 'N/A'}</td>*/}
+                    {/*<td>{data.difficulty || 'N/A'}</td>*/}
+                    {/*<td>{data.status || 'N/A'}</td>*/}
+                    {/*<td>{data.comments || 'N/A'}</td>*/}
                   </tr>
               ))
           ) : (
