@@ -17,7 +17,7 @@ const NotificationsWidget = ({ notifications }) => (
                     </li>
                 ))
             ) : (
-                <p className="text-[var(--text-secondary)]">No notifications.</p>
+                <p className="text-[var(--text-secondary)] text-center">No notifications.</p>
             )}
         </ul>
         <Link

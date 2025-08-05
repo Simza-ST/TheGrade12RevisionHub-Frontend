@@ -11,6 +11,7 @@ import MotivationalQuote from './onDashboardPages/MotivationalQuote';
 import ProgressOverview from './onDashboardPages/ProgressOverview';
 import Header from './common/Header';
 import PerformanceChart from './onDashboardPages/PerformanceChart';
+import { recordActivity } from '../utils/activityUtil.js';
 
 const StatsCard = ({ title, value, icon, color = 'text-[var(--text-normal)]' }) => (
     <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow">
@@ -29,14 +30,13 @@ StatsCard.propTypes = {
     color: PropTypes.string,
 };
 
-const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, activities, setActivities, onActivity }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
     const [courses, setCourses] = useState([]);
-    const [completedTasks, setCompletedTasks] = useState(0); // Used to update stats
-    const [activities, setActivities] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState(0);
     const [quote, setQuote] = useState({ text: '', author: '' });
     const [schedule, setSchedule] = useState([]);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
@@ -49,7 +49,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     });
 
     useEffect(() => {
-        // Initialize theme from sessionStorage or system preference
+        // Initialize theme
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
@@ -92,7 +92,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                 if (coursesResponse.ok && coursesData.success) {
                     setCourses(coursesData.data.map(course => ({
                         name: course.subjectName,
-                        progress: course.progress
+                        progress: course.progress,
                     })));
                 } else {
                     console.error(coursesData.message || 'Failed to fetch course progress');
@@ -112,7 +112,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     setActivities(activitiesData.data.map(activity => ({
                         id: activity.id,
                         description: activity.description,
-                        date: activity.date
+                        date: activity.date,
                     })));
                 } else {
                     console.error(activitiesData.message || 'Failed to fetch activities');
@@ -136,7 +136,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
             }
         };
         fetchData();
-    }, [API_BASE_URL, setDarkMode]);
+    }, [API_BASE_URL, setDarkMode, setActivities]);
 
     const handleLogout = () => {
         sessionStorage.removeItem('jwt');
@@ -145,36 +145,11 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
 
     const handleTimerFinish = () => {
         setShowPopup(true);
+        onActivity('Completed study session'); // Use onActivity
     };
 
     const handleClosePopup = () => {
         setShowPopup(false);
-    };
-
-    const handleRecordActivity = async (description) => {
-        try {
-            const headers = {
-                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
-                'Content-Type': 'application/json',
-            };
-            const response = await fetch(`${API_BASE_URL}/api/user/activities`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(description)
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                setActivities(prev => [{
-                    id: data.data.id,
-                    description: data.data.description,
-                    date: data.data.date
-                }, ...prev.slice(0, 9)]);
-            } else {
-                console.error(data.message || 'Failed to save activity');
-            }
-        } catch (error) {
-            console.error('Error saving activity:', error);
-        }
     };
 
     if (loading) {
@@ -194,7 +169,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
-                    onActivity={handleRecordActivity}
+                    onActivity={onActivity}
                 />
                 <div className="flex-1">
                     <Header
@@ -209,9 +184,9 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     />
                     <div
                         className={`
-                            flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-                            ${isCollapsed ? 'ml-16' : 'ml-64'}
-                        `}
+              flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+              ${isCollapsed ? 'ml-16' : 'ml-64'}
+            `}
                     >
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                             <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
@@ -231,14 +206,14 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                             <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 ">
-                            <RecentActivity activities={activities} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <RecentActivity activities={activities} setActivities={setActivities} API_BASE_URL={API_BASE_URL} />
                             <MotivationalQuote quote={quote} />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                             <StudyTimer onTimerFinish={handleTimerFinish} />
-                            <NotificationsWidget notifications={notifications} setNotifications={setNotifications} onActivity={handleRecordActivity} />
+                            <NotificationsWidget notifications={notifications} setNotifications={setNotifications} onActivity={onActivity} />
                         </div>
                     </div>
                 </div>
@@ -263,6 +238,14 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
 };
 
 StudentDashboard.propTypes = {
+    user: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        firstName: PropTypes.string.isRequired,
+        lastName: PropTypes.string.isRequired,
+        email: PropTypes.string.isRequired,
+        title: PropTypes.string,
+        profilePicture: PropTypes.string,
+    }).isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
@@ -271,11 +254,21 @@ StudentDashboard.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             message: PropTypes.string.isRequired,
-            date: PropTypes.string.isRequired,
+            createdAt: PropTypes.string.isRequired, // Match Notifications
             read: PropTypes.bool.isRequired,
+            type: PropTypes.string,
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default StudentDashboard;

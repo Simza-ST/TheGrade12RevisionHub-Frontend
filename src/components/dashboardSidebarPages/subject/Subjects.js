@@ -7,7 +7,7 @@ import SubjectCard from './SubjectCard';
 import MessageBanner from '../../MessageBanner';
 import Header from "../../common/Header";
 
-const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const [subjects, setSubjects] = useState([]);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
@@ -56,24 +56,8 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     }, [message]);
 
     //for activity recording
-    const handleRecordActivity = async (description) => {
-        try {
-            const headers = {
-                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
-                'Content-Type': 'application/json',
-            };
-            const response = await fetch(`${API_BASE_URL}/activities`, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(description) // Send plain string
-            });
-            const data = await response.json();
-            if (!response.ok || !data.success) {
-                console.error(data.message || 'Failed to save activity');
-            }
-        } catch (error) {
-            console.error('Error saving activity:', error);
-        }
+    const handleRecordActivity = (description) => {
+        onActivity(description); //call recordActivity via App.js with setActivities
     };
 
     const handleAddSubject = async (e) => {
@@ -99,7 +83,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     setEnrolledSubjects(subjectNames);
                 });
                 setMessage({ text: data.message, type: 'success' });
-                await handleRecordActivity(`Added subject: ${selectedSubject}`);
+                handleRecordActivity(`Added subject: ${selectedSubject}`);
                 setSelectedSubject('');
                 setIsAdding(false);
             } else {
@@ -127,7 +111,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     setEnrolledSubjects(subjectNames);
                 });
                 setMessage({ text: data.message, type: 'success' });
-                await handleRecordActivity(`Removed subject: ${subjectName}`);
+                handleRecordActivity(`Removed subject: ${subjectName}`);
             } else {
                 setMessage({ text: data.message || 'Failed to remove subject', type: 'error' });
             }
@@ -378,7 +362,7 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
-                    onActivity={handleRecordActivity}
+                    onActivity={onActivity}
                 />
                 <div className="flex-1">
                     <Header
@@ -468,6 +452,16 @@ Subjects.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+    //activities
+    onActivity: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
 };
 
 export default Subjects;

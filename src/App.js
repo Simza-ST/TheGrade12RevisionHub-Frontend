@@ -38,6 +38,7 @@ import MathematicsP1Nov2022Eng
     from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
+import { recordActivity } from './utils/activityUtil.js';
 
 const PublicLayout = () => (
     <div>
@@ -141,6 +142,7 @@ const App = () => {
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [notifications, setNotifications] = useState([]); // Added state for notifications
+    const [activities, setActivities] = useState([]); //activities state
 
     useEffect(() => {
         const validateToken = async () => {
@@ -168,6 +170,10 @@ const App = () => {
         validateToken();
     }, []);
 
+    const handleRecordActivity = (description) => {
+        recordActivity(description, API_BASE_URL, setActivities);
+    };
+
     const commonProps = {
         isCollapsed,
         setIsCollapsed,
@@ -175,6 +181,9 @@ const App = () => {
         setDarkMode,
         notifications,
         setNotifications,
+        onActivity: handleRecordActivity, //add on activity
+        activities, //add activities
+        setActivities,
     };
 
     return (
