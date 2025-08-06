@@ -30,7 +30,7 @@ StatsCard.propTypes = {
     color: PropTypes.string,
 };
 
-const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, activities, setActivities, onActivity }) => {
+const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
@@ -38,7 +38,6 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [courses, setCourses] = useState([]);
     const [completedTasks, setCompletedTasks] = useState(0);
     const [numberOfSubjects, setNumberOfSubjects] = useState(0);
-    const [activities, setActivities] = useState([]);
     const [quote, setQuote] = useState({ text: '', author: '' });
     const [schedule, setSchedule] = useState([]);
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
