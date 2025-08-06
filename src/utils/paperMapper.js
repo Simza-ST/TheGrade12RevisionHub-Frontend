@@ -1,9 +1,9 @@
 import MathematicsP1Nov2022Eng
-    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/paper1Nov2022/MathematicsP1Nov2022Eng";
 import EnglishFALP12020
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/EnglishFALP12020";
 import MathematicsP2Nov2022Eng
-    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP2Nov2022Eng";
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/paper2Nov2022/MathematicsP2Nov2022Eng";
 
 // Map filenames to components
 const paperComponents = {

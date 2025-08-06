@@ -1,6 +1,19 @@
 import React, { useState } from "react";
-import { API_BASE_URL, getAuthHeaders } from '../../../../../utils/api';
+import { API_BASE_URL, getAuthHeaders } from '../../../../../../utils/api';
 import { useNavigate } from 'react-router-dom';
+import paper2_q1 from './paper2_q1.jpeg';
+import paper2_q1_1 from './paper2_q1.1.jpeg';
+import paper2_q2 from './paper2_q2.jpeg';
+import paper2_q3 from './paper2_q3.jpeg';
+import paper2_q4 from './paper2_q4.jpeg';
+import paper2_q6 from './paper2_q6.jpeg';
+import paper2_q7 from './paper2_q7.jpeg';
+import paper2_q8 from './paper2_q8.jpeg';
+import paper2_q8_2 from './paper2_q8.2.jpeg';
+import paper2_q9_1 from './paper2_q9.1.jpeg';
+import paper2_q9_2 from './paper2_q9.2.jpeg';
+import paper2_q10 from './paper_q10.jpeg';
+import paper2_formulas from './paper2_formulas.jpeg';
 
 const MathematicsP2Nov2022Eng = ({ paperId }) => {
     const navigate = useNavigate();
@@ -356,23 +369,14 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>The matric class of a certain high school had to vote for the chairperson of the RCL (representative council of learners). The scatter plot below shows the IQ (intelligence quotient) of the 10 learners who received the most votes and the number of votes that they received.</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Scatter plot showing IQ vs number of votes" />
+                        <img src={paper2_q1} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <p>Before the election, the popularity of each of these ten learners was established and a popularity score (out of a 100) was assigned to each. The popularity scores and the number of votes of the same 10 learners who received the most votes are shown in the table below.</p>
 
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Popularity score (x)</th>
-                            <td>32</td><td>89</td><td>35</td><td>82</td><td>50</td><td>59</td><td>81</td><td>40</td><td>79</td><td>65</td>
-                        </tr>
-                        <tr>
-                            <th>Number of votes (y)</th>
-                            <td>9</td><td>22</td><td>10</td><td>21</td><td>11</td><td>15</td><td>20</td><td>12</td><td>19</td><td>16</td>
-                        </tr>
-                        </thead>
-                    </table>
+                    <div className="image-placeholder">
+                        <img src={paper2_q1_1} alt="Scatter plot showing IQ vs number of votes" />
+                    </div>
 
                     <div className="sub-question">
                         <p>1.1 Calculate the:</p>
@@ -416,7 +420,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>A company conducted research among all its employees on what percentage of their monthly salary was spent on fuel in a particular month. The data is represented in the ogive (cumulative frequency graph) below.</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Ogive showing percentage of salary spent on fuel" />
+                        <img src={paper2_q2} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <div className="sub-question">
@@ -453,7 +457,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>In the diagram, A(4 ; 2), B(6 ; -4) and C(-2 ; -3) are vertices of \(\triangle ABC\). T is the midpoint of CB. The equation of line AC is \(5x-6y=8\). The angle of inclination of AB is \(\alpha\). \(\triangle DCT\) is drawn such that CD || BA. The lines AC and DT intersect at S, the y-intercept of AC. P, F and R are the x-intercepts of DC, AC and AB respectively.</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Triangle diagram with points A(4,2), B(6,-4), C(-2,-3)" />
+                        <img src={paper2_q3} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <div className="sub-question">
@@ -494,7 +498,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>In the diagram, \( M(3 ; -5) \) is the centre of the circle having PN as its diameter. KL is a tangent to the circle at \( N(7 ; -2) \).</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Circle diagram with points M(3,-5), N(7,-2), P, and tangent KL" />
+                        <img src={paper2_q4} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <div className="sub-question">
@@ -584,7 +588,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>In the diagram below, the graphs of \( f(x) = \tan x \) and \( g(x) = 2\sin 2x \) are drawn for the interval \( x \in [-180^\circ ; 180^\circ] \). A(60°; k) and B are two points of intersection of \( f \) and \( g \).</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Graphs of f(x) = tan x and g(x) = 2 sin 2x" />
+                        <img src={paper2_q6} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <div className="sub-question">
@@ -625,7 +629,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                     <p>AB is a vertical flagpole that is \(\sqrt{5} p\) metres long. AC and AD are two cables anchoring the flagpole. B, C and D are in the same horizontal plane. BD = \(2p\) metres, ACD = \(x\) and ADC = \(45^\circ\).</p>
 
                     <div className="image-placeholder">
-                        <img src="" alt="Flagpole diagram with points A, B, C, D" />
+                        <img src={paper2_q7} alt="Scatter plot showing IQ vs number of votes" />
                     </div>
 
                     <div className="sub-question">
@@ -653,7 +657,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                         <p>In the diagram, point M(3, -5) is the centre of the circle having PN as its diameter. KL is a
                             tangent to the circle at point N(7, -2).</p>
                         <div className="image-placeholder">
-                            <img src="" alt="Circle diagram with cyclic quadrilateral MNPR"/>
+                            <img src={paper2_q8} alt="Scatter plot showing IQ vs number of votes" />
                         </div>
 
                         <p>Determine, giving reasons, the size of the following angles:</p>
@@ -671,7 +675,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                         <p>8.2 In the diagram, AABG is drawn. D and E are midpoints of AB and AG respectively. AG and BG are produced to C and H respectively. F is a point on BC such that FG || CH.</p>
 
                         <div className="image-placeholder">
-                            <img src="" alt="Triangle diagram with midpoints" />
+                            <img src={paper2_q8_2} alt="Scatter plot showing IQ vs number of votes" />
                         </div>
 
                         <p>8.2.1 Give a reason why DE || BH. (1)</p>
@@ -691,7 +695,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                         <p>9.1 In the diagram, O is the centre of a circle. OD bisects chord AB.</p>
 
                         <div className="image-placeholder">
-                            <img src="" alt="Circle diagram with chord AB" />
+                            <img src={paper2_q9_1} alt="Scatter plot showing IQ vs number of votes" />
                         </div>
 
                         <p>Prove the theorem that states that the line from the centre of a circle that bisects a chord is perpendicular to the chord, i.e. OD ⊥ AB. (5)</p>
@@ -702,7 +706,7 @@ const MathematicsP2Nov2022Eng = ({ paperId }) => {
                         <p>9.2 In the diagram, E, B, F, S and P are points on the circle centred at O. GB is a tangent to the circle at B. FE is produced to meet the tangent at G. OT is drawn such that T is the midpoint of EF. GO and BO are drawn. BS is drawn through T. PS ∥ GF.</p>
 
                         <div className="image-placeholder">
-                            <img src="" alt="Circle diagram with tangent and points" />
+                            <img src={paper2_q9_2} alt="Scatter plot showing IQ vs number of votes" />
                         </div>
 
                         <p>Prove, giving reasons, that:</p>

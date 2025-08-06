@@ -35,7 +35,7 @@ import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizVi
 import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
 import QuizView from "./components/dashboardSidebarPages/quiz/QuizView";
 import MathematicsP1Nov2022Eng
-    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/paper1Nov2022/MathematicsP1Nov2022Eng";
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
 import { recordActivity } from './utils/activityUtil.js';
