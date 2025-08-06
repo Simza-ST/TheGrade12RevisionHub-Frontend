@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { PencilIcon } from '@heroicons/react/24/outline';
 
-const ProfileTab = ({ user, setUser }) => {
+const ProfileTab = ({ user, setUser, onActivity }) => {
     const navigate = useNavigate();
     const [previewImage, setPreviewImage] = useState(user.profilePicture || null);
     const [savingProfile, setSavingProfile] = useState(false);
@@ -79,6 +79,7 @@ const ProfileTab = ({ user, setUser }) => {
                 lastName: result.data.lastName,
                 phoneNumber: result.data.phoneNumber,
             }));
+            onActivity('Updated profile information'); // Record activity
             setError('');
         } catch (err) {
             setError(err.message);
@@ -119,6 +120,7 @@ const ProfileTab = ({ user, setUser }) => {
             }));
             console.log("preview: " + result.data.profilePicture)
             // setPreviewImage(result.data.profilePicture);
+            onActivity('Updated profile picture'); // Record activity for profile picture update
             setError('');
         } catch (err) {
             setError(err.message);
@@ -261,6 +263,7 @@ ProfileTab.propTypes = {
         profilePicture: PropTypes.string,
     }).isRequired,
     setUser: PropTypes.func.isRequired,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default ProfileTab;

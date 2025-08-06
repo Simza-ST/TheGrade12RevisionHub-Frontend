@@ -57,14 +57,14 @@ UserProfile.propTypes = {
 const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger ,onActivity}) => {
         const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-        { name: 'Subjects', path: '/subjects', icon: '📚', onClick: () => onActivity && onActivity('Viewed Subjects') },
-        { name: 'Quizzes', path: '/quizzes', icon: '❓', onClick: () => onActivity && onActivity('Viewed Quizzes') },
-        { name: 'Question Papers', path: '/question-papers/list', icon: '📝', onClick: () => onActivity && onActivity('Viewed pdf Question papers') },
+        { name: 'Subjects', path: '/subjects', icon: '📚', },
+        { name: 'Quizzes', path: '/quizzes', icon: '❓',  },
+        { name: 'Question Papers', path: '/question-papers/list', icon: '📝', },
         { name: 'Resources', path: '/resources', icon: '🔗', onClick: () => onActivity && onActivity('Viewed Resources') },
         { name: 'Performance', path: '/performance', icon: '📊', onClick: () => onActivity && onActivity('Viewed Performances') },
         { name: 'Notifications', path: '/notifications', icon: '🔔', onClick: () => onActivity && onActivity('Viewed Notifications') },
         { name: 'Chatroom', path: '/chatroom', icon: '💬', onClick: () => onActivity && onActivity('Visited Chatroom') },
-        { name: 'Settings', path: '/settings', icon: '⚙️', onClick: () => onActivity && onActivity('Visited Settings') },
+        { name: 'Settings', path: '/settings', icon: '⚙️',  },
         { name: 'Logout', path: '/', icon: '🚪', onClick: onLogout },
     ];
 

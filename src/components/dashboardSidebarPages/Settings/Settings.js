@@ -7,7 +7,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { PencilIcon, TrashIcon, PlusIcon, InformationCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import ProfileTab from "./ProfileTab";
 
-const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
@@ -154,7 +154,9 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 body: JSON.stringify({ ...settings, theme: darkMode ? 'dark' : 'light' }),
             });
             if (!response.ok) throw new Error(await response.text());
+
             setSuccess('Settings saved successfully');
+            onActivity('Updated notification settings');
             setError(null);
         } catch (err) {
             setError(`Failed to save settings: ${err.message}`);
@@ -181,6 +183,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             setSuccess('Password changed successfully');
             setError(null);
             setPassword({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            onActivity('Changed password');
         } catch (err) {
             setError(`Failed to change password: ${err.message}`);
         } finally {
@@ -549,6 +552,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
+                    onActivity={onActivity}
                 />
                 <div className="flex-1">
                     <Header
@@ -598,6 +602,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                 <ProfileTab
                                     setUser={setUser}
                                     user={user}
+                                    onActivity={onActivity}
                                 />
                             )}
 
@@ -1039,6 +1044,15 @@ Settings.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+    onActivity: PropTypes.func,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id:PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ),
+    setActivities: PropTypes.func,
 };
 
 export default Settings;

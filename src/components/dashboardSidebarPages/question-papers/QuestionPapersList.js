@@ -8,7 +8,7 @@ import PDFModal from './PDFModal';
 import { useQuestionPapers } from '../../../hooks/useQuestionPapers';
 import Header from '../../common/Header';
 
-const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [] }) => {
+const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications = [], onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const {
         questionPapers,
@@ -367,6 +367,7 @@ const QuestionPaperList = ({ user, setNotifications, isCollapsed, setIsCollapsed
                                     pdfLoading={pdfLoading}
                                     onViewPdf={viewPdf}
                                     onDownloadPdf={downloadPdf}
+                                    onActivity={onActivity}
                                 />
                             </div>
                         </div>
@@ -401,7 +402,16 @@ QuestionPaperList.propTypes = {
             date: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
         })
-    ),
+    ).isRequired,
+    onActivity: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
 };
 
 export default QuestionPaperList;
