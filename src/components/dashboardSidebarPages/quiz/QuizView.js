@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 
-const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities  }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [quiz, setQuiz] = useState(null);
@@ -121,6 +121,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
             setResult(data);
             setError('');
+            onActivity(`Submitted quiz: ${quiz.title}`);//record activity after successful submission
         } catch (err) {
             console.error('Submission error:', err);
             setError(`Failed to submit quiz: ${err.message}`);
@@ -202,6 +203,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
+                    onActivity={onActivity} //Pass onActivity to sidebar
                 />
                 <div className="flex-1">
                     <Header
@@ -330,6 +332,16 @@ QuizView.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+    //activity PropTypes
+    onActivity: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
 };
 
 export default QuizView;

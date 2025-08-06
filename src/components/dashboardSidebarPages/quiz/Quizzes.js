@@ -5,7 +5,7 @@ import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import QuizCard from './QuizCard';
 
-const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const [quizzes, setQuizzes] = useState([]);
     const [subjects, setSubjects] = useState([]);
@@ -77,6 +77,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const handleStartQuiz = (quizId, quizTitle) => {
         console.log('Navigating to quiz ID:', quizId);
+        onActivity(`Started quiz: ${quizTitle}`); //record activity
         navigate(`/quizzes/${quizId}`);
     };
 
@@ -336,6 +337,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                     isCollapsed={isCollapsed}
                     setIsCollapsed={setIsCollapsed}
                     darkMode={darkMode}
+                    onActivity={onActivity} //pass onActivity to sidebar
                 />
                 <div className="flex-1">
                     <Header
@@ -466,6 +468,17 @@ Quizzes.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+
+    //activity
+    onActivity: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
 };
 
 export default Quizzes;
