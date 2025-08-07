@@ -3,9 +3,39 @@ import { Link } from 'react-router-dom';
 import './Signup.css';
 
 const Signup = () => {
+
+    const [idNumber, setIdNumber] = useState('');
     const [error, setError] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+
+    const handleIdChange = (e) => {
+        const value = e.target.value;
+
+        if (/^\d*$/.test(value)) {
+            // Accept only up to 13 digits
+            if (value.length <= 13) {
+                setIdNumber(value);
+                setError('');
+            }
+        } else {
+            setError('ID number must contain digits only.');
+        }
+    };
+    const handlePhoneChange = (e) => {
+        const value = e.target.value;
+
+        if (/^\d*$/.test(value)) {
+            // Only allow up to 10 digits
+            if (value.length <= 10) {
+                setPhoneNumber(value);
+                setError('');
+            }
+        } else {
+            setError('Phone number must contain digits only.');
+        }
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -14,7 +44,7 @@ const Signup = () => {
 
         const firstName = formData.get('firstName');
         const lastName = formData.get('lastName');
-        const idNumber = formData.get('idNumber');
+        const idNumber = formData.get('idNumber') || idNumber;
         const phoneNumber = formData.get('phoneNumber');
         const email = formData.get('email');
         const password = formData.get('password');
@@ -147,6 +177,8 @@ const Signup = () => {
                                     type="text"
                                     id="idNumber"
                                     name="idNumber"
+                                    value={idNumber}
+                                    onChange={handleIdChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                     placeholder="ID Number"
@@ -154,18 +186,20 @@ const Signup = () => {
                                 <label
                                     htmlFor="idNumber"
                                     className="form-label absolute left-4 top-3 text-gray-300 transition-all
-                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
-                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
-                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
+                                     peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                     peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                     peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
                                     ID Number
                                 </label>
                             </div>
                             <div className="relative">
                                 <input
-                                    type="tel"
+                                    type="text"
                                     id="phoneNumber"
                                     name="phoneNumber"
+                                    value={phoneNumber}
+                                    onChange={handlePhoneChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                     placeholder="Phone Number"
@@ -173,9 +207,9 @@ const Signup = () => {
                                 <label
                                     htmlFor="phoneNumber"
                                     className="form-label absolute left-4 top-3 text-gray-300 transition-all
-                                         peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
-                                         peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
-                                         peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
+                                 peer-focus:-translate-y-9 peer-focus:text-sm peer-focus:text-gray-400
+                                 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300
+                                 peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                 >
                                     Phone Number
                                 </label>
