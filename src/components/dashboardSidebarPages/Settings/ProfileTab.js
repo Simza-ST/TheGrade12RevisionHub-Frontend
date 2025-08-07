@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { PencilIcon } from '@heroicons/react/24/outline';
+import {PencilIcon, TrashIcon} from '@heroicons/react/24/outline';
+import ConfirmationModal from "../../common/ConfirmationModal";
 
 const ProfileTab = ({ user, setUser, onActivity }) => {
     const navigate = useNavigate();
@@ -9,6 +10,8 @@ const ProfileTab = ({ user, setUser, onActivity }) => {
     const [savingProfile, setSavingProfile] = useState(false);
     const [savingPicture, setSavingPicture] = useState(false);
     const [error, setError] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const getInitials = (firstName, lastName) => {
         return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
@@ -27,6 +30,25 @@ const ProfileTab = ({ user, setUser, onActivity }) => {
             reader.readAsDataURL(file);
         } else {
             setError('Please upload a valid image (JPG, JPEG, PNG, GIF).');
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        setLoading(true);
+        try {
+            const token = sessionStorage.getItem('jwt');
+            const response = await fetch('http://localhost:6262/api/users/me', {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error(await response.text());
+            sessionStorage.removeItem('jwt');
+            navigate('/login');
+        } catch (err) {
+            setError(`Failed to delete account: ${err.message}`);
+        } finally {
+            setLoading(false);
+            setIsDeleteModalOpen(false);
         }
     };
 
@@ -142,7 +164,7 @@ const ProfileTab = ({ user, setUser, onActivity }) => {
                     {previewImage ? (
                         <img
                             src={previewImage}
-                            alt="Profile picture"
+                            alt="Preview "
                             className="h-24 w-24 rounded-full object-cover border-2 border-[var(--accent-primary)]"
                         />
                     ) : (
@@ -248,7 +270,31 @@ const ProfileTab = ({ user, setUser, onActivity }) => {
                         {savingProfile ? 'Saving...' : 'Save Profile'}
                     </button>
                 </div>
+                <div>
+                    <h4 className="text-base font-medium text-[var(--text-primary)] mb-2">
+                        Delete Account
+                    </h4>
+                    <p className="text-sm text-[var(--text-secondary)] mb-4">
+                        Permanently delete your account and data
+                    </p>
+                    <button
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                        aria-label="Delete Account"
+                        disabled={loading}
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                        Delete Account
+                    </button>
+                </div>
             </div>
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteAccount}
+                title="Confirm Account Deletion"
+                message="Are you sure you want to delete your account? This action cannot be undone."
+            />
         </div>
     );
 };
