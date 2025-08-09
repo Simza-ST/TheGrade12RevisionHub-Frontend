@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
-import ConfirmationModal from '../../common/ConfirmationModal';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ProfileTab from "./ProfileTab";
 
@@ -77,6 +76,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         if (password.newPassword.length < 8 || !/[A-Z]/.test(password.newPassword) || !/[0-9]/.test(password.newPassword))
             return 'New password must be 8+ characters with uppercase and numbers';
         if (password.newPassword !== password.confirmPassword) return 'Passwords do not match';
+        if (password.currentPassword === password.newPassword) return 'Sorry cannot change password (current password is equal to new password)';
         return null;
     };
 

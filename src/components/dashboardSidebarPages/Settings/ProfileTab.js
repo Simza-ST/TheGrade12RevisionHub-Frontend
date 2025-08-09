@@ -37,13 +37,13 @@ const ProfileTab = ({ user, setUser, onActivity }) => {
         setLoading(true);
         try {
             const token = sessionStorage.getItem('jwt');
-            const response = await fetch('http://localhost:6262/api/users/me', {
+            const response = await fetch('http://localhost:6262/api/user/profile/delete-account', {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
             if (!response.ok) throw new Error(await response.text());
             sessionStorage.removeItem('jwt');
-            navigate('/login');
+            navigate('/');
         } catch (err) {
             setError(`Failed to delete account: ${err.message}`);
         } finally {
