@@ -1,55 +1,133 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Signup.css';
 
 const Signup = () => {
     const [error, setError] = useState('');
+    const [idError, setIdError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showOTPPopup, setShowOTPPopup] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [otpError, setOtpError] = useState('');
+    const [email, setEmail] = useState('');
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        idNumber: '',
+        phoneNumber: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: 'USER',
+    });
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+
+    // Validate ID number
+    const validateIdNumber = (id) => {
+        if (!/^\d{13}$/.test(id)) {
+            return 'ID number must be exactly 13 digits.';
+        }
+
+        const year = parseInt(id.substring(0, 2), 10);
+        const month = parseInt(id.substring(2, 4), 10);
+        const day = parseInt(id.substring(4, 6), 10);
+        const currentYear = new Date().getFullYear() % 100; // Last two digits of current year
+        const fullYear = year <= currentYear ? 2000 + year : 1900 + year;
+
+        // Validate month (01-12)
+        if (month < 1 || month > 12) {
+            return 'Invalid month in ID number (must be 01-12).';
+        }
+
+        // Validate day (01-31, basic check)
+        if (day < 1 || day > 31) {
+            return 'Invalid day in ID number (must be 01-31).';
+        }
+
+        // Basic date validity check
+        const date = new Date(fullYear, month - 1, day);
+        if (date.getFullYear() !== fullYear || date.getMonth() + 1 !== month || date.getDate() !== day) {
+            return 'Invalid date in ID number.';
+        }
+
+        return '';
+    };
+
+    // Validate phone number
+    const validatePhoneNumber = (phone) => {
+        const cleanedPhone = phone.replace(/^\+/, ''); // Remove optional leading +
+        if (!/^\d{10}$/.test(cleanedPhone)) {
+            return 'Phone number must be exactly 10 digits.';
+        }
+        return '';
+    };
+
+    // Validate password matching
+    const validatePasswordMatch = (password, confirmPassword) => {
+        if (password !== confirmPassword) {
+            return 'Passwords do not match.';
+        }
+        return '';
+    };
+
+    // Handle input changes and validate in real-time
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+
+        if (name === 'idNumber') {
+            setIdError(validateIdNumber(value));
+        } else if (name === 'phoneNumber') {
+            setPhoneError(validatePhoneNumber(value));
+        } else if (name === 'password' || name === 'confirmPassword') {
+            setPasswordError(validatePasswordMatch(formData.password, formData.confirmPassword));
+        }
+    };
+
+    // Re-validate password match when either password or confirmPassword changes
+    useEffect(() => {
+        setPasswordError(validatePasswordMatch(formData.password, formData.confirmPassword));
+    }, [formData.password, formData.confirmPassword]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
         setError('');
 
-        const form = event.target;
-        const formData = new FormData(form);
-        const firstName = formData.get('firstName');
-        const lastName = formData.get('lastName');
-        const idNumber = formData.get('idNumber');
-        const phoneNumber = formData.get('phoneNumber');
-        const email = formData.get('email');
-        const password = formData.get('password');
-        const confirmPassword = formData.get('confirmPassword');
-        const role = formData.get('role') || 'USER';
-        const profilePicture = formData.get('profilePicture');
-
         // Client-side validation
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
+        if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
             setError('Please enter a valid email address.');
             setIsLoading(false);
             return;
         }
-        if (password.length < 8) {
+        if (formData.password.length < 8) {
             setError('Password must be at least 8 characters long.');
             setIsLoading(false);
             return;
         }
-        if (password !== confirmPassword) {
-            setError('Passwords do not match.');
+        const idError = validateIdNumber(formData.idNumber);
+        if (idError) {
+            setError(idError);
+            setIdError(idError);
             setIsLoading(false);
             return;
         }
-        if (!/^\+?\d{10,15}$/.test(phoneNumber)) {
-            setError('Please enter a valid phone number (10-15 digits).');
+        const phoneError = validatePhoneNumber(formData.phoneNumber);
+        if (phoneError) {
+            setError(phoneError);
+            setPhoneError(phoneError);
             setIsLoading(false);
             return;
         }
-        if (profilePicture && profilePicture.size > 5 * 1024 * 1024) {
-            setError('Profile picture must be less than 5MB.');
+        const passwordError = validatePasswordMatch(formData.password, formData.confirmPassword);
+        if (passwordError) {
+            setError(passwordError);
+            setPasswordError(passwordError);
             setIsLoading(false);
             return;
         }
@@ -61,43 +139,66 @@ const Signup = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    idNumber,
-                    email,
-                    password,
-                    phoneNumber,
-                    role,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    idNumber: formData.idNumber,
+                    email: formData.email,
+                    password: formData.password,
+                    phoneNumber: formData.phoneNumber,
+                    role: formData.role,
                 }),
                 credentials: 'include',
             });
 
             const data = await response.json();
             if (!response.ok) {
-                const errorMsg =
-                    response.status === 415
-                        ? 'Unsupported Media Type: Backend expects multipart/form-data or JSON.'
-                        : response.status === 400
-                            ? 'Invalid request: Check JSON payload.'
-                            : response.status === 404
-                                ? 'Endpoint not found: Verify URL is /signup/signup.'
-                                : `HTTP error! Status: ${response.status}`;
-                throw new Error(data.message || errorMsg);
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
             }
 
             if (data.success) {
-                console.log('Success:', data.message, data.data);
-                form.reset();
+                setEmail(formData.email);
+                setShowOTPPopup(true);
                 setIsLoading(false);
-                navigate('/login');
             } else {
                 setError(data.message || 'Signup failed');
-                console.error('Backend error:', data.message);
                 setIsLoading(false);
             }
         } catch (error) {
-            console.error('Fetch error:', error);
-            setError(error.message || 'An error occurred during signup. Please check server logs and try again.');
+            setError(error.message || 'An error occurred during signup.');
+            setIsLoading(false);
+        }
+    };
+
+    const handleOTPSubmit = async (event) => {
+        event.preventDefault();
+        setOtpError('');
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, otp }),
+                credentials: 'include',
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'OTP verification failed');
+            }
+
+            if (data.success) {
+                setShowOTPPopup(false);
+                setIsLoading(false);
+                navigate('/login');
+            } else {
+                setOtpError(data.message || 'Invalid or expired OTP');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            setOtpError(error.message || 'An error occurred during OTP verification.');
             setIsLoading(false);
         }
     };
@@ -187,6 +288,8 @@ const Signup = () => {
                                         type="text"
                                         id="firstName"
                                         name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="First Name"
@@ -204,6 +307,8 @@ const Signup = () => {
                                         type="text"
                                         id="lastName"
                                         name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Last Name"
@@ -222,6 +327,8 @@ const Signup = () => {
                                     type="text"
                                     id="idNumber"
                                     name="idNumber"
+                                    value={formData.idNumber}
+                                    onChange={handleInputChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                     placeholder="ID Number"
@@ -233,12 +340,17 @@ const Signup = () => {
                                 >
                                     ID Number
                                 </label>
+                                {idError && (
+                                    <p className="text-red-400 text-sm mt-1">{idError}</p>
+                                )}
                             </div>
                             <div className="relative">
                                 <input
                                     type="tel"
                                     id="phoneNumber"
                                     name="phoneNumber"
+                                    value={formData.phoneNumber}
+                                    onChange={handleInputChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                     placeholder="Phone Number"
@@ -250,12 +362,17 @@ const Signup = () => {
                                 >
                                     Phone Number
                                 </label>
+                                {phoneError && (
+                                    <p className="text-red-400 text-sm mt-1">{phoneError}</p>
+                                )}
                             </div>
                             <div className="relative">
                                 <input
                                     type="email"
                                     id="email"
                                     name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                     placeholder="Email Address"
@@ -273,6 +390,8 @@ const Signup = () => {
                                     type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                     placeholder="Password"
@@ -299,6 +418,8 @@ const Signup = () => {
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     id="confirmPassword"
                                     name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
                                     required
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                     placeholder="Confirm Password"
@@ -319,11 +440,14 @@ const Signup = () => {
                                 >
                                     {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                                 </button>
+                                {passwordError && (
+                                    <p className="text-red-400 text-sm mt-1">{passwordError}</p>
+                                )}
                             </div>
                             <button
                                 type="submit"
                                 className="btn-submit w-full flex items-center justify-center"
-                                disabled={isLoading}
+                                disabled={isLoading || idError || phoneError || passwordError}
                             >
                                 Sign Up
                             </button>
@@ -349,6 +473,45 @@ const Signup = () => {
                                     aria-label="Signing up..."
                                 ></div>
                                 <span className="loading-text">Signing Up...</span>
+                            </div>
+                        </div>
+                    )}
+                    {showOTPPopup && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h3 className="text-xl font-semibold text-white mb-4">Verify Your Email</h3>
+                                <p className="text-gray-300 mb-4">Enter the OTP sent to {email}</p>
+                                <form onSubmit={handleOTPSubmit} className="space-y-4">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            id="otp"
+                                            name="otp"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value)}
+                                            required
+                                            className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                            placeholder="Enter OTP"
+                                            disabled={isLoading}
+                                        />
+                                        <label
+                                            htmlFor="otp"
+                                            className="form-label absolute left-4 top-3 text-gray-300 transition-all peer-focus:-translate-y-8 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
+                                        >
+                                            Enter OTP
+                                        </label>
+                                    </div>
+                                    {otpError && (
+                                        <p className="text-red-400 text-sm text-center">{otpError}</p>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="btn-submit w-full flex items-center justify-center"
+                                        disabled={isLoading}
+                                    >
+                                        Verify OTP
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     )}

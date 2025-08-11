@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
@@ -17,6 +17,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         newPassword: '',
         confirmPassword: '',
     });
+    const [passwordMatchError, setPasswordMatchError] = useState('');
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [settings, setSettings] = useState({
         emailNotifications: true,
         chatNotifications: true,
@@ -34,7 +38,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             try {
                 const token = sessionStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
-
 
                 // Fetch settings
                 const settingsResponse = await fetch('http://localhost:6262/api/users/settings', {
@@ -70,6 +73,14 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         fetchUserData();
     }, [darkMode, setDarkMode]);
 
+    // Validate password matching
+    useEffect(() => {
+        if (password.newPassword && password.confirmPassword) {
+            setPasswordMatchError(password.newPassword !== password.confirmPassword ? 'Passwords do not match' : '');
+        } else {
+            setPasswordMatchError('');
+        }
+    }, [password.newPassword, password.confirmPassword]);
 
     const validatePassword = () => {
         if (!password.currentPassword) return 'Current password is required';
@@ -118,7 +129,10 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
 
     const handleChangePassword = async () => {
         const validationError = validatePassword();
-        if (validationError) return setError(validationError);
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
         setLoading(true);
         try {
             const token = sessionStorage.getItem('jwt');
@@ -151,6 +165,18 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const handleLogout = () => {
         sessionStorage.removeItem('jwt');
         navigate('/login');
+    };
+
+    const toggleCurrentPasswordVisibility = () => {
+        setShowCurrentPassword(!showCurrentPassword);
+    };
+
+    const toggleNewPasswordVisibility = () => {
+        setShowNewPassword(!showNewPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     if (loading) {
@@ -279,6 +305,20 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                             border-color: var(--accent-primary);
                             outline: none;
                             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                        }
+                        .form-input-container {
+                            position: relative;
+                        }
+                        .password-toggle {
+                            position: absolute;
+                            right: 14px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            cursor: pointer;
+                            color: var(--text-secondary);
+                        }
+                        .password-toggle:hover {
+                            color: var(--accent-primary);
                         }
                         .btn-primary {
                             background-color: var(--accent-primary);
@@ -455,12 +495,12 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     <div>
                                         <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Change Password</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
+                                            <div className="form-input-container">
                                                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                                                     Current Password
                                                 </label>
                                                 <input
-                                                    type="password"
+                                                    type={showCurrentPassword ? 'text' : 'password'}
                                                     name="currentPassword"
                                                     value={password.currentPassword}
                                                     onChange={handlePasswordChange}
@@ -468,13 +508,21 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                     placeholder="Enter current password"
                                                     aria-label="Current Password"
                                                 />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle"
+                                                    onClick={toggleCurrentPasswordVisibility}
+                                                    aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+                                                >
+                                                    {showCurrentPassword ? '👁️' : '👁️‍🗨️'}
+                                                </button>
                                             </div>
-                                            <div>
+                                            <div className="form-input-container">
                                                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                                                     New Password
                                                 </label>
                                                 <input
-                                                    type="password"
+                                                    type={showNewPassword ? 'text' : 'password'}
                                                     name="newPassword"
                                                     value={password.newPassword}
                                                     onChange={handlePasswordChange}
@@ -482,13 +530,21 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                     placeholder="New password"
                                                     aria-label="New Password"
                                                 />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle"
+                                                    onClick={toggleNewPasswordVisibility}
+                                                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                                                >
+                                                    {showNewPassword ? '👁️' : '👁️‍🗨️'}
+                                                </button>
                                             </div>
-                                            <div>
+                                            <div className="form-input-container">
                                                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                                                     Confirm Password
                                                 </label>
                                                 <input
-                                                    type="password"
+                                                    type={showConfirmPassword ? 'text' : 'password'}
                                                     name="confirmPassword"
                                                     value={password.confirmPassword}
                                                     onChange={handlePasswordChange}
@@ -496,6 +552,17 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                     placeholder="Confirm new password"
                                                     aria-label="Confirm Password"
                                                 />
+                                                <button
+                                                    type="button"
+                                                    className="password-toggle"
+                                                    onClick={toggleConfirmPasswordVisibility}
+                                                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                                                >
+                                                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                                </button>
+                                                {passwordMatchError && (
+                                                    <p className="text-red-800 text-sm mt-1">{passwordMatchError}</p>
+                                                )}
                                             </div>
                                         </div>
                                         <br />
@@ -503,7 +570,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                             onClick={handleChangePassword}
                                             className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Change Password"
-                                            disabled={loading}
+                                            disabled={loading || passwordMatchError}
                                         >
                                             <PencilIcon className="w-4 h-4" />
                                             Change Password
@@ -657,7 +724,7 @@ Settings.propTypes = {
     onActivity: PropTypes.func,
     activities: PropTypes.arrayOf(
         PropTypes.shape({
-            id:PropTypes.number.isRequired,
+            id: PropTypes.number.isRequired,
             description: PropTypes.string.isRequired,
             date: PropTypes.string.isRequired,
         })
