@@ -209,10 +209,17 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
         <div className="full">
             <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
                 <style>{`
-          * {
+          :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header h1) {
             transition: none !important;
             animation: none !important;
             opacity: 1 !important;
+          }
+          .sidebar-wrapper,
+          .hamburger,
+          .dashboard-content,
+          .header,
+          .header-title {
+            transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
           }
           .full {
             width: 100%;
@@ -365,18 +372,33 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
           .dashboard-content::-webkit-scrollbar-track {
             background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
           }
+          /*.header h1 {
+            padding-left: clamp(40px, 10vw, 48px); /!* Default padding *!/
+          }*/
+          @media (max-width: 639px) {
+            .header h1 {
+              padding-left: clamp(48px, 12vw, 56px); /* Extra padding to clear hamburger when sidebar false */
+            }
+            .sidebar-open .header h1 {
+              padding-left: clamp(208px, 50vw, 216px); /* Extra padding when sidebar open (hamburger at 198px) */
+            }
+            .sidebar-open .dashboard-content {
+              margin-left: 198px; /* Shift content right when sidebar open to avoid overlap */
+            }
+          }
           @media (max-width: 480px) {
             .grid {
               grid-template-columns: 1fr;
             }
             .hamburger {
               display: block;
+              
             }
             .sidebar-wrapper {
               display: ${showSidebar ? 'block' : 'none'};
             }
             .hamburger {
-              left: ${showSidebar ? '198px' : '16px'};
+              left: ${showSidebar ? '198px' : '5px'};
             }
             .ml-16, .ml-64 {
               margin-left: 0;
@@ -406,7 +428,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
               display: ${showSidebar ? 'block' : 'none'};
             }
             .hamburger {
-              left: ${showSidebar ? '198px' : '16px'};
+              left: ${showSidebar ? '198px' : '10px'};
             }
             .ml-16, .ml-64 {
               margin-left: 0;
@@ -523,8 +545,9 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                         setDarkMode={setDarkMode}
                         tabDescription="Student Dashboard"
                         userMessage="Welcome to dashboard"
+                        className="header"
                     />
-                    <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content`}>
+                    <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content ${showSidebar ? 'sidebar-open' : ''}`}>
                         <div className="grid md:grid-cols-4 gap-6 mb-6">
                             <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                                 <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊" />

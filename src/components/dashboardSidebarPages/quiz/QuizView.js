@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 
-const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities  }) => {
+const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [quiz, setQuiz] = useState(null);
@@ -12,6 +12,18 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showSidebar, setShowSidebar] = useState(false);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    }, [darkMode]);
+
+    useEffect(() => {
+        if (window.innerWidth <= 639) {
+            setIsCollapsed(!showSidebar);
+        }
+    }, [showSidebar, setIsCollapsed]);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -49,7 +61,6 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                     throw new Error(message || 'Failed to retrieve quiz');
                 }
 
-                // Validate question IDs
                 if (data.questions.some(q => !q.questionId)) {
                     throw new Error('Some questions are missing IDs');
                 }
@@ -121,7 +132,7 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
             setResult(data);
             setError('');
-            onActivity(`Submitted quiz: ${quiz.title}`);//record activity after successful submission
+            onActivity(`Submitted quiz: ${quiz.title}`);
         } catch (err) {
             console.error('Submission error:', err);
             setError(`Failed to submit quiz: ${err.message}`);
@@ -142,69 +153,269 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-primary)]">
-                <style>
-                    {`
-                        .full {
-                            width: 100%;
-                            min-height: 100vh;
-                            position: relative;
-                            z-index: 10;
-                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
+                <style>{`
+                    :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header-title) {
+                        transition: none !important;
+                        animation: none !important;
+                        opacity: 1 !important;
+                    }
+                    .sidebar-wrapper,
+                    .hamburger,
+                    .dashboard-content,
+                    .header,
+                    .header-title {
+                        transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
+                    }
+                    .full {
+                        width: 100%;
+                        min-height: 100vh;
+                        position: relative;
+                        z-index: 10;
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    }
+                    .bg-[var(--bg-primary)] {
+                        background-color: var(--bg-primary, ${darkMode ? '#0f172a' : '#ffffff'});
+                    }
+                    .bg-[var(--bg-secondary)] {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1e293b' : '#ffffff'});
+                    }
+                    .bg-[var(--accent-primary)] {
+                        background-color: var(--accent-primary, #3b82f6);
+                    }
+                    .text-[var(--text-primary)] {
+                        color: var(--text-primary, ${darkMode ? '#e2e8f0' : '#1f2937'});
+                    }
+                    .text-[var(--text-secondary)] {
+                        color: var(--text-secondary, ${darkMode ? '#94a3b8' : '#6b7280'});
+                    }
+                    .border-[var(--border)] {
+                        border-color: var(--border, ${darkMode ? '#475569' : '#e5e7eb'});
+                    }
+                    .hover\\:bg-[var(--hover-tertiary)]:hover {
+                        background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+                    }
+                    .question-card {
+                        transition: box-shadow 0.2s ease;
+                    }
+                    .question-card:hover {
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                    }
+                    .option-label {
+                        cursor: pointer;
+                        padding: clamp(6px, 1.5vw, 8px);
+                        border-radius: 4px;
+                        transition: background-color 0.2s ease;
+                    }
+                    .option-label:hover {
+                        background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+                    }
+                    input[type="radio"]:checked + .option-label {
+                        background-color: var(--accent-primary, #3b82f6);
+                        color: white;
+                    }
+                    .flex {
+                        display: flex;
+                    }
+                    .min-h-screen {
+                        min-height: 100vh;
+                    }
+                    .min-w-0 {
+                        min-width: 0;
+                    }
+                    .justify-center {
+                        justify-content: center;
+                    }
+                    .items-center {
+                        align-items: center;
+                    }
+                    .flex-1 {
+                        flex: 1;
+                    }
+                    .space-y-2 > * + * {
+                        margin-top: clamp(6px, 1.5vw, 8px);
+                    }
+                    .space-y-6 > * + * {
+                        margin-top: clamp(12px, 3vw, 16px);
+                    }
+                    .p-4 {
+                        padding: clamp(8px, 2vw, 12px);
+                    }
+                    .p-6 {
+                        padding: clamp(12px, 3vw, 16px);
+                    }
+                    .sm\\:p-8 {
+                        padding: clamp(16px, 4vw, 20px);
+                    }
+                    .mb-4 {
+                        margin-bottom: clamp(12px, 3vw, 16px);
+                    }
+                    .mb-6 {
+                        margin-bottom: clamp(16px, 4vw, 24px);
+                    }
+                    .mt-6 {
+                        margin-top: clamp(16px, 4vw, 24px);
+                    }
+                    .rounded-lg {
+                        border-radius: 8px;
+                    }
+                    .text-2xl {
+                        font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+                    }
+                    .text-lg {
+                        font-size: clamp(1rem, 3vw, 1.125rem);
+                    }
+                    .text-sm {
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    }
+                    .font-semibold {
+                        font-weight: 600;
+                    }
+                    .font-medium {
+                        font-weight: 500;
+                    }
+                    .hamburger {
+                        display: none;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: 8px;
+                        position: fixed;
+                        top: 16px;
+                        left: 5px;
+                        z-index: 50;
+                        transition: left 0.3s ease-in-out;
+                    }
+                    .sidebar-wrapper {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        height: 100vh;
+                        z-index: 40;
+                        transition: transform 0.3s ease-in-out;
+                    }
+                    .sidebar-hidden {
+                        transform: translateX(-100%);
+                    }
+                    .dashboard-content {
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        padding-right: 8px;
+                    }
+                    .dashboard-content::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-thumb {
+                        background-color: var(--border, ${darkMode ? '#475569' : '#e5e7eb'});
+                        border-radius: 3px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-track {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1e293b' : '#ffffff'});
+                    }
+                    @media (max-width: 639px) {
+                        .ml-16, .ml-64, .sm\\:ml-16, .sm\\:ml-64 {
+                            margin-left: 0;
                         }
-                        .bg-[var(--bg-primary)] {
-                            background-color: var(--bg-primary, ${darkMode ? '#0f172a' : '#ffffff'});
+                        .hamburger {
+                            display: block;
+                            left: ${showSidebar ? '198px' : '5px'};
                         }
-                        .bg-[var(--bg-secondary)] {
-                            background-color: var(--bg-secondary, ${darkMode ? '#1e293b' : '#ffffff'});
+                        .sidebar-wrapper {
+                            display: ${showSidebar ? 'block' : 'none'};
                         }
-                        .bg-[var(--accent-primary)] {
-                            background-color: var(--accent-primary, #3b82f6);
+                        .dashboard-content {
+                            margin-left: ${showSidebar ? '198px' : '0'};
                         }
-                        .text-[var(--text-primary)] {
-                            color: var(--text-primary, ${darkMode ? '#e2e8f0' : '#1f2937'});
-                        }
-                        .text-[var(--text-secondary)] {
-                            color: var(--text-secondary, ${darkMode ? '#94a3b8' : '#6b7280'});
-                        }
-                        .border-[var(--border)] {
-                            border-color: var(--border, ${darkMode ? '#475569' : '#e5e7eb'});
-                        }
-                        .hover\\:bg-[var(--hover-tertiary)]:hover {
-                            background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+                    }
+                    @media (max-width: 480px) {
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(8px, 2vw, 10px);
                         }
                         .question-card {
-                            transition: box-shadow 0.2s ease;
+                            padding: clamp(10px, 2.5vw, 12px);
                         }
-                        .question-card:hover {
-                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                        .text-2xl {
+                            font-size: clamp(1.125rem, 3vw, 1.25rem);
+                        }
+                        .text-lg {
+                            font-size: clamp(0.875rem, 2.5vw, 1rem);
+                        }
+                        .text-sm {
+                            font-size: clamp(0.625rem, 1.8vw, 0.75rem);
                         }
                         .option-label {
-                            cursor: pointer;
-                            padding: 8px;
-                            border-radius: 4px;
-                            transition: background-color 0.2s ease;
+                            padding: clamp(4px, 1vw, 6px);
                         }
-                        .option-label:hover {
-                            background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+                        button {
+                            padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
                         }
-                        input[type="radio"]:checked + .option-label {
-                            background-color: var(--accent-primary, #3b82f6);
-                            color: white;
+                    }
+                    @media (min-width: 481px) and (max-width: 639px) {
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(10px, 2.5vw, 12px);
                         }
-                    `}
-                </style>
-                <Sidebar
-                    user={user}
-                    onLogout={() => {
-                        sessionStorage.removeItem('jwt');
-                        navigate('/login');
+                        .question-card {
+                            padding: clamp(12px, 3vw, 16px);
+                        }
+                    }
+                    @media (min-width: 640px) and (max-width: 767px) {
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(12px, 3vw, 16px);
+                        }
+                        .question-card {
+                            padding: clamp(14px, 3.5vw, 18px);
+                        }
+                        .hamburger {
+                            display: none;
+                        }
+                        .sidebar-wrapper {
+                            display: block;
+                        }
+                    }
+                    @media (min-width: 768px) and (max-width: 1023px) {
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(14px, 3.5vw, 18px);
+                        }
+                        .question-card {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                    }
+                    @media (min-width: 1024px) {
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                        .question-card {
+                            padding: clamp(20px, 5vw, 24px);
+                        }
+                    }
+                `}</style>
+                <button
+                    className="hamburger"
+                    onClick={() => {
+                        setShowSidebar(!showSidebar);
+                        if (!showSidebar) setIsCollapsed(false);
                     }}
-                    isCollapsed={isCollapsed}
-                    setIsCollapsed={setIsCollapsed}
-                    darkMode={darkMode}
-                    onActivity={onActivity} //Pass onActivity to sidebar
-                />
+                    aria-label="Toggle sidebar"
+                >
+                    <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <div className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
+                    <Sidebar
+                        user={user}
+                        onLogout={() => {
+                            sessionStorage.removeItem('jwt');
+                            navigate('/login');
+                        }}
+                        isCollapsed={isCollapsed}
+                        setIsCollapsed={setIsCollapsed}
+                        darkMode={darkMode}
+                        onActivity={onActivity}
+                        disableHamburger={showSidebar && window.innerWidth <= 639}
+                    />
+                </div>
                 <div className="flex-1">
                     <Header
                         user={user}
@@ -215,8 +426,9 @@ const QuizView = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         setDarkMode={setDarkMode}
                         tabDescription="Quiz"
                         userMessage={`Taking ${quiz?.title || 'Quiz'}`}
+                        className="header"
                     />
-                    <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                    <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content`}>
                         {error && (
                             <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg text-sm flex items-center">
                                 <span>{error}</span>
@@ -332,7 +544,6 @@ QuizView.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
-    //activity PropTypes
     onActivity: PropTypes.func.isRequired,
     activities: PropTypes.arrayOf(
         PropTypes.shape({
