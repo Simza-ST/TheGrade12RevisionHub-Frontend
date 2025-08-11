@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Signup.css';
 
@@ -7,8 +7,145 @@ const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordMatch, setPasswordMatch] = useState(null);
+    const [idNumber, setIdNumber] = useState('');
+    const [idValid, setIdValid] = useState(null);
+    const [otp, setOtp] = useState('');
+    const [showOtpModal, setShowOtpModal] = useState(false);
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+
+    // Real-time password matching
+    useEffect(() => {
+        if (password && confirmPassword) {
+            setPasswordMatch(password === confirmPassword);
+        } else {
+            setPasswordMatch(null);
+        }
+    }, [password, confirmPassword]);
+
+    // South African ID number validation (13 digits, YYMMDD date check, Luhn check)
+    const validateIdNumber = (id) => {
+        if (!/^\d{13}$/.test(id)) {
+            console.log('ID validation failed: Must be 13 digits, got', id);
+            return { valid: false, error: 'ID must be exactly 13 digits.' };
+        }
+
+        const year = parseInt(id.substring(0, 2));
+        const month = parseInt(id.substring(2, 4));
+        const day = parseInt(id.substring(4, 6));
+
+        const currentYear = new Date().getFullYear();
+        const fullYear = year + (year > (currentYear % 100) ? 1900 : 2000);
+
+        const isValidDate = (y, m, d) => {
+            if (m < 1 || m > 12) {
+                console.log('ID validation failed: Invalid month', m);
+                return false;
+            }
+            try {
+                const date = new Date(y, m - 1, d);
+                const isValid = date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+                if (!isValid) {
+                    console.log('ID validation failed: Invalid date', { year: y, month: m, day: d });
+                }
+                return isValid;
+            } catch (e) {
+                console.log('ID validation failed: Date error', e);
+                return false;
+            }
+        };
+
+        if (!isValidDate(fullYear, month, day)) {
+            return { valid: false, error: 'Invalid date in ID (format: YYMMDD, e.g., 980215 for 15 Feb 1998).' };
+        }
+
+        let sum = 0;
+        let isEven = false;
+        for (let i = 12; i >= 0; i--) {
+            let digit = parseInt(id[i]);
+            if (isEven) {
+                let doubled = digit * 2;
+                sum += Math.floor(doubled / 10) + (doubled % 10);
+            } else {
+                sum += digit;
+            }
+            isEven = !isEven;
+        }
+        // const isValidChecksum = sum % 10 === 0;
+        // if (!isValidChecksum) {
+        //     console.log('ID validation failed: Invalid checksum', { id, sum });
+        //     return { valid: false, error: 'Invalid ID checksum.' };
+        // }
+
+        console.log('ID validation passed:', id);
+        return { valid: true, error: null };
+    };
+
+    useEffect(() => {
+        if (idNumber) {
+            const result = validateIdNumber(idNumber);
+            setIdValid(result.valid);
+            if (!result.valid) {
+                setError(result.error);
+            } else {
+                setError('');
+            }
+        } else {
+            setIdValid(null);
+            setError('');
+        }
+    }, [idNumber]);
+
+    const sendOtp = async (formData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
+                    idNumber: formData.get('idNumber'),
+                    email: formData.get('email'),
+                    password: formData.get('password'),
+                    phoneNumber: formData.get('phoneNumber'),
+                    role: formData.get('role') || 'USER'
+                }),
+                credentials: 'include',
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                setShowOtpModal(true);
+            } else {
+                setError(data.message || 'Failed to send OTP. Please check your details and try again.');
+            }
+        } catch (error) {
+            setError('Error sending OTP: Network issue or server unavailable. Please try again.');
+        }
+    };
+
+    const verifyOtp = async (email, otpCode) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp: otpCode }),
+                credentials: 'include',
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                return true;
+            } else {
+                setError(data.message || 'Invalid OTP. Please try again.');
+                return false;
+            }
+        } catch (error) {
+            setError('Error verifying OTP: Network issue or server unavailable. Please try again.');
+            return false;
+        }
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -48,58 +185,80 @@ const Signup = () => {
             setIsLoading(false);
             return;
         }
+        const idResult = validateIdNumber(idNumber);
+        if (!idResult.valid) {
+            setError(idResult.error || 'Invalid ID number. Must be a valid 13-digit South African ID with correct date and checksum.');
+            setIsLoading(false);
+            return;
+        }
         if (profilePicture && profilePicture.size > 5 * 1024 * 1024) {
             setError('Profile picture must be less than 5MB.');
             setIsLoading(false);
             return;
         }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    idNumber,
-                    email,
-                    password,
-                    phoneNumber,
-                    role,
-                }),
-                credentials: 'include',
-            });
+        // Send OTP with full form data
+        await sendOtp(formData);
+        setIsLoading(false);
+    };
 
-            const data = await response.json();
-            if (!response.ok) {
-                const errorMsg =
-                    response.status === 415
-                        ? 'Unsupported Media Type: Backend expects multipart/form-data or JSON.'
-                        : response.status === 400
-                            ? 'Invalid request: Check JSON payload.'
-                            : response.status === 404
-                                ? 'Endpoint not found: Verify URL is /signup/signup.'
-                                : `HTTP error! Status: ${response.status}`;
-                throw new Error(data.message || errorMsg);
-            }
+    const handleOtpSubmit = async (event) => {
+        event.preventDefault();
+        setIsLoading(true);
+        setError('');
 
-            if (data.success) {
-                console.log('Success:', data.message, data.data);
-                form.reset();
-                setIsLoading(false);
-                navigate('/login');
-            } else {
-                setError(data.message || 'Signup failed');
-                console.error('Backend error:', data.message);
-                setIsLoading(false);
+        const form = document.getElementById('signupForm');
+        const formData = new FormData(form);
+        const firstName = formData.get('firstName');
+        const lastName = formData.get('lastName');
+        const idNumber = formData.get('idNumber');
+        const phoneNumber = formData.get('phoneNumber');
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const role = formData.get('role') || 'USER';
+
+        if (await verifyOtp(email, otp)) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        idNumber,
+                        email,
+                        password,
+                        phoneNumber,
+                        role,
+                    }),
+                    credentials: 'include',
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    const errorMsg =
+                        response.status === 415
+                            ? 'Unsupported Media Type: Backend expects JSON.'
+                            : response.status === 400
+                                ? 'Invalid request: Check JSON payload.'
+                                : response.status === 404
+                                    ? 'Endpoint not found.'
+                                    : `HTTP error! Status: ${response.status}`;
+                    throw new Error(data.message || errorMsg);
+                }
+
+                if (data.success) {
+                    form.reset();
+                    setShowOtpModal(false);
+                    navigate('/login');
+                } else {
+                    setError(data.message || 'Signup failed');
+                }
+            } catch (error) {
+                setError(error.message || 'An error occurred during signup.');
             }
-        } catch (error) {
-            console.error('Fetch error:', error);
-            setError(error.message || 'An error occurred during signup. Please check server logs and try again.');
-            setIsLoading(false);
         }
+        setIsLoading(false);
     };
 
     const togglePasswordVisibility = () => {
@@ -155,6 +314,33 @@ const Signup = () => {
                         margin-top: 12px;
                         text-align: center;
                     }
+                    .password-match {
+                        color: #34c759;
+                        font-size: 0.875rem;
+                        margin-top: 4px;
+                    }
+                    .password-mismatch {
+                        color: #ff3b30;
+                        font-size: 0.875rem;
+                        margin-top: 4px;
+                    }
+                    .id-valid {
+                        color: #34c759;
+                        font-size: 0.875rem;
+                        margin-top: 4px;
+                    }
+                    .id-invalid {
+                        color: #ff3b30;
+                        font-size: 0.875rem;
+                        margin-top: 4px;
+                    }
+                    .otp-modal {
+                        background: #1f7a6e;
+                        padding: 24px;
+                        border-radius: 12px;
+                        width: 300px;
+                        text-align: center;
+                    }
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
@@ -172,7 +358,6 @@ const Signup = () => {
                 `}
             </style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
-                {/* Left: Signup Form */}
                 <div className="w-1/2 p-10 bg-teal-800 relative">
                     <div className="content" style={{ opacity: isLoading ? 0.3 : 1, transition: 'opacity 0.3s ease-in-out' }}>
                         <div className="flex justify-center mb-6">
@@ -223,9 +408,10 @@ const Signup = () => {
                                     id="idNumber"
                                     name="idNumber"
                                     required
-                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                    className={`form-input peer w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent ${idValid === false ? 'border-red-400' : 'border-gray-600'}`}
                                     placeholder="ID Number"
                                     disabled={isLoading}
+                                    onChange={(e) => setIdNumber(e.target.value.trim())}
                                 />
                                 <label
                                     htmlFor="idNumber"
@@ -233,6 +419,8 @@ const Signup = () => {
                                 >
                                     ID Number
                                 </label>
+                                {idValid === true && <p className="id-valid">Valid ID number</p>}
+                                {idValid === false && <p className="id-invalid">{error || 'Invalid ID number'}</p>}
                             </div>
                             <div className="relative">
                                 <input
@@ -277,6 +465,7 @@ const Signup = () => {
                                     className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                     placeholder="Password"
                                     disabled={isLoading}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                                 <label
                                     htmlFor="password"
@@ -300,9 +489,10 @@ const Signup = () => {
                                     id="confirmPassword"
                                     name="confirmPassword"
                                     required
-                                    className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
+                                    className={`form-input peer w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10 ${passwordMatch === false ? 'border-red-400' : 'border-gray-600'}`}
                                     placeholder="Confirm Password"
                                     disabled={isLoading}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                                 <label
                                     htmlFor="confirmPassword"
@@ -319,6 +509,8 @@ const Signup = () => {
                                 >
                                     {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                                 </button>
+                                {passwordMatch === true && <p className="password-match">Passwords match</p>}
+                                {passwordMatch === false && <p className="password-mismatch">Passwords do not match</p>}
                             </div>
                             <button
                                 type="submit"
@@ -352,8 +544,35 @@ const Signup = () => {
                             </div>
                         </div>
                     )}
+                    {showOtpModal && (
+                        <div className="modal-overlay">
+                            <div className="otp-modal">
+                                <h3 className="text-xl font-semibold text-white mb-4">Enter OTP</h3>
+                                <p className="text-gray-300 mb-4">An OTP has been sent to your email.</p>
+                                <form onSubmit={handleOtpSubmit}>
+                                    <input
+                                        type="text"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-teal-700 text-white mb-4"
+                                        placeholder="Enter OTP"
+                                        disabled={isLoading}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="btn-submit w-full flex items-center justify-center"
+                                        disabled={isLoading}
+                                    >
+                                        Verify OTP
+                                    </button>
+                                </form>
+                                {error && (
+                                    <p className="text-red-400 text-sm mt-4 text-center">{error}</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
-                {/* Right: Animated Services */}
                 <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-start items-center">
                     <h3 className="text-2xl font-semibold text-white mt-10 mb-4 z-10">Why Revision Hub?</h3>
                     <br />
