@@ -39,6 +39,7 @@ import MathematicsP1Nov2022Eng
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
 import { recordActivity } from './utils/activityUtil.js';
+import VerifyOTP from "./pages/VerifyOTP";
 
 const PublicLayout = () => (
     <div>
@@ -209,6 +210,7 @@ const App = () => {
                     <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/verify-otp" element={<VerifyOTP {...commonProps} />} />
 
                     {/* Protected routes */}
                     <Route
@@ -396,6 +398,7 @@ const App = () => {
                             </ProtectedRoute>
                         }
                     />
+
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </Router>

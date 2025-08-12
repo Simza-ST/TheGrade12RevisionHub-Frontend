@@ -72,6 +72,9 @@ const Signup = () => {
         if (password !== confirmPassword) {
             return 'Passwords do not match.';
         }
+        // else {
+        //     return 'Passwords matches.';
+        // }
         return '';
     };
 
@@ -281,6 +284,7 @@ const Signup = () => {
                         </div>
                         <h2 className="text-3xl font-bold text-white text-center mb-2">Join Revision Hub</h2>
                         <p className="text-gray-300 text-center mb-6">Start your study journey today!</p>
+                        {/*<form id="signupForm" encType="multipart/form-data" className="space-y-5" onSubmit={handleSubmit}>*/}
                         <form id="signupForm" encType="multipart/form-data" className="space-y-5" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="relative">
