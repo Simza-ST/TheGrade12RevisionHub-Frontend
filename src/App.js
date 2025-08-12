@@ -243,6 +243,16 @@ const App = () => {
                             </ProtectedRoute>
                         }
                     />
+
+                    <Route
+                        path="/ChatComponent"
+                        element={
+                            <ProtectedRoute >
+                                <UploadDocuments {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+
                     <Route
                         path="/quiz-creation"
                         element={

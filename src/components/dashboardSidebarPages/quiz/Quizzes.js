@@ -86,6 +86,11 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
         navigate('/digitized-question-papers');
     };
 
+    const chatWithAI = () => {
+        setError('');
+        navigate('/chat-with-ai');
+    };
+
     const filteredQuizzes = filterSubject
         ? quizzes.filter(quiz => quiz.subject === filterSubject)
         : quizzes;
