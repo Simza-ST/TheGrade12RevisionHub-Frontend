@@ -480,7 +480,7 @@ const Signup = () => {
                         <div className="modal-overlay">
                             <div className="modal-content">
                                 <h3 className="text-xl font-semibold text-white mb-4">Verify Your Email</h3>
-                                <p className="text-gray-300 mb-4">Enter the OTP sent to {email}</p>
+                                <p className="text-white-300 mb-4">Enter the OTP sent to {email}</p>
                                 <form onSubmit={handleOTPSubmit} className="space-y-4">
                                     <div className="relative">
                                         <input
