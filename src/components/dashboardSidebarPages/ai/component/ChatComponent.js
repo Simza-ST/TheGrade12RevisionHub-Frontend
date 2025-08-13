@@ -1,33 +1,53 @@
 import React, { useState } from 'react';
 import { askDeepSeek } from '../services/deepSeekService';
 
-function ChatComponent() {
+const ChatComponent = () => {
     const [input, setInput] = useState('');
-    const [response, setResponse] = useState('');
+    const [reply, setReply] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!input.trim()) return;
+
+        setIsLoading(true);
+        setError('');
+
         try {
-            const aiResponse = await askDeepSeek(input);
-            setResponse(aiResponse);
-        } catch (error) {
-            setResponse('Failed to get AI response. Please try again.');
+            const aiReply = await askDeepSeek(input);
+            setReply(aiReply);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div>
+        <div className="chat-container">
+            <h2>Chat with DeepSeek AI</h2>
             <form onSubmit={handleSubmit}>
                 <input
+                    type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask DeepSeek..."
+                    placeholder="Ask me anything..."
+                    disabled={isLoading}
                 />
-                <button type="submit">Ask</button>
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Sending...' : 'Send'}
+                </button>
             </form>
-            {response && <div className="response">{response}</div>}
+
+            {error && <p className="error">{error}</p>}
+            {reply && (
+                <div className="ai-reply">
+                    <strong>AI:</strong> {reply}
+                </div>
+            )}
         </div>
     );
-}
+};
 
 export default ChatComponent;

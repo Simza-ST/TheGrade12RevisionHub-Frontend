@@ -56,9 +56,9 @@ UserProfile.propTypes = {
 
 const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger ,onActivity}) => {
         const navItems = [
-        { name: 'Chat with AI', path: '/ChatComponent', icon: '⚙️',  },
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-        { name: 'Subjects', path: '/subjects', icon: '📚', },
+         { name: 'Chat with AI', path: '/ChatComponent', icon: '⚙️',  },
+         { name: 'Subjects', path: '/subjects', icon: '📚', },
         { name: 'Quizzes', path: '/quizzes', icon: '❓',  },
         { name: 'Question Papers', path: '/question-papers/list', icon: '📝', },
         { name: 'Resources', path: '/resources', icon: '🔗', onClick: () => onActivity && onActivity('Viewed Resources') },

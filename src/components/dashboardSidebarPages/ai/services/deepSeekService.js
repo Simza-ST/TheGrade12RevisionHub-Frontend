@@ -1,26 +1,29 @@
 import axios from 'axios';
+import {API_BASE_URL} from "../../../../utils/api";
 
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Check the actual API URL
-const API_KEY = 'your-api-key'; // Replace with your DeepSeek API key
+//const API_BASE_URL = 'http://localhost:6262/api'; // Your Spring Boot endpoint
 
-export const askDeepSeek = async (userMessage) => {
+// Get the JWT token (adjust based on your auth setup)
+const getAuthToken = () => {
+    return sessionStorage.getItem('jwt'); // Or from context/Redux
+};
+
+// Call DeepSeek AI via your backend
+export const askDeepSeek = async (message) => {
     try {
         const response = await axios.post(
-            DEEPSEEK_API_URL,
-            {
-                model: 'deepseek-chat', // Verify the correct model name
-                messages: [{ role: 'user', content: userMessage }],
-            },
+            `${API_BASE_URL}/ai/chat`,
+            { message }, // Request body
             {
                 headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
+                    'Authorization': `Bearer ${getAuthToken()}`, // Attach JWT
                     'Content-Type': 'application/json',
                 },
             }
         );
-        return response.data.choices[0].message.content; // Adjust based on API response
+        return response.data.reply; // Extract AI response
     } catch (error) {
-        console.error('DeepSeek API error:', error);
-        throw error; // Re-throw for handling in components
+        console.error('API Error:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to fetch AI response');
     }
 };

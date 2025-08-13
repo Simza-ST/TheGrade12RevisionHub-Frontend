@@ -39,6 +39,7 @@ import MathematicsP1Nov2022Eng
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
 import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
 import { recordActivity } from './utils/activityUtil.js';
+import ChatComponent from "./components/dashboardSidebarPages/ai/component/ChatComponent";
 
 const PublicLayout = () => (
     <div>
@@ -248,7 +249,7 @@ const App = () => {
                         path="/ChatComponent"
                         element={
                             <ProtectedRoute >
-                                <UploadDocuments {...commonProps} />
+                                <ChatComponent {...commonProps} />
                             </ProtectedRoute>
                         }
                     />
