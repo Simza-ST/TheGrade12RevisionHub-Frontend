@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import Sidebar from '../../common/Sidebar';
 import { v4 as uuidv4 } from 'uuid';
-import {FiEye, FiSend, FiTrash2, FiUser} from 'react-icons/fi';
+import { FiEye, FiSend, FiTrash2, FiUser } from 'react-icons/fi';
 import GroupUsersModal from './GroupUsersModal';
 import ConfirmationModal from './ConfirmationModal';
 import Header from "../../common/Header";
@@ -32,6 +32,8 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
     const [groupUsers, setGroupUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [groupToDelete, setGroupToDelete] = useState(null);
+    const [showSidebar, setShowSidebar] = useState(false);
+    const sidebarRef = useRef(null);
 
     const isAdmin = (groupId) => {
         const group = groups.find((g) => g.id === groupId);
@@ -42,6 +44,22 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
 
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (showSidebar && sidebarRef.current && !sidebarRef.current.contains(e.target) && !e.target.closest('.hamburger')) {
+                setShowSidebar(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showSidebar]);
+
+    useEffect(() => {
+        if (window.innerWidth <= 639) {
+            setIsCollapsed(!showSidebar);
+        }
+    }, [showSidebar, setIsCollapsed]);
 
     const fetchUsers = useCallback(
         async (query = '', type = 'private') => {
@@ -202,36 +220,16 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
         fetchMessages();
     }, [user, chatMode, selectedUserId, selectedGroupId]);
 
-    /*const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
-        if (!dateString || typeof dateString !== 'string') {
-            return 'Unknown Date';
-        }
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            return 'Invalid Date';
-        }
-        const adjustedDate = new Date(date.getTime() - 2 * 60 * 60 * 1000);
-        return adjustedDate.toLocaleString('en-US', {
-            timeZone,
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        });
-    };*/
     const formatDate = (dateString, timeZone = 'Africa/Johannesburg') => {
         if (!dateString || typeof dateString !== 'string') {
             console.warn('Invalid date string:', dateString);
             return 'Unknown Date';
         }
-        // Ensure UTC parsing
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             console.warn('Invalid date:', dateString);
             return 'Invalid Date';
         }
-        // Log raw and formatted values for debugging
         const formatted = date.toLocaleString('en-US', {
             timeZone,
             month: 'short',
@@ -555,7 +553,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
     };
 
     const handleDeleteGroup = async (groupId) => {
-
         try {
             const token = sessionStorage.getItem('jwt');
             const response = await fetch(`http://localhost:6262/api/user/chat/group/${groupId}`, {
@@ -584,7 +581,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
         setIsModalOpen(true);
     };
     const confirmDelete = async () => {
-        if (groupToDelete){
+        if (groupToDelete) {
             await handleDeleteGroup(groupToDelete);
             setIsModalOpen(false);
             setGroupToDelete(null);
@@ -614,213 +611,469 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
 
     if (loading || !user) {
         return (
-            <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+            <div className="full">
+                <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-primary)]">
-                <style>
-                    {`
-                        * {
-                            transition: none !important;
-                            animation: none !important;
-                            opacity: 1 !important;
+            <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
+                <style>{`
+                    :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header h1) {
+                        transition: none !important;
+                        animation: none !important;
+                        opacity: 1 !important;
+                    }
+                    .sidebar-wrapper,
+                    .hamburger,
+                    .dashboard-content,
+                    .header,
+                    .header h1 {
+                        transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
+                    }
+                    .full {
+                        width: 100%;
+                        min-height: 100vh;
+                        position: relative;
+                        z-index: 10;
+                    }
+                    .bg-[var(--bg-primary)] {
+                        background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                    }
+                    .bg-[var(--bg-secondary)] {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                    }
+                    .bg-[var(--bg-tertiary)] {
+                        background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                    }
+                    .bg-[var(--accent-primary)] {
+                        background-color: var(--accent-primary, #007bff);
+                    }
+                    .bg-[var(--accent-secondary)] {
+                        background-color: var(--accent-secondary, #dc3545);
+                    }
+                    .text-[var(--text-primary)] {
+                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                    }
+                    .text-[var(--text-secondary)] {
+                        color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                    }
+                    .text-red-500 {
+                        color: #ef4444;
+                    }
+                    .text-red-600 {
+                        color: #dc2626;
+                    }
+                    .hover\\:bg-[var(--hover-tertiary)]:hover {
+                        background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                    }
+                    .hover\\:bg-[var(--hover-primary)]:hover {
+                        background-color: var(--hover-primary, #0056b3);
+                    }
+                    .hover\\:bg-red-300:hover {
+                        background-color: #fca5a5;
+                    }
+                    .flex {
+                        display: flex;
+                    }
+                    .flex-col {
+                        flex-direction: column;
+                    }
+                    .min-h-screen {
+                        min-height: 100vh;
+                    }
+                    .min-w-0 {
+                        min-width: 0;
+                    }
+                    .justify-center {
+                        justify-content: center;
+                    }
+                    .justify-between {
+                        justify-content: space-between;
+                    }
+                    .items-center {
+                        align-items: center;
+                    }
+                    .flex-1 {
+                        flex: 1;
+                    }
+                    .gap-2 {
+                        gap: clamp(4px, 1vw, 8px);
+                    }
+                    .gap-4 {
+                        gap: clamp(8px, 2vw, 16px);
+                    }
+                    .p-2 {
+                        padding: clamp(4px, 1vw, 8px);
+                    }
+                    .p-3 {
+                        padding: clamp(6px, 1.5vw, 12px);
+                    }
+                    .p-4 {
+                        padding: clamp(8px, 2vw, 16px);
+                    }
+                    .sm\\:p-6 {
+                        padding: clamp(12px, 3vw, 24px);
+                    }
+                    .sm\\:p-8 {
+                        padding: clamp(16px, 4vw, 32px);
+                    }
+                    .rounded-lg {
+                        border-radius: clamp(4px, 1vw, 8px);
+                    }
+                    .rounded-md {
+                        border-radius: clamp(3px, 0.8vw, 6px);
+                    }
+                    .mb-2 {
+                        margin-bottom: clamp(4px, 1vw, 8px);
+                    }
+                    .mb-4 {
+                        margin-bottom: clamp(8px, 2vw, 16px);
+                    }
+                    .mb-6 {
+                        margin-bottom: clamp(12px, 3vw, 24px);
+                    }
+                    .mt-1 {
+                        margin-top: clamp(2px, 0.5vw, 4px);
+                    }
+                    .mt-2 {
+                        margin-top: clamp(4px, 1vw, 8px);
+                    }
+                    .mt-4 {
+                        margin-top: clamp(8px, 2vw, 16px);
+                    }
+                    .shadow-[var(--shadow)] {
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+                    .text-xl {
+                        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+                    }
+                    .text-lg {
+                        font-size: clamp(1rem, 3vw, 1.125rem);
+                    }
+                    .text-base {
+                        font-size: clamp(0.875rem, 2.5vw, 1rem);
+                    }
+                    .text-sm {
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    }
+                    .text-xs {
+                        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
+                    }
+                    .font-bold {
+                        font-weight: 700;
+                    }
+                    .font-semibold {
+                        font-weight: 600;
+                    }
+                    .font-medium {
+                        font-weight: 500;
+                    }
+                    .form-label {
+                        color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
+                        font-weight: 600;
+                        margin-bottom: clamp(6px, 1.5vw, 8px);
+                        display: block;
+                    }
+                    .form-input {
+                        width: 100%;
+                        padding: clamp(6px, 1.5vw, 8px);
+                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                        border-radius: clamp(3px, 0.8vw, 4px);
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    }
+                    .form-input:focus {
+                        border-color: var(--accent-primary, #007bff);
+                        outline: none;
+                    }
+                    .btn-primary {
+                        background-color: var(--accent-primary, #007bff);
+                        color: #ffffff;
+                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
+                        border-radius: clamp(3px, 0.8vw, 4px);
+                        border: none;
+                        cursor: pointer;
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        min-height: 36px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--hover-primary, #0056b3);
+                    }
+                    .disabled\\:opacity-50:disabled {
+                        opacity: 0.5;
+                    }
+                    .disabled\\:cursor-not-allowed:disabled {
+                        cursor: not-allowed;
+                    }
+                    .grid {
+                        display: grid;
+                        gap: clamp(8px, 2vw, 16px);
+                    }
+                    .sm\\:grid-cols-3 {
+                        grid-template-columns: repeat(3, 1fr);
+                    }
+                    .h-4 {
+                        height: clamp(12px, 3vw, 16px);
+                    }
+                    .w-4 {
+                        width: clamp(12px, 3vw, 16px);
+                    }
+                    .min-w-[36px] {
+                        min-width: clamp(28px, 7vw, 36px);
+                    }
+                    .min-h-[36px] {
+                        min-height: clamp(28px, 7vw, 36px);
+                    }
+                    .min-w-[40px] {
+                        min-width: clamp(32px, 8vw, 40px);
+                    }
+                    .min-h-[40px] {
+                        min-height: clamp(32px, 8vw, 40px);
+                    }
+                    .min-w-[60px] {
+                        min-width: clamp(48px, 12vw, 60px);
+                    }
+                    .max-h-[50vh] {
+                        max-height: 50vh;
+                    }
+                    .max-h-48 {
+                        max-height: clamp(160px, 40vw, 192px);
+                    }
+                    .overflow-y-auto {
+                        overflow-y: auto;
+                    }
+                    .truncate {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    .max-w-[150px] {
+                        max-width: clamp(120px, 30vw, 150px);
+                    }
+                    .border-b {
+                        border-bottom-width: 1px;
+                    }
+                    .border-[var(--border-color)] {
+                        border-color: var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                    }
+                    .chat-section {
+                        background: ${darkMode
+                    ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                    : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                        padding: clamp(16px, 4vw, 32px);
+                        border-radius: clamp(8px, 2vw, 16px);
+                    }
+                    .animate-spin {
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    .hamburger {
+                        display: none;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: clamp(6px, 1.5vw, 8px);
+                        position: fixed;
+                        top: clamp(12px, 3vw, 16px);
+                        left: clamp(12px, 3vw, 16px);
+                        z-index: 50;
+                        transition: left 0.3s ease-in-out;
+                    }
+                    .sidebar-wrapper {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        height: 100vh;
+                        z-index: 40;
+                        transition: transform 0.3s ease-in-out;
+                    }
+                    .sidebar-hidden {
+                        transform: translateX(-100%);
+                    }
+                    .dashboard-content {
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        padding-right: clamp(6px, 1.5vw, 8px);
+                    }
+                    .dashboard-content::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-thumb {
+                        background-color: var(--border-color, ${darkMode ? '#4b5563' : '#e5e7eb'});
+                        border-radius: 3px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-track {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                    }
+                    .underline {
+                        text-decoration: underline;
+                    }
+                    .list-disc {
+                        list-style-type: disc;
+                    }
+                    .list-inside {
+                        list-style-position: inside;
+                    }
+                    .space-y-1 > * + * {
+                        margin-top: clamp(3px, 0.8vw, 4px);
+                    }
+                    @media (max-width: 639px) {
+                        .header h1 {
+                            padding-left: clamp(48px, 12vw, 56px);
                         }
-                        .full {
-                            width: 100%;
-                            min-height: 100vh;
-                            position: relative;
-                            z-index: 10;
+                        .sidebar-open .header h1 {
+                            padding-left: clamp(208px, 50vw, 216px);
                         }
-                        .bg-[var(--bg-primary)] {
-                            background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                        .sidebar-open .dashboard-content {
+                            margin-left: clamp(192px, 48vw, 198px);
                         }
-                        .bg-[var(--bg-secondary)] {
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        .hamburger {
+                            display: block;
                         }
-                        .bg-[var(--bg-tertiary)] {
-                            background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                        .sidebar-wrapper {
+                            display: ${showSidebar ? 'block' : 'none'};
                         }
-                        .bg-[var(--accent-primary)] {
-                            background-color: var(--accent-primary, #007bff);
+                        .hamburger {
+                            left: ${showSidebar ? 'clamp(192px, 48vw, 198px)' : 'clamp(12px, 3vw, 16px)'};
                         }
-                        .bg-[var(--accent-secondary)] {
-                            background-color: var(--accent-secondary, #dc3545);
+                        .ml-16, .ml-64 {
+                            margin-left: 0;
                         }
-                        .text-[var(--text-primary)] {
-                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                        }
-                        .text-[var(--text-secondary)] {
-                            color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
-                        }
-                        .hover:bg-[var(--hover-tertiary)]:hover {
-                            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
-                        }
-                        .hover:bg-[var(--hover-primary)]:hover {
-                            background-color: var(--hover-primary, #0056b3);
-                        }
-                        .flex {
-                            display: flex;
-                        }
-                        .min-h-screen {
-                            min-height: 100vh;
-                        }
-                        .min-w-0 {
-                            min-width: 0;
-                        }
-                        .justify-center {
-                            justify-content: center;
-                        }
-                        .justify-between {
-                            justify-content: space-between;
-                        }
-                        .items-center {
-                            align-items: center;
-                        }
-                        .flex-1 {
-                            flex: 1;
-                        }
-                        .gap-4 {
-                            gap: 16px;
-                        }
-                        .p-6 {
-                            padding: 24px;
-                        }
-                        .sm:p-8 {
-                            padding: 32px;
-                        }
-                        .rounded-2xl {
-                            border-radius: 16px;
-                        }
-                        .rounded-lg {
-                            border-radius: 8px;
-                        }
-                        .mb-4 {
-                            margin-bottom: 16px;
-                        }
-                        .mb-6 {
-                            margin-bottom: 24px;
-                        }
-                        .mt-1 {
-                            margin-top: 4px;
-                        }
-                        .mt-4 {
-                            margin-top: 16px;
-                        }
-                        .shadow-[var(--shadow)] {
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                        }
-                        .text-3xl {
-                            font-size: 1.875rem;
+                        .p-4, .sm\\:p-6, .sm\\:p-8 {
+                            padding: clamp(8px, 2vw, 10px);
                         }
                         .text-xl {
-                            font-size: 1.25rem;
+                            font-size: clamp(0.875rem, 2.5vw, 1rem);
                         }
                         .text-lg {
-                            font-size: 1.125rem;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
                         }
                         .text-base {
-                            font-size: 1rem;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
                         }
                         .text-sm {
-                            font-size: 0.875rem;
+                            font-size: clamp(0.625rem, 1.8vw, 0.75rem);
                         }
                         .text-xs {
-                            font-size: 0.75rem;
-                        }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .font-medium {
-                            font-weight: 500;
-                        }
-                        .form-input {
-                            width: 100%;
-                            padding: 8px;
-                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                            border-radius: 4px;
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                            color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                            font-size: 0.875rem;
-                        }
-                        .form-input:focus {
-                            border-color: var(--accent-primary, #007bff);
-                            outline: none;
+                            font-size: clamp(0.5rem, 1.5vw, 0.625rem);
                         }
                         .btn-primary {
-                            background-color: var(--accent-primary, #007bff);
-                            color: #ffffff;
-                            padding: 8px 16px;
-                            border-radius: 4px;
-                            border: none;
-                            cursor: pointer;
-                        }
-                        .btn-primary:hover {
-                            background-color: var(--hover-primary, #0056b3);
+                            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+                            min-height: 36px;
                         }
                         .grid {
-                            display: grid;
                             grid-template-columns: 1fr;
-                            gap: 16px;
                         }
-                        .sm:grid-cols-3 {
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: 1fr;
+                        }
+                        .flex flex-col sm\\:flex-row {
+                            flex-direction: column;
+                        }
+                        .max-h-[50vh] {
+                            max-height: 40vh;
+                        }
+                        .max-h-48 {
+                            max-height: 160px;
+                        }
+                    }
+                    @media (min-width: 640px) and (max-width: 767px) {
+                        .grid {
+                            grid-template-columns: repeat(1, 1fr);
+                        }
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .hamburger {
+                            display: none;
+                        }
+                        .sidebar-wrapper {
+                            display: block;
+                        }
+                        .p-4, .sm\\:p-6 {
+                            padding: clamp(12px, 3vw, 16px);
+                        }
+                        .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                        .flex flex-col sm\\:flex-row {
+                            flex-direction: row;
+                        }
+                    }
+                    @media (min-width: 768px) and (max-width: 1023px) {
+                        .grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .sm\\:grid-cols-3 {
                             grid-template-columns: repeat(3, 1fr);
                         }
-                        .-top-2 {
-                            top: -8px;
+                        .p-4, .sm\\:p-6 {
+                            padding: clamp(12px, 3vw, 16px);
                         }
-                        .-right-2 {
-                            right: -8px;
+                        .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
                         }
-                        .h-5 {
-                            height: 20px;
+                    }
+                    @media (min-width: 1024px) and (max-width: 1279px) {
+                        .grid {
+                            grid-template-columns: repeat(3, 1fr);
                         }
-                        .w-5 {
-                            width: 20px;
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
                         }
-                        .chat-section {
-                            background: ${darkMode
-                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
-                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
-                            background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                            border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                            padding: 32px;
-                            border-radius: 16px;
+                    }
+                    @media (min-width: 1280px) {
+                        .grid {
+                            grid-template-columns: repeat(3, 1fr);
                         }
-                        .ml-16 {
-                            margin-left: 64px;
+                        .sm\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
                         }
-                        .ml-64 {
-                            margin-left: 256px;
+                        .p-4, .sm\\:p-6 {
+                            padding: clamp(16px, 3.5vw, 20px);
                         }
-                        @media (min-width: 640px) {
-                            .sm:grid-cols-3 {
-                                grid-template-columns: repeat(3, 1fr);
-                            }
-                            .sm:p-8 {
-                                padding: 32px;
-                            }
+                        .sm\\:p-8 {
+                            padding: clamp(20px, 4vw, 24px);
                         }
-                        .underline {
-                            text-decoration: underline;
-                        }
-                    `}
-                </style>
-                <Sidebar
-                    user={user}
-                    onLogout={handleLogout}
-                    isCollapsed={isCollapsed}
-                    setIsCollapsed={setIsCollapsed}
-                    darkMode={darkMode}
-                />
+                    }
+                `}</style>
+                <button
+                    className="hamburger"
+                    onClick={() => {
+                        setShowSidebar(!showSidebar);
+                        if (!showSidebar) setIsCollapsed(false);
+                    }}
+                    aria-label="Toggle sidebar"
+                >
+                    <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <div ref={sidebarRef} className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
+                    <Sidebar
+                        user={user}
+                        onLogout={handleLogout}
+                        isCollapsed={isCollapsed}
+                        setIsCollapsed={setIsCollapsed}
+                        darkMode={darkMode}
+                        disableHamburger={showSidebar && window.innerWidth <= 639}
+                    />
+                </div>
                 <div className="flex-1">
                     <Header
                         user={user}
@@ -831,291 +1084,289 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         setDarkMode={setDarkMode}
                         tabDescription="Chatroom"
                         userMessage="Connect with peers"
+                        className="header"
                     />
-                <div className={`flex-1 min-w-0 p-4 sm:p-6 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-                    <div className="chat-section">
-                        <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                            <button
-                                onClick={() => {
-                                    setChatMode('group');
-                                    setSelectedUserId(null);
-                                    setPrivateSearchQuery('');
-                                    setMessages([]);
-                                }}
-                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                            >
-                                Group Chats
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setChatMode('private');
-                                    setSelectedUserId(null);
-                                    setPrivateSearchQuery('');
-                                    setMessages([]);
-                                }}
-                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                            >
-                                Private Chat
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setChatMode('createGroup');
-                                    setSelectedUserId(null);
-                                    setPrivateSearchQuery('');
-                                    setCreateGroupSearchQuery('');
-                                    setMessages([]);
-                                }}
-                                className={`px-3 py-2 sm:p-3 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                            >
-                                Manage Groups
-                            </button>
-                        </div>
-
-                        {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
-
-                        {chatMode === 'group' && (
-                            <div>
-                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Group Chats:</h2>
-                                <div className="flex flex-col gap-2 mb-4">
-                                    <select
-                                        value={selectedGroupId || ''}
-                                        onChange={(e) => {
-                                            setSelectedGroupId(Number(e.target.value) || null);
-                                            setMessages([]);
-                                        }}
-                                        className="form-input w-full text-base"
-                                        disabled={groups.length === 0}
-                                    >
-                                        <option value="">Main Group Chat</option>
-                                        {groups.map((g) => (
-                                            <option key={g.id} value={g.id}>
-                                                {g.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="max-h-[50vh] overflow-y-auto mb-4">
-                                    {messages.length > 0 ? (
-                                        messages.map((msg) => (
-                                            <div
-                                                key={msg.id || msg.tempId}
-                                                className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
-                                            >
-                                                <span className="font-medium text-base text-[var(--text-primary)]">
-                                                    {getSenderName(msg.senderId)}:
-                                                </span>
-                                                <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-[var(--text-secondary)]">No messages found.</p>
-                                    )}
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type a message..."
-                                        className="form-input flex-1"
-                                        aria-label="Message input"
-                                    />
-                                    <button
-                                        onClick={handleSendMessage}
-                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px]"
-                                        aria-label="Send message"
-                                    >
-                                        <FiSend className="w-4 h-4" />
-                                    </button>
-                                </div>
+                    <div className={`flex-1 min-w-0 p-4 sm:p-6 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content ${showSidebar ? 'sidebar-open' : ''}`}>
+                        <div className="chat-section">
+                            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                                <button
+                                    onClick={() => {
+                                        setChatMode('group');
+                                        setSelectedUserId(null);
+                                        setPrivateSearchQuery('');
+                                        setMessages([]);
+                                    }}
+                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
+                                >
+                                    Group Chats
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setChatMode('private');
+                                        setSelectedGroupId(null);
+                                        setPrivateSearchQuery('');
+                                        setMessages([]);
+                                    }}
+                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
+                                >
+                                    Private Chat
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setChatMode('createGroup');
+                                        setSelectedGroupId(null);
+                                        setPrivateSearchQuery('');
+                                        setCreateGroupSearchQuery('');
+                                        setMessages([]);
+                                    }}
+                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
+                                >
+                                    Manage Groups
+                                </button>
                             </div>
-                        )}
-                        {chatMode === 'private' && (
-                            <div>
-                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Private Chat:</h2>
-                                <div className="flex flex-col gap-2 mb-4">
-                                    <input
-                                        type="text"
-                                        value={privateSearchQuery}
-                                        onChange={(e) => setPrivateSearchQuery(e.target.value)}
-                                        placeholder="Search users..."
-                                        className="form-input w-full text-base"
-                                        aria-label="Search users"
-                                    />
-                                    <select
-                                        value={selectedUserId || ''}
-                                        onChange={(e) => {
-                                            const userId = e.target.value ? Number(e.target.value) : null;
-                                            setSelectedUserId(userId);
-                                            setMessages([]);
-                                            console.log('Selected user:', userId);
-                                        }}
-                                        className="form-input w-full text-base"
-                                        disabled={users.length === 0}
-                                    >
-                                        <option value="">Select a user</option>
-                                        {users.map((u) => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.firstName} {u.lastName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="max-h-[50vh] overflow-y-auto mb-4">
-                                    {messages.length > 0 ? (
-                                        messages.map((msg) => (
-                                            <div
-                                                key={msg.id || msg.tempId}
-                                                className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
-                                            >
-                                                <span className="font-medium text-base text-[var(--text-primary)]">
-                                                    {getSenderName(msg.senderId)}:
-                                                </span>
-                                                <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
-                                                <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-[var(--text-secondary)]">No messages yet.</p>
-                                    )}
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type a message..."
-                                        className="form-input flex-1"
-                                        aria-label="Type a message"
-                                        disabled={!selectedUserId}
-                                    />
-                                    <button
-                                        onClick={handleSendMessage}
-                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={!selectedUserId}
-                                        aria-label="Send message"
-                                    >
-                                        <FiSend className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        {chatMode === 'createGroup' && (
-                            <div>
-                                <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Manage Groups:</h2>
-                                <div className="flex flex-col">
-                                    <div className="max-h-48 overflow-y-auto mt-2">
-                                        {groups.map((g) => (
-                                            <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
-                                                <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
+
+                            {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
+
+                            {chatMode === 'group' && (
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Group Chats:</h2>
+                                    <div className="flex flex-col gap-2 mb-4">
+                                        <select
+                                            value={selectedGroupId || ''}
+                                            onChange={(e) => {
+                                                setSelectedGroupId(Number(e.target.value) || null);
+                                                setMessages([]);
+                                            }}
+                                            className="form-input w-full text-base"
+                                            disabled={groups.length === 0}
+                                        >
+                                            <option value="">Main Group Chat</option>
+                                            {groups.map((g) => (
+                                                <option key={g.id} value={g.id}>
                                                     {g.name}
-                                                </span>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditGroupId(g.id);
-                                                            setEditGroupName(g.name);
-                                                            fetchGroupUsers(g.id);
-                                                        }}
-                                                        className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
-                                                        aria-label={`View users in group ${g.name}`}
-                                                    >
-                                                        {/*<FiUser className="w-4 h-4" />*/}
-                                                        {user && g.creatorId === user.id ? (
-                                                            <FiUser className = "w-4 h-4" />
-                                                        ) : (
-                                                            <FiEye className = "w-4 h-4" />
-                                                        )}
-
-                                                    </button>
-                                                    {user && g.creatorId === user.id && (
-                                                        <button
-                                                            onClick={() => openDeleteModal(g.id)}
-                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
-                                                            aria-label={`Delete group ${g.name}`}
-                                                        >
-                                                            <FiTrash2 className="w-4 h-4 text-red-600" />
-                                                        </button>
-                                                    )}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="max-h-[50vh] overflow-y-auto mb-4">
+                                        {messages.length > 0 ? (
+                                            messages.map((msg) => (
+                                                <div
+                                                    key={msg.id || msg.tempId}
+                                                    className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
+                                                >
+                                                    <span className="font-medium text-base text-[var(--text-primary)]">
+                                                        {getSenderName(msg.senderId)}:
+                                                    </span>
+                                                    <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                    <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-[var(--text-secondary)]">No messages found.</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Type a message..."
+                                            className="form-input flex-1"
+                                            aria-label="Message input"
+                                        />
+                                        <button
+                                            onClick={handleSendMessage}
+                                            className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px]"
+                                            aria-label="Send message"
+                                        >
+                                            <FiSend className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)] mt-4">Create New Group</h3>
-                                <div className="flex flex-col gap-2 mb-4">
-                                    <input
-                                        type="text"
-                                        value={groupName}
-                                        onChange={(e) => setGroupName(e.target.value)}
-                                        placeholder="Enter group name..."
-                                        className="form-input w-full text-base"
-                                        aria-label="Group name"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={createGroupSearchQuery}
-                                        onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
-                                        placeholder="Click SpaceBar to search..."
-                                        className="form-input w-full text-base"
-                                        aria-label="Search users"
-                                    />
-                                    {createGroupSearchQuery && (
-                                        <div className="max-h-48 overflow-y-auto">
+                            )}
+                            {chatMode === 'private' && (
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Private Chat:</h2>
+                                    <div className="flex flex-col gap-2 mb-4">
+                                        <input
+                                            type="text"
+                                            value={privateSearchQuery}
+                                            onChange={(e) => setPrivateSearchQuery(e.target.value)}
+                                            placeholder="Search users..."
+                                            className="form-input w-full text-base"
+                                            aria-label="Search users"
+                                        />
+                                        <select
+                                            value={selectedUserId || ''}
+                                            onChange={(e) => {
+                                                const userId = e.target.value ? Number(e.target.value) : null;
+                                                setSelectedUserId(userId);
+                                                setMessages([]);
+                                                console.log('Selected user:', userId);
+                                            }}
+                                            className="form-input w-full text-base"
+                                            disabled={users.length === 0}
+                                        >
+                                            <option value="">Select a user</option>
                                             {users.map((u) => (
-                                                <div key={u.id} className="flex items-center p-2 border-b border-[var(--border-color)]">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedMemberIds.includes(u.id)}
-                                                        onChange={() => toggleMember(u.id)}
-                                                        className="mr-4"
-                                                        aria-label={`Select ${u.firstName} ${u.lastName}`}
-                                                    />
-                                                    <span className="text-base text-[var(--text-primary)]">
-                                                        {u.firstName} {u.lastName}
+                                                <option key={u.id} value={u.id}>
+                                                    {u.firstName} {u.lastName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="max-h-[50vh] overflow-y-auto mb-4">
+                                        {messages.length > 0 ? (
+                                            messages.map((msg) => (
+                                                <div
+                                                    key={msg.id || msg.tempId}
+                                                    className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
+                                                >
+                                                    <span className="font-medium text-base text-[var(--text-primary)]">
+                                                        {getSenderName(msg.senderId)}:
                                                     </span>
+                                                    <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                    <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-[var(--text-secondary)]">No messages yet.</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Type a message..."
+                                            className="form-input flex-1"
+                                            aria-label="Type a message"
+                                            disabled={!selectedUserId}
+                                        />
+                                        <button
+                                            onClick={handleSendMessage}
+                                            className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={!selectedUserId}
+                                            aria-label="Send message"
+                                        >
+                                            <FiSend className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {chatMode === 'createGroup' && (
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Manage Groups:</h2>
+                                    <div className="flex flex-col">
+                                        <div className="max-h-48 overflow-y-auto mt-2">
+                                            {groups.map((g) => (
+                                                <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
+                                                    <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
+                                                        {g.name}
+                                                    </span>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditGroupId(g.id);
+                                                                setEditGroupName(g.name);
+                                                                fetchGroupUsers(g.id);
+                                                            }}
+                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
+                                                            aria-label={`View users in group ${g.name}`}
+                                                        >
+                                                            {user && g.creatorId === user.id ? (
+                                                                <FiUser className="w-4 h-4" />
+                                                            ) : (
+                                                                <FiEye className="w-4 h-4" />
+                                                            )}
+                                                        </button>
+                                                        {user && g.creatorId === user.id && (
+                                                            <button
+                                                                onClick={() => openDeleteModal(g.id)}
+                                                                className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
+                                                                aria-label={`Delete group ${g.name}`}
+                                                            >
+                                                                <FiTrash2 className="w-4 h-4 text-red-600" />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)] mt-4">Create New Group</h3>
+                                    <div className="flex flex-col gap-2 mb-4">
+                                        <input
+                                            type="text"
+                                            value={groupName}
+                                            onChange={(e) => setGroupName(e.target.value)}
+                                            placeholder="Enter group name..."
+                                            className="form-input w-full text-base"
+                                            aria-label="Group name"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={createGroupSearchQuery}
+                                            onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
+                                            placeholder="Click SpaceBar to search..."
+                                            className="form-input w-full text-base"
+                                            aria-label="Search users"
+                                        />
+                                        {createGroupSearchQuery && (
+                                            <div className="max-h-48 overflow-y-auto">
+                                                {users.map((u) => (
+                                                    <div key={u.id} className="flex items-center p-2 border-b border-[var(--border-color)]">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedMemberIds.includes(u.id)}
+                                                            onChange={() => toggleMember(u.id)}
+                                                            className="mr-4"
+                                                            aria-label={`Select ${u.firstName} ${u.lastName}`}
+                                                        />
+                                                        <span className="text-base text-[var(--text-primary)]">
+                                                            {u.firstName} {u.lastName}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={handleCreateGroup}
+                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        aria-label="Create group"
+                                    >
+                                        Create Group
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleCreateGroup}
-                                    className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
-                                    aria-label="Create group"
-                                >
-                                    Create Group
-                                </button>
-                            </div>
-                        )}
-                        {editGroupId && (
-                            <GroupUsersModal
-                                editGroupId={editGroupId}
-                                editGroupName={editGroupName}
-                                setEditGroupName={setEditGroupName}
-                                setEditGroupId={setEditGroupId}
-                                handleEditGroup={handleEditGroup}
-                                groupUsers={groupUsers}
-                                handleRemoveUser={handleRemoveUser}
-                                availableUsers={users}
-                                handleAddUser={handleAddUser}
-                                isAdmin={isAdmin(editGroupId)}
-                                currentUserId={user.id}
+                            )}
+                            {editGroupId && (
+                                <GroupUsersModal
+                                    editGroupId={editGroupId}
+                                    editGroupName={editGroupName}
+                                    setEditGroupName={setEditGroupName}
+                                    setEditGroupId={setEditGroupId}
+                                    handleEditGroup={handleEditGroup}
+                                    groupUsers={groupUsers}
+                                    handleRemoveUser={handleRemoveUser}
+                                    availableUsers={users}
+                                    handleAddUser={handleAddUser}
+                                    isAdmin={isAdmin(editGroupId)}
+                                    currentUserId={user.id}
+                                />
+                            )}
+                            <ConfirmationModal
+                                isOpen={isModalOpen}
+                                onClose={closeModal}
+                                onConfirm={confirmDelete}
+                                title="Confirm Group Deletion"
+                                message="Are you sure you want to delete this group? This action cannot be undone."
                             />
-                        )}
-                        <ConfirmationModal
-                            isOpen={isModalOpen}
-                            onClose={closeModal}
-                            onConfirm={confirmDelete}
-                            title="Confirm Group Deletion"
-                            message="Are you sure you want to delete this group? This action cannot be undone."
-                        />
-
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     );
 };

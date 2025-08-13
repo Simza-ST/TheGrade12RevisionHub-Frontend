@@ -328,6 +328,7 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     type="file"
                     accept="image/*,application/pdf"
                     disabled={showResults}
+                    className="file-input"
                 />
             );
         }
@@ -339,9 +340,7 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
             <div className="input-container">
                 <input
                     type="text"
-                    className={`${isWide ? 'wide-input' : ''} 
-                        ${isCorrect ? 'correct-answer' : ''} 
-                        ${isIncorrect ? 'incorrect-answer' : ''}`}
+                    className={`input ${isWide ? 'wide-input' : ''} ${isCorrect ? 'correct-answer' : ''} ${isIncorrect ? 'incorrect-answer' : ''}`}
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => handleInputChange(questionId, e.target.value)}
@@ -385,9 +384,9 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
 
     // Render paired inputs (e.g., "or" inputs)
     const renderPairedInputs = (id1, id2, placeholder1, placeholder2) => (
-        <div className="input-group">
+        <div className="input-group paired-inputs">
             {renderInput(id1, placeholder1)}
-            <span>or</span>
+            <span className="or-divider">or</span>
             {renderInput(id2, placeholder2)}
         </div>
     );
@@ -917,55 +916,71 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     font-family: 'Arial', sans-serif;
                     max-width: 1200px;
                     margin: 0 auto;
-                    padding: 20px;
+                    padding: clamp(1rem, 3vw, 1.5rem);
                     background-color: #f9f9f9;
                     border-radius: 10px;
                     box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                    min-height: 100vh;
                 }
 
-                h1, h2 {
+                h1 {
+                    font-size: clamp(1.5rem, 4vw, 2rem);
                     color: #2c3e50;
                     text-align: center;
+                    margin-bottom: clamp(1rem, 2vw, 1.5rem);
                 }
 
+                h2 {
+                    font-size: clamp(1.25rem, 3vw, 1.5rem);
+                    color: #2c3e50;
+                    margin-bottom: clamp(0.75rem, 2vw, 1rem);
+                }
+                
                 .question-section {
-                    margin-bottom: 30px;
-                    padding: 20px;
+                    margin-bottom: clamp(1rem, 3vw, 1.5rem);
+                    padding: clamp(0.75rem, 2vw, 1rem);
                     background-color: white;
                     border-radius: 8px;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    overflow: hidden;
+                }
+
+                .question {
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem);
                 }
 
                 .sub-question {
-                    margin: 15px 0;
+                    margin: clamp(0.5rem, 1.5vw, 0.75rem) 0;
                 }
 
                 .equation {
                     font-family: 'Times New Roman', serif;
                     font-style: italic;
-                }
-
-                input {
-                    padding: 10px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    font-size: 16px;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                 }
 
                 .input-container {
-                    margin-bottom: 15px;
+                    margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+                    width: 100%;
                 }
 
-                .input-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin: 10px 0;
+                .input {
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem);
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
+                    width: 100%;
+                    box-sizing: border-box;
+                    transition: border-color 0.3s, background-color 0.3s;
                 }
 
                 .wide-input {
+                    max-width: 100%;
+                }
+
+                .file-input {
                     width: 100%;
-                    max-width: 400px;
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem);
                 }
 
                 .correct-answer {
@@ -978,19 +993,43 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     background-color: #ffebee;
                 }
 
+                .input-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+                    margin: clamp(0.5rem, 1.5vw, 0.75rem) 0;
+                }
+
+                .paired-inputs {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .or-divider {
+                    font-size: clamp(0.8rem, 2vw, 0.9rem);
+                    color: #555;
+                }
+
+                .triple-inputs {
+                    flex-wrap: wrap;
+                    justify-content: flex-start;
+                }
+
                 .solution-buttons {
                     display: flex;
-                    gap: 10px;
-                    margin-top: 8px;
+                    flex-wrap: wrap;
+                    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+                    margin-top: clamp(0.3rem, 1vw, 0.5rem);
                 }
 
                 .solution-button {
-                    padding: 6px 12px;
+                    padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.6rem, 1.5vw, 0.75rem);
                     background-color: #3498db;
                     color: white;
                     border: none;
                     border-radius: 4px;
-                    font-size: 14px;
+                    font-size: clamp(0.8rem, 2vw, 0.9rem);
                     cursor: pointer;
                     transition: background-color 0.3s;
                 }
@@ -1000,12 +1039,12 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 }
 
                 .revealed-answer {
-                    margin-top: 8px;
-                    padding: 10px;
+                    margin-top: clamp(0.3rem, 1vw, 0.5rem);
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem);
                     background-color: #e9f7ef;
                     border-left: 4px solid #28a745;
                     border-radius: 4px;
-                    font-size: 14px;
+                    font-size: clamp(0.8rem, 2vw, 0.9rem);
                 }
 
                 .solution-modal {
@@ -1019,14 +1058,15 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     justify-content: center;
                     align-items: center;
                     z-index: 1000;
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem);
                 }
 
                 .modal-content {
                     background-color: white;
-                    padding: 30px;
+                    padding: clamp(1rem, 3vw, 1.5rem);
                     border-radius: 8px;
-                    max-width: 600px;
-                    width: 90%;
+                    max-width: clamp(300px, 90vw, 600px);
+                    width: 100%;
                     max-height: 80vh;
                     overflow-y: auto;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.25);
@@ -1035,13 +1075,14 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 .modal-content h3 {
                     margin-top: 0;
                     color: #2c3e50;
+                    font-size: clamp(1.2rem, 3vw, 1.5rem);
                     border-bottom: 2px solid #eee;
-                    padding-bottom: 10px;
+                    padding-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
                 }
 
                 .modal-content p {
                     line-height: 1.6;
-                    font-size: 16px;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                     white-space: pre-wrap;
                 }
 
@@ -1049,11 +1090,11 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     background-color: #3498db;
                     color: white;
                     border: none;
-                    padding: 10px 20px;
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.25rem);
                     border-radius: 4px;
                     cursor: pointer;
-                    margin-top: 20px;
-                    font-size: 16px;
+                    margin-top: clamp(0.75rem, 2vw, 1rem);
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                 }
 
                 .modal-close:hover {
@@ -1063,17 +1104,15 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 .submit-button {
                     background-color: #2196F3;
                     color: white;
-                    padding: 12px 24px;
+                    padding: clamp(0.6rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.5rem);
                     border: none;
                     border-radius: 4px;
-                    font-size: 16px;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                     cursor: pointer;
                     transition: background-color 0.3s;
-                    margin: 20px 0;
+                    margin: clamp(1rem, 2.5vw, 1.25rem) auto;
                     display: block;
-                    width: 200px;
-                    margin-left: auto;
-                    margin-right: auto;
+                    width: clamp(150px, 40vw, 200px);
                 }
 
                 .submit-button:hover:not(:disabled) {
@@ -1086,8 +1125,8 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 }
 
                 .score-display {
-                    margin-top: 20px;
-                    padding: 20px;
+                    margin-top: clamp(1rem, 2.5vw, 1.25rem);
+                    padding: clamp(0.75rem, 2vw, 1rem);
                     border-radius: 8px;
                     background-color: #f9f9f9;
                     border: 1px solid #ddd;
@@ -1096,44 +1135,49 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                 }
 
                 .score-display h3 {
-                    margin: 0 0 10px 0;
-                    font-size: 24px;
+                    margin: 0 0 clamp(0.5rem, 1.5vw, 0.75rem);
+                    font-size: clamp(1.2rem, 3vw, 1.5rem);
                     color: #333;
                 }
 
                 .pass {
                     color: #4CAF50;
                     font-weight: bold;
-                    margin-top: 10px;
+                    margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                 }
 
                 .fail {
                     color: #f44336;
                     font-weight: bold;
-                    margin-top: 10px;
+                    margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                 }
 
                 .error {
                     color: #f44336;
-                    margin-top: 10px;
+                    margin-top: clamp(0.5rem, 1.5vw, 0.75rem);
                     font-weight: bold;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                 }
 
                 .action-buttons {
                     display: flex;
+                    flex-wrap: wrap;
                     justify-content: center;
-                    gap: 15px;
-                    margin-top: 20px;
+                    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+                    margin-top: clamp(0.75rem, 2vw, 1rem);
                 }
 
                 .retry-button, .exit-button {
-                    padding: 10px 20px;
+                    padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.25rem);
                     border: none;
                     border-radius: 4px;
-                    font-size: 16px;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                     cursor: pointer;
                     transition: all 0.3s;
                     font-weight: bold;
+                    width: clamp(120px, 30vw, 150px);
                 }
 
                 .retry-button {
@@ -1158,9 +1202,126 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
                     max-width: 100%;
                     height: auto;
                     display: block;
-                    margin: 15px auto;
+                    margin: clamp(0.5rem, 1.5vw, 0.75rem) auto;
                     border: 1px solid #ddd;
                     border-radius: 4px;
+                    object-fit: contain;
+                }
+
+                /* Media Queries for Responsiveness */
+                @media (max-width: 640px) {
+                    .math-exam {
+                        padding: clamp(0.5rem, 2vw, 0.75rem);
+                    }
+
+                    h1 {
+                        font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+                    }
+
+                    h2 {
+                        font-size: clamp(1rem, 3vw, 1.25rem);
+                    }
+
+                    .question-section {
+                        padding: clamp(0.5rem, 1.5vw, 0.75rem);
+                    }
+
+                    .input-group {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .input {
+                        font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+                        padding: clamp(0.4rem, 1.2vw, 0.6rem);
+                    }
+
+                    .solution-button {
+                        font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+                        padding: clamp(0.3rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.6rem);
+                    }
+
+                    .submit-button {
+                        width: 100%;
+                        max-width: 100%;
+                    }
+
+                    .retry-button, .exit-button {
+                        width: 100%;
+                        max-width: 100%;
+                    }
+
+                    .modal-content {
+                        max-width: 90vw;
+                        padding: clamp(0.75rem, 2vw, 1rem);
+                    }
+
+                    .modal-content h3 {
+                        font-size: clamp(1rem, 2.5vw, 1.25rem);
+                    }
+
+                    .modal-content p {
+                        font-size: clamp(0.8rem, 2vw, 0.9rem);
+                    }
+                }
+
+                @media (min-width: 641px) and (max-width: 1024px) {
+                    .math-exam {
+                        padding: clamp(0.75rem, 2.5vw, 1rem);
+                    }
+
+                    h1 {
+                        font-size: clamp(1.5rem, 3.5vw, 1.75rem);
+                    }
+
+                    h2 {
+                        font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+                    }
+
+                    .input-group {
+                        flex-wrap: wrap;
+                    }
+
+                    .input {
+                        max-width: 200px;
+                    }
+
+                    .wide-input {
+                        max-width: 100%;
+                    }
+
+                    .submit-button {
+                        width: clamp(180px, 40vw, 220px);
+                    }
+                }
+
+                @media (min-width: 1025px) {
+                    .input {
+                        max-width: 250px;
+                    }
+
+                    .wide-input {
+                        max-width: 400px;
+                    }
+                }
+
+                /* Scrollbar Styling */
+                .question-section, .modal-content {
+                    scrollbar-width: thin;
+                    scrollbar-color: #888 #f1f1f1;
+                }
+
+                .question-section::-webkit-scrollbar, .modal-content::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .question-section::-webkit-scrollbar-thumb, .modal-content::-webkit-scrollbar-thumb {
+                    background-color: #888;
+                    border-radius: 3px;
+                }
+
+                .question-section::-webkit-scrollbar-track, .modal-content::-webkit-scrollbar-track {
+                    background-color: #f1f1f1;
                 }
             `}</style>
         </div>

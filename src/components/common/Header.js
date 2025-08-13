@@ -15,9 +15,21 @@ const Header = ({ user, notifications, isCollapsed, darkMode, setDarkMode , tabD
                 ${isCollapsed ? 'ml-16' : 'ml-64'}
             `}
         >
+            {/*Moving the h1*/}
+            <style>{`
+               /* .header-title {
+                    padding-left: clamp(40px, 10vw, 48px); /!* Default padding *!/
+                    transition: padding-left 0.3s ease-in-out; /!* Smooth transition *!/
+                }*/
+                @media (max-width: 639px) {
+                    .header-title {
+                        padding-left: clamp(24px, 6vw, 40px);/*48px, 12vw, 56px*/); /* Shift right to (24px, 6vw, 40px);) clear hamburger */
+                    }
+                }
+            `}</style>
             <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-md  flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-[var(--text-primary)]">{tabDescription}</h1>
+                    <h1 className="header-title text-3xl font-bold text-[var(--text-primary)]">{tabDescription}</h1>
                     <p className="text-sm mt-1 text-[var(--text-secondary)]">{userMessage}, {displayName}!</p>
                 </div>
                 <div className="flex gap-4">

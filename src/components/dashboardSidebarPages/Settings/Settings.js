@@ -29,10 +29,28 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     });
 
     useEffect(() => {
-        // Apply theme to document
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
         document.documentElement.style.fontSize = settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : '16px';
+    }, [darkMode, settings.fontSize]);
 
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (showSidebar && sidebarRef.current && !sidebarRef.current.contains(e.target) && !e.target.closest('.hamburger')) {
+                setShowSidebar(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showSidebar]);
+
+    useEffect(() => {
+        if (window.innerWidth <= 639) {
+            setIsCollapsed(!showSidebar);
+        }
+    }, [showSidebar, setIsCollapsed]);
+
+    useEffect(() => {
         const fetchUserData = async () => {
             setLoading(true);
             try {
@@ -117,6 +135,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 body: JSON.stringify({ ...settings, theme: darkMode ? 'dark' : 'light' }),
             });
             if (!response.ok) throw new Error(await response.text());
+
             setSuccess('Settings saved successfully');
             onActivity('Updated notification settings');
             setError(null);
@@ -181,265 +200,466 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+            <div className="full">
+                <div className="flex min-h-screen bg-[var(--bg-primary)] justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-primary)]">
-                <style>
-                    {`
-                        * {
-                            box-sizing: border-box;
-                            transition: background-color 0.2s ease, color 0.2s ease;
+            <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
+                <style>{`
+                    :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header h1) {
+                        transition: none !important;
+                        animation: none !important;
+                        opacity: 1 !important;
+                    }
+                    .sidebar-wrapper,
+                    .hamburger,
+                    .dashboard-content,
+                    .header,
+                    .header h1 {
+                        transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
+                    }
+                    .full {
+                        width: 100%;
+                        min-height: 100vh;
+                        position: relative;
+                        z-index: 10;
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    }
+                    .bg-[var(--bg-primary)] {
+                        background-color: var(--bg-primary, ${darkMode ? '#0f172a' : '#ffffff'});
+                    }
+                    .bg-[var(--bg-secondary)] {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1e293b' : '#ffffff'});
+                    }
+                    .bg-[var(--bg-tertiary)] {
+                        background-color: var(--bg-tertiary, ${darkMode ? '#334155' : '#f1f5f9'});
+                    }
+                    .bg-[var(--accent-primary)] {
+                        background-color: var(--accent-primary, #3b82f6);
+                    }
+                    .bg-[var(--accent-secondary)] {
+                        background-color: var(--accent-secondary, #ef4444);
+                    }
+                    .bg-red-100 {
+                        background-color: rgba(239, 68, 68, 0.1);
+                    }
+                    .bg-green-100 {
+                        background-color: rgba(134, 239, 172, 0.1);
+                    }
+                    .text-[var(--text-primary)] {
+                        color: var(--text-primary, ${darkMode ? '#e2e8f0' : '#1f2937'});
+                    }
+                    .text-[var(--text-secondary)] {
+                        color: var(--text-secondary, ${darkMode ? '#94a3b8' : '#6b7280'});
+                    }
+                    .text-red-800 {
+                        color: #b91c1c;
+                    }
+                    .text-green-800 {
+                        color: #15803d;
+                    }
+                    .border-[var(--border)] {
+                        border-color: var(--border, ${darkMode ? '#475569' : '#e5e7eb'});
+                    }
+                    .hover\\:bg-blue-600:hover {
+                        background-color: #2563eb;
+                    }
+                    .hover\\:bg-red-600:hover {
+                        background-color: #dc2626;
+                    }
+                    .hover\\:bg-gray-100:hover {
+                        background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+                    }
+                    .flex {
+                        display: flex;
+                    }
+                    .min-h-screen {
+                        min-height: 100vh;
+                    }
+                    .flex-1 {
+                        flex: 1;
+                    }
+                    .gap-2 {
+                        gap: clamp(4px, 1vw, 8px);
+                    }
+                    .gap-4 {
+                        gap: clamp(8px, 2vw, 16px);
+                    }
+                    .gap-6 {
+                        gap: clamp(12px, 3vw, 24px);
+                    }
+                    .p-4 {
+                        padding: clamp(8px, 2vw, 16px);
+                    }
+                    .p-6 {
+                        padding: clamp(12px, 3vw, 24px);
+                    }
+                    .sm\\:p-8 {
+                        padding: clamp(16px, 4vw, 32px);
+                    }
+                    .rounded-xl {
+                        border-radius: clamp(8px, 2vw, 12px);
+                    }
+                    .rounded-lg {
+                        border-radius: clamp(4px, 1vw, 8px);
+                    }
+                    .mb-2 {
+                        margin-bottom: clamp(4px, 1vw, 8px);
+                    }
+                    .mb-4 {
+                        margin-bottom: clamp(8px, 2vw, 16px);
+                    }
+                    .mb-6 {
+                        margin-bottom: clamp(12px, 3vw, 24px);
+                    }
+                    .mt-4 {
+                        margin-top: clamp(8px, 2vw, 16px);
+                    }
+                    .shadow-xl {
+                        box-shadow: 0 clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px) rgba(0,0,0,0.1);
+                    }
+                    .text-2xl {
+                        font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+                    }
+                    .text-xl {
+                        font-size: clamp(1rem, 3vw, 1.25rem);
+                    }
+                    .text-base {
+                        font-size: clamp(0.875rem, 2.5vw, 1rem);
+                    }
+                    .text-sm {
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    }
+                    .text-xs {
+                        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
+                    }
+                    .font-bold {
+                        font-weight: 700;
+                    }
+                    .font-semibold {
+                        font-weight: 600;
+                    }
+                    .font-medium {
+                        font-weight: 500;
+                    }
+                    .form-input, select {
+                        width: 100%;
+                        padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 14px);
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        border: 1px solid var(--border);
+                        border-radius: clamp(4px, 1vw, 6px);
+                        background-color: var(--bg-secondary);
+                        color: var(--text-primary);
+                        transition: border-color 0.2s ease;
+                    }
+                    .form-input:focus, select:focus {
+                        border-color: var(--accent-primary);
+                        outline: none;
+                        box-shadow: 0 0 0 clamp(2px, 0.5vw, 3px) rgba(59, 130, 246, 0.1);
+                    }
+                    .btn-primary {
+                        background-color: var(--accent-primary);
+                        color: white;
+                        padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+                        border-radius: clamp(4px, 1vw, 6px);
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        font-weight: 500;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-secondary {
+                        background-color: var(--bg-tertiary);
+                        color: var(--text-primary);
+                        padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+                        border-radius: clamp(4px, 1vw, 6px);
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        font-weight: 500;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-danger {
+                        background-color: var(--accent-secondary);
+                        color: white;
+                        padding: clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px);
+                        border-radius: clamp(4px, 1vw, 6px);
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        font-weight: 500;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-primary:hover {
+                        background-color: #2563eb;
+                    }
+                    .btn-secondary:hover {
+                        background-color: var(--hover-gray);
+                    }
+                    .btn-danger:hover {
+                        background-color: #dc2626;
+                    }
+                    .tabs {
+                        display: flex;
+                        border-bottom: 2px solid var(--border);
+                        margin-bottom: clamp(16px, 4vw, 24px);
+                        overflow-x: auto;
+                        flex-wrap: wrap;
+                    }
+                    .tab {
+                        padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+                        font-size: clamp(0.875rem, 2.5vw, 1rem);
+                        font-weight: 500;
+                        color: var(--text-secondary);
+                        cursor: pointer;
+                        border-bottom: 2px solid transparent;
+                        transition: all 0.2s ease;
+                        white-space: nowrap;
+                    }
+                    .tab.active {
+                        color: var(--text-primary);
+                        border-bottom-color: var(--accent-primary);
+                        font-weight: 600;
+                    }
+                    .tab:hover:not(.active) {
+                        color: var(--text-primary);
+                        background-color: var(--hover-gray);
+                    }
+                    .tooltip {
+                        position: relative;
+                        display: inline-flex;
+                        align-items: center;
+                    }
+                    .tooltip:hover .tooltip-text {
+                        visibility: visible;
+                        opacity: 1;
+                    }
+                    .tooltip-text {
+                        visibility: hidden;
+                        opacity: 0;
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background-color: var(--bg-gray-900, #1f2937);
+                        color: white;
+                        padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+                        border-radius: clamp(4px, 1vw, 6px);
+                        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
+                        white-space: nowrap;
+                        z-index: 10;
+                        transition: opacity 0.2s ease;
+                        margin-bottom: clamp(4px, 1vw, 8px);
+                    }
+                    .hamburger {
+                        display: none;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: clamp(6px, 1.5vw, 8px);
+                        position: fixed;
+                        top: clamp(12px, 3vw, 16px);
+                        left: clamp(12px, 3vw, 16px);
+                        z-index: 50;
+                        transition: left 0.3s ease-in-out;
+                    }
+                    .sidebar-wrapper {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        height: 100vh;
+                        z-index: 40;
+                        transition: transform 0.3s ease-in-out;
+                    }
+                    .sidebar-hidden {
+                        transform: translateX(-100%);
+                    }
+                    .dashboard-content {
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        padding-right: clamp(6px, 1.5vw, 8px);
+                    }
+                    .dashboard-content::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-thumb {
+                        background-color: var(--border-color, ${darkMode ? '#4b5563' : '#e5e7eb'});
+                        border-radius: 3px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-track {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                    }
+                    .w-4 {
+                        width: clamp(12px, 3vw, 16px);
+                    }
+                    .h-4 {
+                        height: clamp(12px, 3vw, 16px);
+                    }
+                    .w-40 {
+                        width: clamp(120px, 30vw, 160px);
+                    }
+                    .h-40 {
+                        height: clamp(120px, 30vw, 160px);
+                    }
+                    .w-32 {
+                        width: clamp(96px, 24vw, 128px);
+                    }
+                    .space-y-4 > * + * {
+                        margin-top: clamp(8px, 2vw, 16px);
+                    }
+                    .space-y-6 > * + * {
+                        margin-top: clamp(12px, 3vw, 24px);
+                    }
+                    .grid {
+                        display: grid;
+                        gap: clamp(12px, 3vw, 24px);
+                    }
+                    .grid-cols-1 {
+                        grid-template-columns: 1fr;
+                    }
+                    .md\\:grid-cols-2 {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                    .animate-spin {
+                        animation: spin 1s linear infinite;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    @media (max-width: 639px) {
+                        .header h1 {
+                            padding-left: clamp(48px, 12vw, 56px);
                         }
-                        .full {
-                            width: 100%;
-                            min-height: 100vh;
-                            position: relative;
-                            z-index: 10;
-                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        .sidebar-open .header h1 {
+                            padding-left: clamp(208px, 50vw, 216px);
                         }
-                        .bg-[var(--bg-primary)] {
-                            background-color: var(--bg-primary, ${darkMode ? '#0f172a' : '#ffffff'});
+                        .sidebar-open .dashboard-content {
+                            margin-left: clamp(192px, 48vw, 198px);
                         }
-                        .bg-[var(--bg-secondary)] {
-                            background-color: var(--bg-secondary, ${darkMode ? '#1e293b' : '#ffffff'});
+                        .hamburger {
+                            display: block;
                         }
-                        .bg-[var(--bg-tertiary)] {
-                            background-color: var(--bg-tertiary, ${darkMode ? '#334155' : '#f1f5f9'});
+                        .sidebar-wrapper {
+                            display: ${showSidebar ? 'block' : 'none'};
                         }
-                        .bg-[var(--accent-primary)] {
-                            background-color: var(--accent-primary, #3b82f6);
+                        .hamburger {
+                            left: ${showSidebar ? 'clamp(192px, 48vw, 198px)' : 'clamp(12px, 3vw, 16px)'};
                         }
-                        .bg-[var(--accent-secondary)] {
-                            background-color: var(--accent-secondary, #ef4444);
+                        .ml-16, .ml-64 {
+                            margin-left: 0;
                         }
-                        .text-[var(--text-primary)] {
-                            color: var(--text-primary, ${darkMode ? '#e2e8f0' : '#1f2937'});
-                        }
-                        .text-[var(--text-secondary)] {
-                            color: var(--text-secondary, ${darkMode ? '#94a3b8' : '#6b7280'});
-                        }
-                        .border-[var(--border)] {
-                            border-color: var(--border, ${darkMode ? '#475569' : '#e5e7eb'});
-                        }
-                        .hover\\:bg-blue-600:hover {
-                            background-color: #2563eb;
-                        }
-                        .hover\\:bg-red-600:hover {
-                            background-color: #dc2626;
-                        }
-                        .hover\\:bg-gray-100:hover {
-                            background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
-                        }
-                        .flex {
-                            display: flex;
-                        }
-                        .min-h-screen {
-                            min-height: 100vh;
-                        }
-                        .flex-1 {
-                            flex: 1;
-                        }
-                        .gap-6 {
-                            gap: 24px;
-                        }
-                        .p-6 {
-                            padding: 24px;
-                        }
-                        .sm\\:p-8 {
-                            padding: 32px;
-                        }
-                        .rounded-xl {
-                            border-radius: 12px;
-                        }
-                        .rounded-lg {
-                            border-radius: 8px;
-                        }
-                        .mb-6 {
-                            margin-bottom: 24px;
-                        }
-                        .mt-4 {
-                            margin-top: 16px;
-                        }
-                        .shadow-xl {
-                            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(8px, 2vw, 12px);
                         }
                         .text-2xl {
-                            font-size: 1.5rem;
-                            line-height: 2rem;
+                            font-size: clamp(1rem, 3vw, 1.25rem);
                         }
                         .text-xl {
-                            font-size: 1.25rem;
+                            font-size: clamp(0.875rem, 2.5vw, 1rem);
                         }
                         .text-base {
-                            font-size: 1rem;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
                         }
                         .text-sm {
-                            font-size: 0.875rem;
+                            font-size: clamp(0.625rem, 1.8vw, 0.75rem);
                         }
-                        .font-bold {
-                            font-weight: 700;
-                        }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .font-medium {
-                            font-weight: 500;
-                        }
-                        .form-input, select {
-                            width: 100%;
-                            padding: 10px 14px;
-                            font-size: 0.875rem;
-                            border: 1px solid var(--border);
-                            border-radius: 6px;
-                            background-color: var(--bg-secondary);
-                            color: var(--text-primary);
-                            transition: border-color 0.2s ease;
-                        }
-                        .form-input:focus, select:focus {
-                            border-color: var(--accent-primary);
-                            outline: none;
-                            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-                        }
-                        .form-input-container {
-                            position: relative;
-                        }
-                        .password-toggle {
-                            position: absolute;
-                            right: 14px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            cursor: pointer;
-                            color: var(--text-secondary);
-                        }
-                        .password-toggle:hover {
-                            color: var(--accent-primary);
-                        }
-                        .btn-primary {
-                            background-color: var(--accent-primary);
-                            color: white;
-                            padding: 10px 20px;
-                            border-radius: 6px;
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            border: none;
-                            cursor: pointer;
-                        }
-                        .btn-secondary {
-                            background-color: var(--bg-tertiary);
-                            color: var(--text-primary);
-                            padding: 10px 20px;
-                            border-radius: 6px;
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            border: none;
-                            cursor: pointer;
-                        }
-                        .btn-danger {
-                            background-color: var(--accent-secondary);
-                            color: white;
-                            padding: 10px 20px;
-                            border-radius: 6px;
-                            font-size: 0.875rem;
-                            font-weight: 500;
-                            border: none;
-                            cursor: pointer;
-                        }
-                        .btn-primary:hover {
-                            background-color: #2563eb;
-                        }
-                        .btn-secondary:hover {
-                            background-color: var(--hover-gray);
-                        }
-                        .btn-danger:hover {
-                            background-color: #dc2626;
+                        .btn-primary, .btn-secondary, .btn-danger {
+                            padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+                            font-size: clamp(0.625rem, 1.8vw, 0.75rem);
+                            min-height: 32px;
                         }
                         .tabs {
-                            display: flex;
-                            border-bottom: 2px solid var(--border);
-                            margin-bottom: 1.5rem;
-                            overflow-x: auto;
-                            flex-wrap: wrap;
+                            gap: 4px;
                         }
                         .tab {
-                            padding: 0.75rem 1.5rem;
-                            font-size: 1rem;
-                            font-weight: 500;
-                            color: var(--text-secondary);
-                            cursor: pointer;
-                            border-bottom: 2px solid transparent;
-                            transition: all 0.2s ease;
+                            padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
                         }
-                        .tab.active {
-                            color: var(--text-primary);
-                            border-bottom-color: var(--accent-primary);
-                            font-weight: 600;
+                        .grid {
+                            grid-template-columns: 1fr;
                         }
-                        .tab:hover:not(.active) {
-                            color: var(--text-primary);
-                            background-color: var(--hover-gray);
+                        .md\\:grid-cols-2 {
+                            grid-template-columns: 1fr;
                         }
-                        .tooltip {
-                            position: relative;
-                            display: inline-flex;
-                            align-items: center;
+                    }
+                    @media (min-width: 640px) and (max-width: 767px) {
+                        .hamburger {
+                            display: none;
                         }
-                        .tooltip:hover .tooltip-text {
-                            visibility: visible;
-                            opacity: 1;
+                        .sidebar-wrapper {
+                            display: block;
                         }
-                        .tooltip-text {
-                            visibility: hidden;
-                            opacity: 0;
-                            position: absolute;
-                            bottom: 100%;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            background-color: var(--bg-gray-900, #1f2937);
-                            color: white;
-                            padding: 6px 12px;
-                            border-radius: 6px;
-                            font-size: 0.75rem;
-                            white-space: nowrap;
-                            z-index: 10;
-                            transition: opacity 0.2s ease;
-                            margin-bottom: 8px;
+                        .p-6 {
+                            padding: clamp(12px, 3vw, 16px);
                         }
-                        .ml-16 {
-                            margin-left: 64px;
+                        .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
                         }
-                        .ml-64 {
-                            margin-left: 256px;
+                        .grid {
+                            grid-template-columns: 1fr;
                         }
-                        @media (min-width: 640px) {
-                            .sm\\:p-8 {
-                                padding: 32px;
-                            }
+                        .md\\:grid-cols-2 {
+                            grid-template-columns: 1fr;
                         }
-                        @media (max-width: 768px) {
-                            .tabs {
-                                flex-direction: row;
-                            }
-                            .tab {
-                                flex: 1;
-                                text-align: center;
-                            }
+                    }
+                    @media (min-width: 768px) and (max-width: 1023px) {
+                        .p-6 {
+                            padding: clamp(12px, 3vw, 16px);
                         }
-                    `}
-                </style>
-                <Sidebar
-                    user={user}
-                    onLogout={handleLogout}
-                    isCollapsed={isCollapsed}
-                    setIsCollapsed={setIsCollapsed}
-                    darkMode={darkMode}
-                    onActivity={onActivity}
-                />
+                        .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                        .grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                    @media (min-width: 1024px) and (max-width: 1279px) {
+                        .grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                    @media (min-width: 1280px) {
+                        .p-6 {
+                            padding: clamp(16px, 3.5vw, 20px);
+                        }
+                        .sm\\:p-8 {
+                            padding: clamp(20px, 4vw, 24px);
+                        }
+                    }
+                `}</style>
+                <button
+                    className="hamburger"
+                    onClick={() => {
+                        setShowSidebar(!showSidebar);
+                        if (!showSidebar) setIsCollapsed(false);
+                    }}
+                    aria-label="Toggle sidebar"
+                >
+                    <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <div ref={sidebarRef} className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
+                    <Sidebar
+                        user={user}
+                        onLogout={handleLogout}
+                        isCollapsed={isCollapsed}
+                        setIsCollapsed={setIsCollapsed}
+                        darkMode={darkMode}
+                        disableHamburger={showSidebar && window.innerWidth <= 639}
+                        onActivity={onActivity}
+                    />
+                </div>
                 <div className="flex-1">
                     <Header
                         user={user}
@@ -450,8 +670,9 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                         setDarkMode={setDarkMode}
                         tabDescription="Settings"
                         userMessage="Manage your account and preferences"
+                        className="header"
                     />
-                    <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                    <main className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content ${showSidebar ? 'sidebar-open' : ''}`}>
                         <div className="bg-[var(--bg-secondary)] rounded-xl p-6 shadow-xl">
                             {error && (
                                 <div className="mb-6 p-4 bg-red-100 text-red-800 rounded-lg text-sm flex items-center">
@@ -568,7 +789,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         <br />
                                         <button
                                             onClick={handleChangePassword}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            className="btn-secondary mt-4 flex items-center gap-2"
                                             aria-label="Change Password"
                                             disabled={loading || passwordMatchError}
                                         >
@@ -626,7 +847,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     <div className="flex gap-4">
                                         <button
                                             onClick={handleSaveSettings}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            className="btn-secondary flex items-center gap-2"
                                             aria-label="Save Notification Settings"
                                             disabled={loading}
                                         >
@@ -635,7 +856,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         </button>
                                         <button
                                             onClick={handleClearNotifications}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            className="btn-secondary flex items-center gap-2"
                                             aria-label="Clear Notifications"
                                             disabled={loading}
                                         >
@@ -682,7 +903,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     </div>
                                     <button
                                         onClick={handleSaveSettings}
-                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                        className="btn-secondary flex items-center gap-2"
                                         aria-label="Save Appearance Settings"
                                         disabled={loading}
                                     >

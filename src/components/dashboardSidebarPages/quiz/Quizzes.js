@@ -13,14 +13,20 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
     const [error, setError] = useState('');
     const [filterSubject, setFilterSubject] = useState('');
     const [sortBy, setSortBy] = useState('dueDate');
-
-    const notificationCount = notifications.filter(notification => !notification.read).length;
+    const [showSidebar, setShowSidebar] = useState(false);
 
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
+
+    useEffect(() => {
+        if (window.innerWidth <= 639) {
+            setIsCollapsed(!showSidebar);
+        }
+    }, [showSidebar, setIsCollapsed]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,7 +83,7 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     const handleStartQuiz = (quizId, quizTitle) => {
         console.log('Navigating to quiz ID:', quizId);
-        onActivity(`Started quiz: ${quizTitle}`); //record activity
+        onActivity(`Started quiz: ${quizTitle}`);
         navigate(`/quizzes/${quizId}`);
     };
 
@@ -115,230 +121,350 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 
     return (
         <div className="full">
-            <div className="flex min-h-screen bg-[var(--bg-primary)]">
-                <style>
-                    {`
-    .full {
-    width: 100%;
-    min-height: 100vh;
-    position: relative;
-    z-index: 10;
-}
-.bg-[var(--bg-primary)] {
-    background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
-}
-.bg-[var(--bg-secondary)] {
-    background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-}
-.bg-[var(--bg-tertiary)] {
-    background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
-}
-.bg-[var(--accent-primary)] {
-    background-color: var(--accent-primary, #007bff);
-}
-.bg-[var(--accent-secondary)] {
-    background-color: var(--accent-secondary, #dc3545);
-}
-.text-[var(--text-primary)] {
-    color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-}
-.text-[var(--text-secondary)] {
-    color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
-}
-.text-white {
-    color: #ffffff;
-}
-.hover\\:bg-[var(--hover-tertiary)]:hover {
-    background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
-}
-.hover\\:bg-[var(--hover-primary)]:hover {
-    background-color: var(--hover-primary, #0056b3);
-}
-.hover\\:text-[var(--hover-secondary)]:hover {
-    color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
-}
-.flex {
-    display: flex;
-}
-.min-h-screen {
-    min-height: 100vh;
-}
-.min-w-0 {
-    min-width: 0;
-}
-.justify-center {
-    justify-content: center;
-}
-.justify-between {
-    justify-content: space-between;
-}
-.items-center {
-    align-items: center;
-}
-.flex-1 {
-    flex: 1;
-}
-.gap-4 {
-    gap: 16px;
-}
-.p-6 {
-    padding: 24px;
-}
-.sm\\:p-8 {
-    padding: 32px;
-}
-.rounded-2xl {
-    border-radius: 16px;
-}
-.rounded-lg {
-    border-radius: 8px;
-}
-.rounded-md {
-    border-radius: 6px;
-}
-.mb-4 {
-    margin-bottom: 16px;
-}
-.mb-6 {
-    margin-bottom: 24px;
-}
-.mt-1 {
-    margin-top: 4px;
-}
-.mt-4 {
-    margin-top: 16px;
-}
-.shadow-[var(--shadow)] {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.form-label {
-    color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: block;
-}
-.form-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-    border-radius: 4px;
-    background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-    color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-}
-.form-input:focus {
-    border-color: var(--accent-primary, #007bff);
-    outline: none;
-}
-.btn-primary {
-    background-color: var(--accent-primary, #007bff);
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-}
-.btn-primary:hover {
-    background-color: var(--hover-primary, #0056b3);
-}
-.grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-}
-.sm\\:grid-cols-2 {
-    grid-template-columns: repeat(2, 1fr);
-}
-.md\\:grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-}
-.col-span-full {
-    grid-column: 1 / -1;
-}
-.-top-2 {
-    top: -8px;
-}
-.-right-2 {
-    right: -8px;
-}
-.h-5 {
-    height: 20px;
-}
-.w-5 {
-    width: 20px;
-}
-.quiz-section {
-    background: ${darkMode
-                        ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
-                        : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
-    background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-    border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 32px;
-    border-radius: 16px;
-}
-.ml-16 {
-    margin-left: 64px;
-}
-.ml-64 {
-    margin-left: 256px;
-}
-@media (min-width: 640px) {
-.sm\\:grid-cols-2 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-.sm\\:p-8 {
-        padding: 32px;
-    }
-}
-@media (min-width: 768px) {
-.md\\:grid-cols-3 {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-.underline {
-    text-decoration: underline;
-}
-.text-3xl {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-}
-.text-xl {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-}
-.text-lg {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-}
-.text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-}
-.text-xs {
-    font-size: 0.75rem;
-    line-height: 1rem;
-}
-.font-bold {
-    font-weight: 700;
-}
-.font-semibold {
-    font-weight: 600;
-}
-.font-medium {
-    font-weight: 500;
-}
-`}
-                </style>
-                <Sidebar
-                    user={user}
-                    onLogout={handleLogout}
-                    isCollapsed={isCollapsed}
-                    setIsCollapsed={setIsCollapsed}
-                    darkMode={darkMode}
-                    onActivity={onActivity} //pass onActivity to sidebar
-                />
+            <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
+                <style>{`
+                    :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header-title) {
+                        transition: none !important;
+                        animation: none !important;
+                        opacity: 1 !important;
+                    }
+                    .sidebar-wrapper,
+                    .hamburger,
+                    .dashboard-content,
+                    .header,
+                    .header-title {
+                        transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
+                    }
+                    .full {
+                        width: 100%;
+                        min-height: 100vh;
+                        position: relative;
+                        z-index: 10;
+                    }
+                    .bg-[var(--bg-primary)] {
+                        background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
+                    }
+                    .bg-[var(--bg-secondary)] {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                    }
+                    .bg-[var(--bg-tertiary)] {
+                        background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
+                    }
+                    .bg-[var(--accent-primary)] {
+                        background-color: var(--accent-primary, #007bff);
+                    }
+                    .bg-[var(--accent-secondary)] {
+                        background-color: var(--accent-secondary, #dc3545);
+                    }
+                    .text-[var(--text-primary)] {
+                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                    }
+                    .text-[var(--text-secondary)] {
+                        color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
+                    }
+                    .text-white {
+                        color: #ffffff;
+                    }
+                    .hover\\:bg-[var(--hover-tertiary)]:hover {
+                        background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
+                    }
+                    .hover\\:bg-[var(--hover-primary)]:hover {
+                        background-color: var(--hover-primary, #0056b3);
+                    }
+                    .hover\\:text-[var(--hover-secondary)]:hover {
+                        color: var(--hover-secondary, ${darkMode ? '#f87171' : '#b91c1c'});
+                    }
+                    .flex {
+                        display: flex;
+                    }
+                    .min-h-screen {
+                        min-height: 100vh;
+                    }
+                    .min-w-0 {
+                        min-width: 0;
+                    }
+                    .justify-center {
+                        justify-content: center;
+                    }
+                    .justify-between {
+                        justify-content: space-between;
+                    }
+                    .items-center {
+                        align-items: center;
+                    }
+                    .flex-1 {
+                        flex: 1;
+                    }
+                    .gap-4 {
+                        gap: clamp(8px, 2vw, 12px);
+                    }
+                    .gap-6 {
+                        gap: clamp(12px, 3vw, 16px);
+                    }
+                    .p-4 {
+                        padding: clamp(8px, 2vw, 12px);
+                    }
+                    .p-6 {
+                        padding: clamp(12px, 3vw, 16px);
+                    }
+                    .sm\\:p-8 {
+                        padding: clamp(16px, 4vw, 20px);
+                    }
+                    .rounded-2xl {
+                        border-radius: 16px;
+                    }
+                    .rounded-lg {
+                        border-radius: 8px;
+                    }
+                    .rounded-md {
+                        border-radius: 6px;
+                    }
+                    .mb-4 {
+                        margin-bottom: 16px;
+                    }
+                    .mb-6 {
+                        margin-bottom: 24px;
+                    }
+                    .mt-1 {
+                        margin-top: 4px;
+                    }
+                    .mt-4 {
+                        margin-top: 16px;
+                    }
+                    .shadow-[var(--shadow)] {
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+                    .form-label {
+                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                        display: block;
+                    }
+                    .form-input {
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                        border-radius: 4px;
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                        line-height: 1.25rem;
+                    }
+                    .form-input:focus {
+                        border-color: var(--accent-primary, #007bff);
+                        outline: none;
+                    }
+                    .btn-primary {
+                        background-color: var(--accent-primary, #007bff);
+                        color: #ffffff;
+                        padding: 8px 16px;
+                        border-radius: 4px;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--hover-primary, #0056b3);
+                    }
+                    .grid {
+                        display: grid;
+                        gap: clamp(8px, 2vw, 12px);
+                    }
+                    .hamburger {
+                        display: none;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: 8px;
+                        position: fixed;
+                        top: 16px;
+                        left: 5px;
+                        z-index: 50;
+                        transition: left 0.3s ease-in-out;
+                    }
+                    .sidebar-wrapper {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        height: 100vh;
+                        z-index: 40;
+                        transition: transform 0.3s ease-in-out;
+                    }
+                    .sidebar-hidden {
+                        transform: translateX(-100%);
+                    }
+                    .dashboard-content {
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        padding-right: 8px;
+                    }
+                    .dashboard-content::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-thumb {
+                        background-color: var(--border-color, ${darkMode ? '#4b5563' : '#e5e7eb'});
+                        border-radius: 3px;
+                    }
+                    .dashboard-content::-webkit-scrollbar-track {
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                    }
+                    .quiz-section {
+                        background: ${darkMode
+                    ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+                    : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
+                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                        padding: clamp(16px, 4vw, 24px);
+                        border-radius: 16px;
+                    }
+                    .underline {
+                        text-decoration: underline;
+                    }
+                    .text-3xl {
+                        font-size: clamp(1.5rem, 4.5vw, 1.875rem);
+                    }
+                    .text-xl {
+                        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+                    }
+                    .text-lg {
+                        font-size: clamp(1rem, 3vw, 1.125rem);
+                    }
+                    .text-sm {
+                        font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    }
+                    .text-xs {
+                        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
+                    }
+                    .font-bold {
+                        font-weight: 700;
+                    }
+                    .font-semibold {
+                        font-weight: 600;
+                    }
+                    .font-medium {
+                        font-weight: 500;
+                    }
+                    @media (max-width: 639px) {
+                        .ml-16, .ml-64, .sm\\:ml-16, .sm\\:ml-64 {
+                            margin-left: 0;
+                        }
+                        .hamburger {
+                            display: block;
+                            left: ${showSidebar ? '198px' : '5px'};
+                        }
+                        .sidebar-wrapper {
+                            display: ${showSidebar ? 'block' : 'none'};
+                        }
+                        .dashboard-content {
+                            margin-left: ${showSidebar ? '198px' : '0'};
+                        }
+                    }
+                    @media (max-width: 480px) {
+                        .grid {
+                            grid-template-columns: 1fr;
+                        }
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(8px, 2vw, 10px);
+                        }
+                        .quiz-section {
+                            padding: clamp(12px, 3vw, 16px);
+                        }
+                        .text-3xl {
+                            font-size: clamp(1.25rem, 4vw, 1.5rem);
+                        }
+                        .text-xl {
+                            font-size: clamp(1rem, 3vw, 1.125rem);
+                        }
+                        .text-lg {
+                            font-size: clamp(0.875rem, 2.5vw, 1rem);
+                        }
+                    }
+                    @media (min-width: 481px) and (max-width: 639px) {
+                        .grid {
+                            grid-template-columns: 1fr;
+                        }
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(10px, 2.5vw, 12px);
+                        }
+                        .quiz-section {
+                            padding: clamp(14px, 3.5vw, 18px);
+                        }
+                    }
+                    @media (min-width: 640px) and (max-width: 767px) {
+                        .grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .hamburger {
+                            display: none;
+                        }
+                        .sidebar-wrapper {
+                            display: block;
+                        }
+                    }
+                    @media (min-width: 768px) and (max-width: 1023px) {
+                        .grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(12px, 3vw, 16px);
+                        }
+                        .quiz-section {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                    }
+                    @media (min-width: 1024px) {
+                        .grid {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .sm\\:grid-cols-2 {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                        .md\\:grid-cols-3 {
+                            grid-template-columns: repeat(3, 1fr);
+                        }
+                        .p-6, .sm\\:p-8 {
+                            padding: clamp(16px, 4vw, 20px);
+                        }
+                        .quiz-section {
+                            padding: clamp(20px, 5vw, 24px);
+                        }
+                    }
+                `}</style>
+                <button
+                    className="hamburger"
+                    onClick={() => {
+                        setShowSidebar(!showSidebar);
+                        if (!showSidebar) setIsCollapsed(false);
+                    }}
+                    aria-label="Toggle sidebar"
+                >
+                    <svg className="w-6 h-6 text-[var(--text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <div className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
+                    <Sidebar
+                        user={user}
+                        onLogout={handleLogout}
+                        isCollapsed={isCollapsed}
+                        setIsCollapsed={setIsCollapsed}
+                        darkMode={darkMode}
+                        onActivity={onActivity}
+                        disableHamburger={showSidebar && window.innerWidth <= 639}
+                    />
+                </div>
                 <div className="flex-1">
                     <Header
                         user={user}
@@ -349,8 +475,9 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
                         setDarkMode={setDarkMode}
                         tabDescription="Quizzes"
                         userMessage="Test your knowledge"
+                        className="header"
                     />
-                    <div className={`flex-1 min-w-0 p-6 sm:p-8 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+                    <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content`}>
                         <div className="quiz-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold text-[var(--text-primary)]">Explore Quizzes</h2>
@@ -454,6 +581,11 @@ const Quizzes = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, not
 Quizzes.propTypes = {
     user: PropTypes.shape({
         name: PropTypes.string.isRequired,
+        firstName: PropTypes.string,
+        lastName: PropTypes.string,
+        email: PropTypes.string,
+        title: PropTypes.string,
+        profilePicture: PropTypes.string,
     }).isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
@@ -468,8 +600,6 @@ Quizzes.propTypes = {
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
-
-    //activity
     onActivity: PropTypes.func.isRequired,
     activities: PropTypes.arrayOf(
         PropTypes.shape({

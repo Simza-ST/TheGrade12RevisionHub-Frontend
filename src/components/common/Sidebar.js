@@ -62,7 +62,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disabl
         { name: 'Question Papers', path: '/question-papers/list', icon: '📝', },
         { name: 'Resources', path: '/resources', icon: '🔗', onClick: () => onActivity && onActivity('Viewed Resources') },
         { name: 'Performance', path: '/performance', icon: '📊', onClick: () => onActivity && onActivity('Viewed Performances') },
-        { name: 'Notifications', path: '/notifications', icon: '🔔', onClick: () => onActivity && onActivity('Viewed Notifications') },
+        { name: 'Notifications', path: '/notifications', icon: '🔔', },
         { name: 'Chatroom', path: '/chatroom', icon: '💬', onClick: () => onActivity && onActivity('Visited Chatroom') },
         { name: 'Settings', path: '/settings', icon: '⚙️',  },
         { name: 'Logout', path: '/', icon: '🚪', onClick: onLogout },

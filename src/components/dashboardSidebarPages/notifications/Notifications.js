@@ -530,7 +530,7 @@ const Notifications = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMod
                         display: none;
                         cursor: pointer;
                         background: none;
-                        border: none;
+                        border: 3px;
                         padding: 8px;
                         position: fixed;
                         top: 16px;
@@ -557,7 +557,7 @@ const Notifications = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMod
                             display: ${showSidebar ? 'block' : 'none'};
                         }
                         .hamburger {
-                            left: ${showSidebar ? '198px' : '16px'};
+                            left: ${showSidebar ? '198px' : '2px'};
                         }
                         .ml-16, .ml-64 {
                             margin-left: 0;
