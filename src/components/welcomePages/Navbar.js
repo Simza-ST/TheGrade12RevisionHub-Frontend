@@ -7,7 +7,7 @@ const Navbar = () => {
 
     useEffect(() => {
         const typed = new Typed('.TheRevisionHub-text', {
-            strings: ['The Revision Hub.', 'Where You Can Make Your Own Future.'],
+            strings: ['The Revision Hub.', 'Where You Can Make','Your Own Future.'],
             typeSpeed: 70,
             backSpeed: 70,
             backDelay: 2000,
