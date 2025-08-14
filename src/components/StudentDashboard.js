@@ -1,18 +1,331 @@
-import React, { useState, useEffect, useMemo } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import PropTypes from 'prop-types';
+// import Sidebar from './common/Sidebar';
+// import CourseMastery from './onDashboardPages/CourseMastery';
+// import Schedule from './onDashboardPages/Schedule';
+// import RecentActivity from './onDashboardPages/RecentActivity';
+// import NotificationsWidget from './onDashboardPages/NotificationsWidget';
+// import StudyTimer from './onDashboardPages/StudyTimer';
+// import MotivationalQuote from './onDashboardPages/MotivationalQuote';
+// import ProgressOverview from './onDashboardPages/ProgressOverview';
+// import Header from './common/Header';
+// import PerformanceChart from './onDashboardPages/PerformanceChart';
+// import { recordActivity } from '../utils/activityUtil.js';
+//
+// const StatsCard = ({ title, value, icon, color = 'text-[var(--text-normal)]' }) => (
+//     <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow">
+//         <div className={`text-3xl ${color}`}>{icon}</div>
+//         <div>
+//             <h3 className="text-lg font-semibold text-[var(--text-normal)]">{title}</h3>
+//             <p className={`text-2xl ${color}`}>{value}</p>
+//         </div>
+//     </div>
+// );
+//
+// StatsCard.propTypes = {
+//     title: PropTypes.string.isRequired,
+//     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+//     icon: PropTypes.string.isRequired,
+//     color: PropTypes.string,
+// };
+//
+// const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
+//     const navigate = useNavigate();
+//     const [loading, setLoading] = useState(true);
+//     const [showPopup, setShowPopup] = useState(false);
+//     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
+//     const [courses, setCourses] = useState([]);
+//     const [completedTasks, setCompletedTasks] = useState(0);
+//     const [numberOfSubjects, setNumberOfSubjects] = useState(0);
+//     const [quote, setQuote] = useState({ text: '', author: '' });
+//     const [schedule, setSchedule] = useState([]);
+//     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+//
+//     const [stats, setStats] = useState({
+//         numberOfSubjects: 0,
+//         attendance: '0%',
+//         achievements: '18',
+//         completedTasks: 0,
+//     });
+//
+//     useEffect(() => {
+//         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+//         document.documentElement.setAttribute('data-theme', savedTheme);
+//         setDarkMode(savedTheme === 'dark');
+//     }, [setDarkMode]);
+//
+//     useEffect(() => {
+//         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+//         sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
+//     }, [darkMode]);
+//
+//     // Sample function to enroll a subject (for testing)
+//     const enrollSubject = async (subjectId) => {
+//         try {
+//             const headers = {
+//                 Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+//                 'Content-Type': 'application/json',
+//             };
+//             const response = await fetch(`${API_BASE_URL}/api/user/enroll-subject`, {
+//                 method: 'POST',
+//                 headers,
+//                 body: JSON.stringify({ subjectId }),
+//             });
+//             const data = await response.json();
+//             if (response.ok && data.success) {
+//                 console.log('Subject enrolled:', data.message);
+//                 // Re-fetch subjects to update UI
+//                 const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
+//                 const subjectsData = await subjectsResponse.json();
+//                 if (subjectsResponse.ok && subjectsData.success) {
+//                     setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
+//                     setNumberOfSubjects(subjectsData.data);
+//                 }
+//             } else {
+//                 console.error(data.message || 'Failed to enroll subject');
+//             }
+//         } catch (error) {
+//             console.error('Error enrolling subject:', error);
+//         }
+//     };
+//
+//     useEffect(() => {
+//         const fetchData = async () => {
+//             try {
+//                 setLoading(true);
+//                 const headers = {
+//                     Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+//                     'Content-Type': 'application/json',
+//                 };
+//
+//                 const enrolledResponse = await fetch(`${API_BASE_URL}/api/user/enrolled-subjects`, { headers });
+//                 const enrolledData = await enrolledResponse.json();
+//                 if (enrolledResponse.ok && enrolledData.success) {
+//                     const subjectNames = Array.isArray(enrolledData.data) ? enrolledData.data.map(s => s.subjectName || s) : [];
+//                     setEnrolledSubjects(subjectNames);
+//                     // Sync stats with enrolled subjects count as fallback
+//                     setStats(prev => ({ ...prev, numberOfSubjects: subjectNames.length }));
+//                 } else {
+//                     console.error(enrolledData.message || 'Failed to fetch enrolled subjects');
+//                 }
+//
+//                 const tasksResponse = await fetch(`${API_BASE_URL}/api/user/completed-tasks`, { headers });
+//                 const tasksData = await tasksResponse.json();
+//                 if (tasksResponse.ok && tasksData.success) {
+//                     setCompletedTasks(tasksData.data);
+//                     setStats(prev => ({ ...prev, completedTasks: tasksData.data }));
+//                 } else {
+//                     console.error(tasksData.message || 'Failed to fetch completed tasks count');
+//                 }
+//
+//                 const coursesResponse = await fetch(`${API_BASE_URL}/api/user/courses`, { headers });
+//                 const coursesData = await coursesResponse.json();
+//                 if (coursesResponse.ok && coursesData.success) {
+//                     setCourses(coursesData.data.map(course => ({
+//                         name: course.subjectName,
+//                         progress: course.progress,
+//                     })));
+//                 } else {
+//                     console.error(coursesData.message || 'Failed to fetch course progress');
+//                 }
+//
+//                 const attendanceResponse = await fetch(`${API_BASE_URL}/api/user/attendance`, { headers });
+//                 const attendanceData = await attendanceResponse.json();
+//                 if (attendanceResponse.ok && attendanceData.success) {
+//                     setStats(prev => ({ ...prev, attendance: `${attendanceData.data}%` }));
+//                 } else {
+//                     console.error(attendanceData.message || 'Failed to fetch attendance percentage');
+//                 }
+//
+//                 const activitiesResponse = await fetch(`${API_BASE_URL}/api/user/activities`, { headers });
+//                 const activitiesData = await activitiesResponse.json();
+//                 if (activitiesResponse.ok && activitiesData.success) {
+//                     setActivities(activitiesData.data.map(activity => ({
+//                         id: activity.id,
+//                         description: activity.description,
+//                         date: activity.date,
+//                     })));
+//                 } else {
+//                     console.error(activitiesData.message || 'Failed to fetch activities');
+//                 }
+//
+//                 const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
+//                 const subjectsData = await subjectsResponse.json();
+//                 console.log('Count Subjects Response:', subjectsData); // Debug log
+//                 if (subjectsResponse.ok && subjectsData.success) {
+//                     setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
+//                     setNumberOfSubjects(subjectsData.data);
+//                 } else {
+//                     console.error(subjectsData.message || 'Failed to fetch number of subjects');
+//                 }
+//
+//                 setSchedule([
+//                     { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
+//                     { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
+//                     { day: 'T', course: 'Physical Sciences', time: '10:00-11:00', location: 'Lab A' },
+//                     { day: 'W', course: 'History', time: '09:00-10:30', location: 'Room 303' },
+//                 ]);
+//
+//                 setQuote({
+//                     text: 'Education is the most powerful weapon you can use to change the world.',
+//                     author: 'Nelson Mandela',
+//                 });
+//
+//                 // Test enrollment (uncomment to enroll a subject with ID 1)
+//                 // await enrollSubject(1);
+//             } catch (error) {
+//                 console.error('Error fetching data:', error);
+//             } finally {
+//                 setLoading(false);
+//             }
+//         };
+//         fetchData();
+//     }, [API_BASE_URL, setDarkMode, setActivities]);
+//
+//     const handleLogout = () => {
+//         sessionStorage.removeItem('jwt');
+//         navigate('/login');
+//     };
+//
+//     const handleTimerFinish = () => {
+//         setShowPopup(true);
+//         onActivity('Completed study session'); // Use onActivity
+//     };
+//
+//     const handleClosePopup = () => {
+//         setShowPopup(false);
+//     };
+//
+//     if (loading) {
+//         return (
+//             <div className="flex min-h-screen justify-center items-center">
+//                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
+//             </div>
+//         );
+//     }
+//
+//     return (
+//         <>
+//             <div className="flex min-h-screen">
+//                 <Sidebar
+//                     user={user}
+//                     onLogout={handleLogout}
+//                     isCollapsed={isCollapsed}
+//                     setIsCollapsed={setIsCollapsed}
+//                     darkMode={darkMode}
+//                     onActivity={onActivity}
+//                 />
+//                 <div className="flex-1">
+//                     <Header
+//                         user={user}
+//                         notifications={notifications}
+//                         setNotifications={setNotifications}
+//                         isCollapsed={isCollapsed}
+//                         darkMode={darkMode}
+//                         setDarkMode={setDarkMode}
+//                         tabDescription="Student Dashboard"
+//                         userMessage="Welcome to dashboard"
+//                     />
+//                     <div
+//                         className={`
+//               flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
+//               ${isCollapsed ? 'ml-16' : 'ml-64'}
+//             `}
+//                     >
+//                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+//                             <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
+//                                 <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊" />
+//                                 <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
+//                                 <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
+//                                 <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
+//                             </div>
+//                             <div className="md:col-span-4">
+//                                 <ProgressOverview courses={courses} />
+//                             </div>
+//                         </div>
+//
+//                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+//                             <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} courses={courses} />
+//                             <Schedule schedule={schedule} />
+//                             <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
+//                         </div>
+//
+//                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+//                             <RecentActivity activities={activities} setActivities={setActivities} API_BASE_URL={API_BASE_URL} />
+//                             <MotivationalQuote quote={quote} />
+//                         </div>
+//
+//                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+//                             <StudyTimer onTimerFinish={handleTimerFinish} />
+//                             <NotificationsWidget notifications={notifications} setNotifications={setNotifications} onActivity={onActivity} />
+//                         </div>
+//                     </div>
+//                 </div>
+//                 {showPopup && (
+//                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+//                         <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+//                             <h3 className="text-xl font-semibold text-[var(--text-primary)]">Time is up!</h3>
+//                             <p className="text-[var(--text-secondary)] mb-4">Your study session has ended.</p>
+//                             <button
+//                                 onClick={handleClosePopup}
+//                                 className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] w-full"
+//                                 aria-label="Close popup"
+//                             >
+//                                 OK
+//                             </button>
+//                         </div>
+//                     </div>
+//                 )}
+//             </div>
+//         </>
+//     );
+// };
+//
+// StudentDashboard.propTypes = {
+//     isCollapsed: PropTypes.bool.isRequired,
+//     setIsCollapsed: PropTypes.func.isRequired,
+//     darkMode: PropTypes.bool.isRequired,
+//     setDarkMode: PropTypes.func.isRequired,
+//     notifications: PropTypes.arrayOf(
+//         PropTypes.shape({
+//             id: PropTypes.number.isRequired,
+//             message: PropTypes.string.isRequired,
+//             createdAt: PropTypes.string.isRequired, // Match Notifications
+//             read: PropTypes.bool.isRequired,
+//             type: PropTypes.string,
+//         })
+//     ).isRequired,
+//     setNotifications: PropTypes.func.isRequired,
+//     activities: PropTypes.arrayOf(
+//         PropTypes.shape({
+//             id: PropTypes.number.isRequired,
+//             description: PropTypes.string.isRequired,
+//             date: PropTypes.string.isRequired,
+//         })
+//     ).isRequired,
+//     setActivities: PropTypes.func.isRequired,
+//     onActivity: PropTypes.func.isRequired,
+// };
+//
+// export default StudentDashboard;
+
+//new code below
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from './common/Sidebar';
 import CourseMastery from './onDashboardPages/CourseMastery';
 import Schedule from './onDashboardPages/Schedule';
 import RecentActivity from './onDashboardPages/RecentActivity';
-import UpcomingDeadlines from './onDashboardPages/UpcomingDeadlines';
-import RecommendedResources from './onDashboardPages/RecommendedResources';
 import NotificationsWidget from './onDashboardPages/NotificationsWidget';
 import StudyTimer from './onDashboardPages/StudyTimer';
 import MotivationalQuote from './onDashboardPages/MotivationalQuote';
 import ProgressOverview from './onDashboardPages/ProgressOverview';
 import Header from './common/Header';
 import PerformanceChart from './onDashboardPages/PerformanceChart';
+import { recordActivity } from '../utils/activityUtil.js';
 
 const StatsCard = ({ title, value, icon, color = 'text-[var(--text-normal)]' }) => (
     <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow">
@@ -31,32 +344,31 @@ StatsCard.propTypes = {
     color: PropTypes.string,
 };
 
-const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications }) => {
+const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, notifications, setNotifications, onActivity, activities, setActivities }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
+    const [showRatingPopup, setShowRatingPopup] = useState(false);
     const [enrolledSubjects, setEnrolledSubjects] = useState([]);
-    const [courses, setCourses] = useState([]); // Reintroduced to fix undefined error
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
-
-    const [stats] = useState({
-        performance: '90%',
-        attendance: '97.2%',
-        achievements: '18',
-        completedTasks: '45',
-    });
-    const [schedule, setSchedule] = useState([]);
-    const [activities, setActivities] = useState([]);
-    const [deadlines, setDeadlines] = useState([]);
-    const [resources, setResources] = useState([]);
+    const [courses, setCourses] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState(0);
     const [quote, setQuote] = useState({ text: '', author: '' });
+    const [schedule, setSchedule] = useState([]);
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262';
+    const [res, setRes] = useState(false);
+
+    const [stats, setStats] = useState({
+        numberOfSubjects: 0,
+        attendance: '0%',
+        achievements: '18',
+        completedTasks: 0,
+    });
 
     useEffect(() => {
-        // Initialize theme from sessionStorage or system preference
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');
-    }, []);
+    }, [setDarkMode]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -71,165 +383,285 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json',
                 };
-                // Fetch enrolled subjects
-                const enrolledResponse = await fetch(`${API_BASE_URL}/enrolled-subjects`, { headers });
-const enrolledData = await enrolledResponse.json();
-if (enrolledResponse.ok && enrolledData.success) {
-    const subjectNames = Array.isArray(enrolledData.data) ? enrolledData.data.map(s => s.subjectName || s) : [];
-    setEnrolledSubjects(subjectNames);
-} else {
-    console.error(enrolledData.message || 'Failed to fetch enrolled subjects');
-}
 
-// Reintroduce mock courses data to support ProgressOverview and PerformanceChart
-setTimeout(() => {
-    setCourses([
-        { name: 'Advanced Calculus', progress: 100 },
-        { name: 'Physical Sciences', progress: 80 },
-        { name: 'Mathematics', progress: 85 },
-        { name: 'Information Technology', progress: 50 },
-        { name: 'History', progress: 100 },
-        { name: 'Chemistry', progress: 92 },
-    ]);
-    setSchedule([
-        { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
-        { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
-        { day: 'T', course: 'Physical Sciences', time: '10:00-11:00', location: 'Lab A' },
-        { day: 'W', course: 'History', time: '09:00-10:30', location: 'Room 303' },
-    ]);
-    setActivities([
-        { id: 1, description: 'Completed Quiz 1 in Mathematics', date: '2025-05-20T10:18:00Z' },
-        { id: 2, description: 'Submitted Assignment for Physical Sciences', date: '2025-05-19T15:30:00Z' },
-        { id: 3, description: 'Joined study group for Chemistry', date: '2025-05-18T19:00:00Z' },
-        { id: 4, description: 'Reviewed History notes', date: '2025-05-17T09:00:00Z' },
-    ]);
-    setDeadlines([
-        { id: 1, title: 'Mathematics Quiz 2', dueDate: '2025-06-23' },
-        { id: 2, title: 'Physics Assignment', dueDate: '2025-06-25' },
-        { id: 3, title: 'History Essay', dueDate: '2025-06-27' },
-    ]);
-    setResources([
-        { id: 1, title: 'Khan Academy Calculus', url: 'https://khanacademy.org', description: 'Interactive calculus lessons' },
-        { id: 2, title: 'Crash Course Chemistry', url: 'https://youtube.com', description: 'Video series on chemistry concepts' },
-        { id: 3, title: 'History.com', url: 'https://history.com', description: 'Articles on historical events' },
-    ]);
-    setQuote({
-        text: 'Education is the most powerful weapon you can use to change the world.',
-        author: 'Nelson Mandela',
-    });
-    setLoading(false);
-}, 25);
-} catch (error) {
-    console.error('Error fetching data:', error);
-    setLoading(false);
-}
-};
-fetchData();
-}, []);
+                const enrolledResponse = await fetch(`${API_BASE_URL}/api/user/enrolled-subjects`, { headers });
+                const enrolledData = await enrolledResponse.json();
+                if (enrolledResponse.ok && enrolledData.success) {
+                    const subjectNames = Array.isArray(enrolledData.data) ? enrolledData.data.map(s => s.subjectName || s) : [];
+                    setEnrolledSubjects(subjectNames);
+                    setStats(prev => ({ ...prev, numberOfSubjects: subjectNames.length }));
+                } else {
+                    console.error(enrolledData.message || 'Failed to fetch enrolled subjects');
+                }
+
+                const tasksResponse = await fetch(`${API_BASE_URL}/api/user/completed-tasks`, { headers });
+                const tasksData = await tasksResponse.json();
+                if (tasksResponse.ok && tasksData.success) {
+                    setCompletedTasks(tasksData.data);
+                    setStats(prev => ({ ...prev, completedTasks: tasksData.data }));
+                } else {
+                    console.error(tasksData.message || 'Failed to fetch completed tasks count');
+                }
+
+                const coursesResponse = await fetch(`${API_BASE_URL}/api/user/courses`, { headers });
+                const coursesData = await coursesResponse.json();
+                if (coursesResponse.ok && coursesData.success) {
+                    setCourses(coursesData.data.map(course => ({
+                        name: course.subjectName,
+                        progress: course.progress,
+                    })));
+                } else {
+                    console.error(coursesData.message || 'Failed to fetch course progress');
+                }
+
+                const attendanceResponse = await fetch(`${API_BASE_URL}/api/user/attendance`, { headers });
+                const attendanceData = await attendanceResponse.json();
+                if (attendanceResponse.ok && attendanceData.success) {
+                    setStats(prev => ({ ...prev, attendance: `${attendanceData.data}%` }));
+                } else {
+                    console.error(attendanceData.message || 'Failed to fetch attendance percentage');
+                }
+
+                const activitiesResponse = await fetch(`${API_BASE_URL}/api/user/activities`, { headers });
+                const activitiesData = await activitiesResponse.json();
+                if (activitiesResponse.ok && activitiesData.success) {
+                    setActivities(activitiesData.data.map(activity => ({
+                        id: activity.id,
+                        description: activity.description,
+                        date: activity.date,
+                    })));
+                } else {
+                    console.error(activitiesData.message || 'Failed to fetch activities');
+                }
+
+                setSchedule([
+                    { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
+                    { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
+                    { day: 'T', course: 'Physical Sciences', time: '10:00-11:00', location: 'Lab A' },
+                    { day: 'W', course: 'History', time: '09:00-10:30', location: 'Room 303' },
+                ]);
+
+                setQuote({
+                    text: 'Education is the most powerful weapon you can use to change the world.',
+                    author: 'Nelson Mandela',
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [API_BASE_URL, setActivities]);
+
+    useEffect(() => {
+        const checkRating = async () => {
+            try {
+                const headers = { Authorization: `Bearer ${sessionStorage.getItem('jwt')}` };
+                const res = await fetch(`${API_BASE_URL}/api/user/has-rated`, { headers });
+                const data = await res.json();
+                if (res.ok && !data) {
+
+                    console.log("Siphiwe"+data);
+                    setRes(true);
+                    setShowRatingPopup(true);
+                }
+            } catch (err) {
+                console.error("Error checking rating:", err);
+            }
+        };
+        checkRating();
+    }, [API_BASE_URL]);
 
     const handleLogout = () => {
+        if (res) {
+            setShowRatingPopup(true);
+        } else {
+            sessionStorage.removeItem('jwt');
+            navigate('/login');
+        }
+    };
+
+    const submitRating = async (value) => {
+        try {
+            const headers = {
+                Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                'Content-Type': 'application/json',
+            };
+            const res = await fetch(`${API_BASE_URL}/api/user/rate-app`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ rating: value }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                onActivity(`Rated app: ${value}`);
+                setShowRatingPopup(false);
+                sessionStorage.removeItem('jwt');
+                navigate('/login');
+            } else {
+                console.error(data.message || 'Failed to submit rating');
+                setShowRatingPopup(false);
+                sessionStorage.removeItem('jwt');
+                navigate('/login');
+            }
+        } catch (err) {
+            console.error('Error saving rating:', err);
+            setShowRatingPopup(false);
+            sessionStorage.removeItem('jwt');
+            navigate('/login');
+        }
+    };
+
+    const handleTimerFinish = () => {
+        setShowPopup(true);
+        onActivity('Completed study session');
+    };
+
+    const handleClosePopup = () => {
+        setShowPopup(false);
+    };
+
+    const handleRatingClose = () => {
+        setShowRatingPopup(false);
         sessionStorage.removeItem('jwt');
         navigate('/login');
     };
 
-const handleTimerFinish = () => {
-    setShowPopup(true);
-};
-
-const handleClosePopup = () => {
-    setShowPopup(false);
-};
-
-if (loading) {
-    return (
-        <div className="flex min-h-screen justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
-        </div>
-    );
-}
-
-return (
-    <>
-        <div className="flex min-h-screen">
-            <Sidebar
-                user={user}
-                onLogout={handleLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
-                darkMode={darkMode}
-            />
-            <div className="flex-1">
-                <Header
-                    user={user}
-                    notifications={notifications}
-                    setNotifications={setNotifications}
-                    isCollapsed={isCollapsed}
-                    darkMode={darkMode}
-                    setDarkMode={setDarkMode}
-                    tabDescription="StudentDashboard"
-                    userMessage="Welcome"
-                />
-                <div
-                    className={`
-                            flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300
-                            ${isCollapsed ? 'ml-16' : 'ml-64'}
-                        `}
-                >
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
-                            <StatsCard title="Performance" value={stats.performance} icon="📊" />
-                            <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
-                            <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
-                            <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
-                        </div>
-                        <div className="md:col-span-4">
-                            <ProgressOverview courses={courses} />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} />
-                        <Schedule schedule={schedule} />
-                        <PerformanceChart courses={courses} darkMode={darkMode} />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <RecentActivity activities={activities} />
-                        <UpcomingDeadlines deadlines={deadlines} />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <RecommendedResources resources={resources} />
-                        <NotificationsWidget notifications={notifications} />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <StudyTimer onTimerFinish={handleTimerFinish} />
-                        <MotivationalQuote quote={quote} />
-                    </div>
-                </div>
+    if (loading) {
+        return (
+            <div className="flex min-h-screen justify-center items-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-primary)]"></div>
             </div>
-            {showPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-2xl max-w-sm w-full">
-                        <h3 className="text-xl font-semibold text-[var(--text-primary)]">Time is up!</h3>
-                        <p className="text-[var(--text-secondary)] mb-4">Your study session has ended.</p>
-                        <button
-                            onClick={handleClosePopup}
-                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] w-full"
-                            aria-label="Close popup"
-                        >
-                            OK
-                        </button>
+        );
+    }
+
+    return (
+        <>
+            <div className="flex min-h-screen">
+                <Sidebar
+                    user={user}
+                    onLogout={handleLogout}
+                    isCollapsed={isCollapsed}
+                    setIsCollapsed={setIsCollapsed}
+                    darkMode={darkMode}
+                    onActivity={onActivity}
+                />
+                <div className="flex-1">
+                    <Header
+                        user={user}
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        isCollapsed={isCollapsed}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
+                        tabDescription="Student Dashboard"
+                        userMessage="Welcome to dashboard"
+                    />
+                    <div className={`${isCollapsed ? 'ml-16' : 'ml-64'} flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300`}>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                            <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-4 gap-6">
+                                <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊" />
+                                <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
+                                <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
+                                <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
+                            </div>
+                            <div className="md:col-span-4">
+                                <ProgressOverview courses={courses} />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} courses={courses} />
+                            <Schedule schedule={schedule} />
+                            <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <RecentActivity activities={activities} setActivities={setActivities} API_BASE_URL={API_BASE_URL} />
+                            <MotivationalQuote quote={quote} />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <StudyTimer onTimerFinish={handleTimerFinish} />
+                            <NotificationsWidget notifications={notifications} setNotifications={setNotifications} onActivity={onActivity} />
+                        </div>
                     </div>
                 </div>
-            )}
-        </div>
-    </>
-);
+
+                {/* Study timer popup */}
+                {showPopup && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+                            <h3 className="text-xl font-semibold text-[var(--text-primary)]">Time is up!</h3>
+                            <p className="text-[var(--text-secondary)] mb-4">Your study session has ended.</p>
+                            <button
+                                onClick={handleClosePopup}
+                                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] w-full"
+                                aria-label="Close popup"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Rating popup */}
+                {showRatingPopup && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center">
+                            <h3 className="text-xl font-semibold text-[var(--text-primary)]">Rate Your Experience</h3>
+                            <p className="text-[var(--text-secondary)] mb-4">How was your experience using the app?</p>
+                            <div className="flex justify-center gap-6 text-4xl mb-2">
+                                <button
+                                    onClick={() => submitRating('difficult')}
+                                    title="Difficult"
+                                    className="hover:scale-110 transition-transform"
+                                    aria-label="Difficult rating"
+                                >
+                                    😣
+                                </button>
+                                <button
+                                    onClick={() => submitRating('manageable')}
+                                    title="Manageable"
+                                    className="hover:scale-110 transition-transform"
+                                    aria-label="Manageable rating"
+                                >
+                                    🙂
+                                </button>
+                                <button
+                                    onClick={() => submitRating('easy')}
+                                    title="Easy"
+                                    className="hover:scale-110 transition-transform"
+                                    aria-label="Easy rating"
+                                >
+                                    😄
+                                </button>
+                            </div>
+                            <div className="flex justify-center gap-16 text-sm text-[var(--text-secondary)]">
+                                <span>Difficult</span>
+                                <span>Manageable</span>
+                                <span>Easy</span>
+                            </div>
+                            <button
+                                onClick={handleRatingClose}
+                                className="mt-4 px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] w-full"
+                                aria-label="Skip rating"
+                            >
+                                Skip
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
+    );
 };
 
 StudentDashboard.propTypes = {
+    user: PropTypes.shape({
+        first_login: PropTypes.bool.isRequired,
+    }).isRequired,
     isCollapsed: PropTypes.bool.isRequired,
     setIsCollapsed: PropTypes.func.isRequired,
     darkMode: PropTypes.bool.isRequired,
@@ -238,11 +670,21 @@ StudentDashboard.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             message: PropTypes.string.isRequired,
-            date: PropTypes.string.isRequired,
+            createdAt: PropTypes.string.isRequired,
             read: PropTypes.bool.isRequired,
+            type: PropTypes.string,
         })
     ).isRequired,
     setNotifications: PropTypes.func.isRequired,
+    activities: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            description: PropTypes.string.isRequired,
+            date: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    setActivities: PropTypes.func.isRequired,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default StudentDashboard;

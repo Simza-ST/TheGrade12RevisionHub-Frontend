@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import './sidebar.css';
+
 
 const UserProfile = ({ user, onLogout }) => {
     if (!user) {
@@ -11,13 +12,23 @@ const UserProfile = ({ user, onLogout }) => {
         ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
         : user.email || 'User';
 
+    const getInitials = (firstName, lastName) => {
+        return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+    };
+
     return (
         <div className="user-profile flex items-center space-x-4 p-4 bg-[var(--bg-secondary)] rounded-2xl shadow-lg">
-            <img
-                src={user.profilePicture || '/default-avatar.png'}
-                alt="Profile"
-                className="w-12 h-12 rounded-full border-2 border-[var(--accent-primary)] object-cover"
-            />
+            {user.profilePicture ? (
+                <img
+                    src={user.profilePicture}
+                    alt="Profile picture"
+                    className="w-12 h-12 rounded-full border-2 border-[var(--accent-primary)] object-cover"
+                />
+            ) : (
+                <div className="h-12 w-12 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center text-2xl text-[var(--text-primary)] border-2 border-[var(--accent-primary)]">
+                    {getInitials(user.firstName, user.lastName)}
+                </div>
+            )}
             <div className="user-profile-info flex-1">
                 <h2 className="text-base font-bold text-[var(--text-primary)]">
                     {displayName || 'Unknown User'}
@@ -44,17 +55,17 @@ UserProfile.propTypes = {
     onLogout: PropTypes.func.isRequired,
 };
 
-const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger }) => {
-    const navItems = [
+const Sidebar = ({ user, onLogout, isCollapsed, setIsCollapsed, darkMode, disableHamburger ,onActivity}) => {
+        const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
-        { name: 'Subjects', path: '/subjects', icon: '📚' },
-        { name: 'Quizzes', path: '/quizzes', icon: '❓' },
-        { name: 'Question Papers', path: '/question-papers/list', icon: '📝' },
-        { name: 'Resources', path: '/resources', icon: '🔗' },
-        { name: 'Performance', path: '/performance', icon: '📊' },
-        { name: 'Notifications', path: '/notifications', icon: '🔔' },
-        { name: 'Chatroom', path: '/chatroom', icon: '💬' },
-        { name: 'Settings', path: '/settings', icon: '⚙️' },
+        { name: 'Subjects', path: '/subjects', icon: '📚', },
+        { name: 'Quizzes', path: '/quizzes', icon: '❓',  },
+        { name: 'Question Papers', path: '/question-papers/list', icon: '📝', },
+        { name: 'Resources', path: '/resources', icon: '🔗', onClick: () => onActivity && onActivity('Viewed Resources') },
+        { name: 'Performance', path: '/performance', icon: '📊', onClick: () => onActivity && onActivity('Viewed Performances') },
+        { name: 'Notifications', path: '/notifications', icon: '🔔', onClick: () => onActivity && onActivity('Viewed Notifications') },
+        { name: 'Chatroom', path: '/chatroom', icon: '💬', onClick: () => onActivity && onActivity('Visited Chatroom') },
+        { name: 'Settings', path: '/settings', icon: '⚙️',  },
         { name: 'Logout', path: '/', icon: '🚪', onClick: onLogout },
     ];
 
@@ -137,6 +148,7 @@ Sidebar.propTypes = {
     setIsCollapsed: PropTypes.func,
     darkMode: PropTypes.bool.isRequired,
     disableHamburger: PropTypes.bool,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default Sidebar;
