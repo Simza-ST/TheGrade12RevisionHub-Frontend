@@ -184,6 +184,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     };
 
     const handleLogout = () => {
+
         sessionStorage.removeItem('jwt');
         navigate('/login');
     };

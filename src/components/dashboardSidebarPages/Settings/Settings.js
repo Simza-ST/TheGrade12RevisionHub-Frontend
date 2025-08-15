@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Sidebar from '../../common/Sidebar';
@@ -21,6 +21,8 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(false);
+    const sidebarRef = useRef(null);
     const [settings, setSettings] = useState({
         emailNotifications: true,
         chatNotifications: true,
