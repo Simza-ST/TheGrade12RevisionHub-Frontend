@@ -9,7 +9,7 @@ import MathematicsP2Nov2022Eng
 const paperComponents = {
     "Mathematics P1 Nov 2022 Eng": MathematicsP1Nov2022Eng,
     "Mathematics P2 Nov 2022 Eng": MathematicsP2Nov2022Eng,
-    "EnglishFALP12020": EnglishFALP12020,
+    "English FAL P1 Nov 2022": EnglishFALP12020,
     // Add more filename mappings as needed:
 };
 
