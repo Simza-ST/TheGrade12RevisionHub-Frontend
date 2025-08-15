@@ -11,8 +11,6 @@ const paperComponents = {
     "Mathematics P2 Nov 2022 Eng": MathematicsP2Nov2022Eng,
     "EnglishFALP12020": EnglishFALP12020,
     // Add more filename mappings as needed:
-    // "PhysicsP1May2023": PhysicsP1May2023,
-    // "ChemistryP2Sep2022": ChemistryP2Sep2022,
 };
 
 export const getPaperComponent = (fileName) => {
