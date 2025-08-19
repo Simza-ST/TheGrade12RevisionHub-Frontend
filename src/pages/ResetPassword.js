@@ -11,6 +11,9 @@ const ResetPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isOtpVerified, setIsOtpVerified] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
     const email = location.state?.email || '';
@@ -21,7 +24,15 @@ const ResetPassword = () => {
         if (!email) {
             setError('Email is missing. Please start the process from forgot password.');
         }
-    }, [email]);
+        setPasswordError(validatePasswordMatch(newPassword, confirmPassword));
+    }, [email, newPassword, confirmPassword]);
+
+    const validatePasswordMatch = (password, confirmPassword) => {
+        if (password && confirmPassword && password !== confirmPassword) {
+            return 'Passwords do not match.';
+        }
+        return '';
+    };
 
     const handleOtpSubmit = async (event) => {
         event.preventDefault();
@@ -178,6 +189,14 @@ const ResetPassword = () => {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
@@ -223,13 +242,13 @@ const ResetPassword = () => {
                             <form id="resetPasswordForm" className="space-y-5" onSubmit={handlePasswordSubmit}>
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         id="password"
                                         name="password"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         required
-                                        className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                        className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                         placeholder="New Password"
                                         disabled={isLoading}
                                     />
@@ -239,16 +258,25 @@ const ResetPassword = () => {
                                     >
                                         New Password
                                     </label>
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-3 text-gray-300 hover:text-teal-400 focus:outline-none"
+                                        onClick={togglePasswordVisibility}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        disabled={isLoading}
+                                    >
+                                        {showPassword ? '👁️' : '👁️‍🗨️'}
+                                    </button>
                                 </div>
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showConfirmPassword ? 'text' : 'password'}
                                         id="confirmPassword"
                                         name="confirmPassword"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
-                                        className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
+                                        className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                         placeholder="Confirm Password"
                                         disabled={isLoading}
                                     />
@@ -258,11 +286,21 @@ const ResetPassword = () => {
                                     >
                                         Confirm Password
                                     </label>
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-3 text-gray-300 hover:text-teal-400 focus:outline-none"
+                                        onClick={toggleConfirmPasswordVisibility}
+                                        aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                                        disabled={isLoading}
+                                    >
+                                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                    </button>
+                                    {passwordError && <p className="text-red-400 text-sm mt-1">{passwordError}</p>}
                                 </div>
                                 <button
                                     type="submit"
                                     className="btn-submit w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50"
-                                    disabled={isLoading}
+                                    disabled={isLoading || passwordError}
                                 >
                                     Set New Password
                                 </button>
