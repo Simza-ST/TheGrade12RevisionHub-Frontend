@@ -40,6 +40,7 @@ import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/
 import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
 import { recordActivity } from './utils/activityUtil.js';
 import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
 
 const PublicLayout = () => (
     <div>
@@ -211,6 +212,7 @@ const App = () => {
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/verify-otp" element={<VerifyOTP {...commonProps} />} />
+                    <Route path="/reset-password" element={<ResetPassword {...commonProps} />} />
 
                     {/* Protected routes */}
                     <Route
