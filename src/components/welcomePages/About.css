@@ -85,3 +85,69 @@ section {
     margin-top: 0;
     font-family: 'Inter', sans-serif;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .content {
+        width: 90%;
+    }
+
+    .about-details {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .left {
+        width: 100%;
+        margin-right: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .left img {
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .right {
+        width: 100%;
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .title span {
+        font-size: 25px;
+    }
+
+    .topic {
+        font-size: 1.3em;
+    }
+
+    .right p {
+        font-size: 0.95em;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .content {
+        width: 95%;
+    }
+
+    .title span {
+        font-size: 20px;
+    }
+
+    .topic {
+        font-size: 1.2em;
+    }
+
+    .right p {
+        font-size: 0.9em;
+    }
+
+    .left img {
+        max-width: 300px;
+    }
+}
