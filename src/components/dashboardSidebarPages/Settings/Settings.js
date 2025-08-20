@@ -859,7 +859,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         <br />
                                         <button
                                             onClick={handleChangePassword}
-                                            className="btn-secondary mt-4 flex items-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Change Password"
                                             disabled={loading || passwordMatchError}
                                         >
@@ -917,7 +917,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     <div className="flex gap-4">
                                         <button
                                             onClick={handleSaveSettings}
-                                            className="btn-secondary flex items-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Save Notification Settings"
                                             disabled={loading}
                                         >
@@ -926,7 +926,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         </button>
                                         <button
                                             onClick={handleClearNotifications}
-                                            className="btn-secondary flex items-center gap-2"
+                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                             aria-label="Clear Notifications"
                                             disabled={loading}
                                         >
@@ -973,7 +973,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                     </div>
                                     <button
                                         onClick={handleSaveSettings}
-                                        className="btn-secondary flex items-center gap-2"
+                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
                                         aria-label="Save Appearance Settings"
                                         disabled={loading}
                                     >
