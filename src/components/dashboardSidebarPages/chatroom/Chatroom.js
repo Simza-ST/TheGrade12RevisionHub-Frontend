@@ -50,7 +50,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                 setShowSidebar(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showSidebar]);
@@ -286,7 +285,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
 
     useEffect(() => {
         if (!user || stompClientRef.current) return;
-
         const socket = new SockJS('http://localhost:6262/ws');
         const client = new Client({
             webSocketFactory: () => socket,
@@ -298,7 +296,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                 console.log('WebSocket connected for user:', user.email);
                 stompClientRef.current = client;
                 setStompClient(client);
-
                 client.subscribe('/topic/group', (message) => {
                     console.log('Received group message:', message.body);
                     if (chatMode === 'group' && !selectedGroupId) {
@@ -306,7 +303,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         updateMessagesWithServerResponse(data);
                     }
                 });
-
                 groups.forEach(group => {
                     client.subscribe(`/topic/group/${group.id}`, (message) => {
                         console.log(`Received group message for group ${group.id}:`, message.body);
@@ -323,7 +319,6 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         }
                     });
                 });
-
                 client.subscribe(`/user/${user.id}/queue/message`, (message) => {
                     console.log('Received private message:', message.body);
                     if (chatMode === 'private' && selectedUserId) {
@@ -347,9 +342,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                 setStompClient(null);
             },
         });
-
         client.activate();
-
         return () => {
             if (stompClientRef.current) {
                 client.deactivate();
@@ -576,10 +569,12 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             setError('Failed to delete group: ' + error.message);
         }
     };
+
     const openDeleteModal = (groupId) => {
         setGroupToDelete(groupId);
         setIsModalOpen(true);
     };
+
     const confirmDelete = async () => {
         if (groupToDelete) {
             await handleDeleteGroup(groupToDelete);
@@ -587,6 +582,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
             setGroupToDelete(null);
         }
     };
+
     const closeModal = () => {
         setIsModalOpen(false);
         setGroupToDelete(null);
@@ -623,265 +619,141 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
         <div className="full">
             <div className="flex min-h-screen bg-[var(--bg-primary)] relative">
                 <style>{`
-                    :not(.sidebar-wrapper, .hamburger, .dashboard-content, .header, .header h1) {
-                        transition: none !important;
-                        animation: none !important;
-                        opacity: 1 !important;
+                    :root {
+                        --bg-primary: ${darkMode ? '#111827' : '#f4f4f4'};
+                        --bg-secondary: ${darkMode ? '#1f2937' : '#ffffff'};
+                        --bg-tertiary: ${darkMode ? '#374151' : '#f3f4f6'};
+                        --text-primary: ${darkMode ? '#f3f4f6' : '#1f2937'};
+                        --text-secondary: ${darkMode ? '#d1d5db' : '#6b7280'};
+                        --accent-primary: #4FD1C5;
+                        --accent-secondary: #ef4444;
+                        --hover-primary: #3CB7AB;
+                        --hover-tertiary: ${darkMode ? '#4b5563' : '#e5e7eb'};
+                        --border-color: ${darkMode ? '#4b5563' : '#e5e7eb'};
+                        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
                     }
-                    .sidebar-wrapper,
-                    .hamburger,
-                    .dashboard-content,
-                    .header,
-                    .header h1 {
-                        transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out;
-                    }
+
                     .full {
                         width: 100%;
                         min-height: 100vh;
                         position: relative;
                         z-index: 10;
                     }
-                    .bg-[var(--bg-primary)] {
-                        background-color: var(--bg-primary, ${darkMode ? '#111827' : '#f4f4f4'});
-                    }
-                    .bg-[var(--bg-secondary)] {
-                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                    }
-                    .bg-[var(--bg-tertiary)] {
-                        background-color: var(--bg-tertiary, ${darkMode ? '#374151' : '#e5e7eb'});
-                    }
-                    .bg-[var(--accent-primary)] {
-                        background-color: var(--accent-primary, #007bff);
-                    }
-                    .bg-[var(--accent-secondary)] {
-                        background-color: var(--accent-secondary, #dc3545);
-                    }
-                    .text-[var(--text-primary)] {
-                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                    }
-                    .text-[var(--text-secondary)] {
-                        color: var(--text-secondary, ${darkMode ? '#d1d5db' : '#666666'});
-                    }
-                    .text-red-500 {
-                        color: #ef4444;
-                    }
-                    .text-red-600 {
-                        color: #dc2626;
-                    }
-                    .hover\\:bg-[var(--hover-tertiary)]:hover {
-                        background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
-                    }
-                    .hover\\:bg-[var(--hover-primary)]:hover {
-                        background-color: var(--hover-primary, #0056b3);
-                    }
-                    .hover\\:bg-red-300:hover {
-                        background-color: #fca5a5;
-                    }
-                    .flex {
-                        display: flex;
-                    }
-                    .flex-col {
-                        flex-direction: column;
-                    }
-                    .min-h-screen {
-                        min-height: 100vh;
-                    }
-                    .min-w-0 {
-                        min-width: 0;
-                    }
-                    .justify-center {
-                        justify-content: center;
-                    }
-                    .justify-between {
-                        justify-content: space-between;
-                    }
-                    .items-center {
-                        align-items: center;
-                    }
-                    .flex-1 {
-                        flex: 1;
-                    }
-                    .gap-2 {
-                        gap: clamp(4px, 1vw, 8px);
-                    }
-                    .gap-4 {
-                        gap: clamp(8px, 2vw, 16px);
-                    }
-                    .p-2 {
-                        padding: clamp(4px, 1vw, 8px);
-                    }
-                    .p-3 {
-                        padding: clamp(6px, 1.5vw, 12px);
-                    }
-                    .p-4 {
-                        padding: clamp(8px, 2vw, 16px);
-                    }
-                    .sm\\:p-6 {
-                        padding: clamp(12px, 3vw, 24px);
-                    }
-                    .sm\\:p-8 {
-                        padding: clamp(16px, 4vw, 32px);
-                    }
-                    .rounded-lg {
-                        border-radius: clamp(4px, 1vw, 8px);
-                    }
-                    .rounded-md {
-                        border-radius: clamp(3px, 0.8vw, 6px);
-                    }
-                    .mb-2 {
-                        margin-bottom: clamp(4px, 1vw, 8px);
-                    }
-                    .mb-4 {
-                        margin-bottom: clamp(8px, 2vw, 16px);
-                    }
-                    .mb-6 {
-                        margin-bottom: clamp(12px, 3vw, 24px);
-                    }
-                    .mt-1 {
-                        margin-top: clamp(2px, 0.5vw, 4px);
-                    }
-                    .mt-2 {
-                        margin-top: clamp(4px, 1vw, 8px);
-                    }
-                    .mt-4 {
-                        margin-top: clamp(8px, 2vw, 16px);
-                    }
-                    .shadow-[var(--shadow)] {
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    }
-                    .text-xl {
-                        font-size: clamp(1.125rem, 3.5vw, 1.25rem);
-                    }
-                    .text-lg {
-                        font-size: clamp(1rem, 3vw, 1.125rem);
-                    }
-                    .text-base {
-                        font-size: clamp(0.875rem, 2.5vw, 1rem);
-                    }
-                    .text-sm {
-                        font-size: clamp(0.75rem, 2vw, 0.875rem);
-                    }
-                    .text-xs {
-                        font-size: clamp(0.625rem, 1.8vw, 0.75rem);
-                    }
-                    .font-bold {
-                        font-weight: 700;
-                    }
-                    .font-semibold {
-                        font-weight: 600;
-                    }
-                    .font-medium {
-                        font-weight: 500;
-                    }
-                    .form-label {
-                        color: var(--text-primary, ${darkMode ? '#e5e7eb' : '#1f2937'});
-                        font-weight: 600;
-                        margin-bottom: clamp(6px, 1.5vw, 8px);
-                        display: block;
-                    }
-                    .form-input {
-                        width: 100%;
-                        padding: clamp(6px, 1.5vw, 8px);
-                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                        border-radius: clamp(3px, 0.8vw, 4px);
-                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                        color: var(--text-primary, ${darkMode ? '#ffffff' : '#333333'});
-                        font-size: clamp(0.75rem, 2vw, 0.875rem);
-                    }
-                    .form-input:focus {
-                        border-color: var(--accent-primary, #007bff);
-                        outline: none;
-                    }
-                    .btn-primary {
-                        background-color: var(--accent-primary, #007bff);
-                        color: #ffffff;
-                        padding: clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px);
-                        border-radius: clamp(3px, 0.8vw, 4px);
-                        border: none;
-                        cursor: pointer;
-                        font-size: clamp(0.75rem, 2vw, 0.875rem);
-                        min-height: 36px;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    .btn-primary:hover {
-                        background-color: var(--hover-primary, #0056b3);
-                    }
-                    .disabled\\:opacity-50:disabled {
-                        opacity: 0.5;
-                    }
-                    .disabled\\:cursor-not-allowed:disabled {
-                        cursor: not-allowed;
-                    }
-                    .grid {
-                        display: grid;
-                        gap: clamp(8px, 2vw, 16px);
-                    }
-                    .sm\\:grid-cols-3 {
-                        grid-template-columns: repeat(3, 1fr);
-                    }
-                    .h-4 {
-                        height: clamp(12px, 3vw, 16px);
-                    }
-                    .w-4 {
-                        width: clamp(12px, 3vw, 16px);
-                    }
-                    .min-w-[36px] {
-                        min-width: clamp(28px, 7vw, 36px);
-                    }
-                    .min-h-[36px] {
-                        min-height: clamp(28px, 7vw, 36px);
-                    }
-                    .min-w-[40px] {
-                        min-width: clamp(32px, 8vw, 40px);
-                    }
-                    .min-h-[40px] {
-                        min-height: clamp(32px, 8vw, 40px);
-                    }
-                    .min-w-[60px] {
-                        min-width: clamp(48px, 12vw, 60px);
-                    }
-                    .max-h-[50vh] {
-                        max-height: 50vh;
-                    }
-                    .max-h-48 {
-                        max-height: clamp(160px, 40vw, 192px);
-                    }
-                    .overflow-y-auto {
-                        overflow-y: auto;
-                    }
-                    .truncate {
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                    }
-                    .max-w-[150px] {
-                        max-width: clamp(120px, 30vw, 150px);
-                    }
-                    .border-b {
-                        border-bottom-width: 1px;
-                    }
-                    .border-[var(--border-color)] {
-                        border-color: var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                    }
+
                     .chat-section {
                         background: ${darkMode
                     ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
                     : 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)'};
-                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
-                        border: 1px solid var(--border-color, ${darkMode ? '#374151' : '#e5e7eb'});
-                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                        padding: clamp(16px, 4vw, 32px);
-                        border-radius: clamp(8px, 2vw, 16px);
+                        border-radius: 12px;
+                        box-shadow: var(--shadow);
+                        padding: 24px;
+                        height: calc(100vh - 80px);
+                        display: flex;
+                        flex-direction: column;
                     }
-                    .animate-spin {
-                        animation: spin 1s linear infinite;
+
+                    .message-container {
+                        flex: 1;
+                        overflow-y: auto;
+                        padding: 16px;
+                        border-radius: 8px;
+                        background-color: var(--bg-secondary);
+                        margin-bottom: 16px;
                     }
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
+
+                    .message-container::-webkit-scrollbar {
+                        width: 6px;
                     }
+
+                    .message-container::-webkit-scrollbar-thumb {
+                        background-color: var(--border-color);
+                        border-radius: 3px;
+                    }
+
+                    .message-container::-webkit-scrollbar-track {
+                        background-color: var(--bg-secondary);
+                    }
+
+                    .message {
+                        margin-bottom: 12px;
+                        padding: 12px 16px;
+                        border-radius: 12px;
+                        max-width: 75%;
+                        word-break: break-word;
+                        animation: fadeIn 0.3s ease-in;
+                    }
+
+                    .message.sent {
+                        background-color: var(--accent-primary);
+                        color: white;
+                        margin-left: auto;
+                    }
+
+                    .message.received {
+                        background-color: var(--bg-tertiary);
+                        color: var(--text-primary);
+                    }
+
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+
+                    .form-input {
+                        width: 100%;
+                        padding: 10px;
+                        border: 1px solid var(--border-color);
+                        border-radius: 8px;
+                        background-color: var(--bg-secondary);
+                        color: var(--text-primary);
+                        font-size: 0.875rem;
+                        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                    }
+
+                    .form-input:focus {
+                        border-color: var(--accent-primary);
+                        box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.1);
+                        outline: none;
+                    }
+
+                    .btn-primary {
+                        background-color: var(--accent-primary);
+                        color: white;
+                        padding: 10px 16px;
+                        border-radius: 8px;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 0.875rem;
+                        font-weight: 500;
+                        transition: background-color 0.2s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .btn-primary:hover {
+                        background-color: var(--hover-primary);
+                    }
+
+                    .btn-secondary {
+                        background-color: var(--bg-tertiary);
+                        color: var(--text-primary);
+                        padding: 10px 16px;
+                        border-radius: 8px;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 0.875rem;
+                        font-weight: 500;
+                        transition: background-color 0.2s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .btn-secondary:hover {
+                        background-color: var(--hover-tertiary);
+                    }
+
                     .hamburger {
                         display: none;
                         cursor: pointer;
@@ -894,6 +766,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         z-index: 50;
                         transition: left 0.3s ease-in-out;
                     }
+
                     .sidebar-wrapper {
                         position: fixed;
                         top: 0;
@@ -902,156 +775,77 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         z-index: 40;
                         transition: transform 0.3s ease-in-out;
                     }
+
                     .sidebar-hidden {
                         transform: translateX(-100%);
                     }
+
                     .dashboard-content {
                         max-height: 80vh;
                         overflow-y: auto;
                         padding-right: clamp(6px, 1.5vw, 8px);
                     }
+
                     .dashboard-content::-webkit-scrollbar {
                         width: 6px;
                     }
+
                     .dashboard-content::-webkit-scrollbar-thumb {
-                        background-color: var(--border-color, ${darkMode ? '#4b5563' : '#e5e7eb'});
+                        background-color: var(--border-color);
                         border-radius: 3px;
                     }
+
                     .dashboard-content::-webkit-scrollbar-track {
-                        background-color: var(--bg-secondary, ${darkMode ? '#1f2937' : '#ffffff'});
+                        background-color: var(--bg-secondary);
                     }
-                    .underline {
-                        text-decoration: underline;
-                    }
-                    .list-disc {
-                        list-style-type: disc;
-                    }
-                    .list-inside {
-                        list-style-position: inside;
-                    }
-                    .space-y-1 > * + * {
-                        margin-top: clamp(3px, 0.8vw, 4px);
-                    }
+
                     @media (max-width: 639px) {
-                        .header h1 {
-                            padding-left: clamp(48px, 12vw, 56px);
-                        }
-                        .sidebar-open .header h1 {
-                            padding-left: clamp(208px, 50vw, 216px);
-                        }
-                        .sidebar-open .dashboard-content {
-                            margin-left: clamp(192px, 48vw, 198px);
-                        }
                         .hamburger {
                             display: block;
+                            left: ${showSidebar ? 'clamp(192px, 48vw, 198px)' : 'clamp(12px, 3vw, 16px)'};
                         }
+
                         .sidebar-wrapper {
                             display: ${showSidebar ? 'block' : 'none'};
                         }
-                        .hamburger {
-                            left: ${showSidebar ? 'clamp(192px, 48vw, 198px)' : 'clamp(12px, 3vw, 16px)'};
+
+                        .chat-section {
+                            padding: 16px;
+                            height: calc(100vh - 64px);
                         }
+
+                        .message {
+                            max-width: 85%;
+                        }
+
+                        .header h1 {
+                            padding-left: clamp(48px, 12vw, 56px);
+                        }
+
+                        .sidebar-open .header h1 {
+                            padding-left: clamp(208px, 50vw, 216px);
+                        }
+
+                        .sidebar-open .dashboard-content {
+                            margin-left: clamp(192px, 48vw, 198px);
+                        }
+
                         .ml-16, .ml-64 {
                             margin-left: 0;
                         }
-                        .p-4, .sm\\:p-6, .sm\\:p-8 {
-                            padding: clamp(8px, 2vw, 10px);
-                        }
-                        .text-xl {
-                            font-size: clamp(0.875rem, 2.5vw, 1rem);
-                        }
-                        .text-lg {
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
-                        }
-                        .text-base {
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
-                        }
-                        .text-sm {
-                            font-size: clamp(0.625rem, 1.8vw, 0.75rem);
-                        }
-                        .text-xs {
-                            font-size: clamp(0.5rem, 1.5vw, 0.625rem);
-                        }
-                        .btn-primary {
-                            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-                            min-height: 36px;
-                        }
-                        .grid {
-                            grid-template-columns: 1fr;
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: 1fr;
-                        }
-                        .flex flex-col sm\\:flex-row {
-                            flex-direction: column;
-                        }
-                        .max-h-[50vh] {
-                            max-height: 40vh;
-                        }
-                        .max-h-48 {
-                            max-height: 160px;
-                        }
                     }
-                    @media (min-width: 640px) and (max-width: 767px) {
-                        .grid {
-                            grid-template-columns: repeat(1, 1fr);
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: repeat(2, 1fr);
-                        }
+
+                    @media (min-width: 640px) {
                         .hamburger {
                             display: none;
                         }
+
                         .sidebar-wrapper {
                             display: block;
                         }
-                        .p-4, .sm\\:p-6 {
-                            padding: clamp(12px, 3vw, 16px);
-                        }
-                        .sm\\:p-8 {
-                            padding: clamp(16px, 4vw, 20px);
-                        }
-                        .flex flex-col sm\\:flex-row {
-                            flex-direction: row;
-                        }
-                    }
-                    @media (min-width: 768px) and (max-width: 1023px) {
-                        .grid {
-                            grid-template-columns: repeat(2, 1fr);
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                        .p-4, .sm\\:p-6 {
-                            padding: clamp(12px, 3vw, 16px);
-                        }
-                        .sm\\:p-8 {
-                            padding: clamp(16px, 4vw, 20px);
-                        }
-                    }
-                    @media (min-width: 1024px) and (max-width: 1279px) {
-                        .grid {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                    }
-                    @media (min-width: 1280px) {
-                        .grid {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                        .sm\\:grid-cols-3 {
-                            grid-template-columns: repeat(3, 1fr);
-                        }
-                        .p-4, .sm\\:p-6 {
-                            padding: clamp(16px, 3.5vw, 20px);
-                        }
-                        .sm\\:p-8 {
-                            padding: clamp(20px, 4vw, 24px);
-                        }
                     }
                 `}</style>
+
                 <button
                     className="hamburger"
                     onClick={() => {
@@ -1064,6 +858,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
                     </svg>
                 </button>
+
                 <div ref={sidebarRef} className={`sidebar-wrapper ${!showSidebar ? 'sidebar-hidden' : ''}`}>
                     <Sidebar
                         user={user}
@@ -1074,6 +869,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                         disableHamburger={showSidebar && window.innerWidth <= 639}
                     />
                 </div>
+
                 <div className="flex-1">
                     <Header
                         user={user}
@@ -1088,85 +884,77 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                     />
                     <div className={`flex-1 min-w-0 p-4 sm:p-6 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content ${showSidebar ? 'sidebar-open' : ''}`}>
                         <div className="chat-section">
-                            <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                                <button
-                                    onClick={() => {
-                                        setChatMode('group');
-                                        setSelectedUserId(null);
-                                        setPrivateSearchQuery('');
-                                        setMessages([]);
-                                    }}
-                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'group' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                                >
-                                    Group Chats
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setChatMode('private');
-                                        setSelectedGroupId(null);
-                                        setPrivateSearchQuery('');
-                                        setMessages([]);
-                                    }}
-                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'private' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                                >
-                                    Private Chat
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setChatMode('createGroup');
-                                        setSelectedGroupId(null);
-                                        setPrivateSearchQuery('');
-                                        setCreateGroupSearchQuery('');
-                                        setMessages([]);
-                                    }}
-                                    className={`px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] ${chatMode === 'createGroup' ? 'bg-[var(--accent-primary)] text-white' : ''}`}
-                                >
-                                    Manage Groups
-                                </button>
+                            <div className="flex items-center gap-3 mb-6">
+                                {['group', 'private', 'createGroup'].map((mode) => (
+                                    <button
+                                        key={mode}
+                                        onClick={() => {
+                                            setChatMode(mode);
+                                            if (mode === 'group') setSelectedUserId(null);
+                                            if (mode === 'private') setSelectedGroupId(null);
+                                            setPrivateSearchQuery('');
+                                            setCreateGroupSearchQuery('');
+                                            setMessages([]);
+                                        }}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm sm:text-base transition-all duration-200 ${
+                                            chatMode === mode
+                                                ? 'bg-[var(--accent-primary)] text-white'
+                                                : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-tertiary)]'
+                                        }`}
+                                    >
+                                        {mode === 'group' && 'Group Chats'}
+                                        {mode === 'private' && 'Private Chat'}
+                                        {mode === 'createGroup' && 'Manage Groups'}
+                                    </button>
+                                ))}
                             </div>
 
-                            {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm">
+                                    {error}
+                                </div>
+                            )}
 
                             {chatMode === 'group' && (
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Group Chats:</h2>
-                                    <div className="flex flex-col gap-2 mb-4">
-                                        <select
-                                            value={selectedGroupId || ''}
-                                            onChange={(e) => {
-                                                setSelectedGroupId(Number(e.target.value) || null);
-                                                setMessages([]);
-                                            }}
-                                            className="form-input w-full text-base"
-                                            disabled={groups.length === 0}
-                                        >
-                                            <option value="">Main Group Chat</option>
-                                            {groups.map((g) => (
-                                                <option key={g.id} value={g.id}>
-                                                    {g.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="max-h-[50vh] overflow-y-auto mb-4">
+                                <div className="flex flex-col flex-1">
+                                    <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Group Chats</h2>
+                                    <select
+                                        value={selectedGroupId || ''}
+                                        onChange={(e) => {
+                                            setSelectedGroupId(Number(e.target.value) || null);
+                                            setMessages([]);
+                                        }}
+                                        className="form-input mb-4"
+                                        disabled={groups.length === 0}
+                                    >
+                                        <option value="">Main Group Chat</option>
+                                        {groups.map((g) => (
+                                            <option key={g.id} value={g.id}>
+                                                {g.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="message-container">
                                         {messages.length > 0 ? (
                                             messages.map((msg) => (
                                                 <div
                                                     key={msg.id || msg.tempId}
-                                                    className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
+                                                    className={`message ${msg.senderId === user.id ? 'sent' : 'received'}`}
                                                 >
-                                                    <span className="font-medium text-base text-[var(--text-primary)]">
-                                                        {getSenderName(msg.senderId)}:
-                                                    </span>
-                                                    <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="font-semibold text-sm">
+                                                            {getSenderName(msg.senderId)}:
+                                                        </span>
+                                                        <span className="text-sm">{msg.content}</span>
+                                                    </div>
                                                     <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className="text-sm text-[var(--text-secondary)]">No messages found.</p>
+                                            <p className="text-sm text-[var(--text-secondary)] text-center">No messages found.</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex items-center gap-3 mt-4">
                                         <input
                                             type="text"
                                             value={newMessage}
@@ -1177,24 +965,25 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                         />
                                         <button
                                             onClick={handleSendMessage}
-                                            className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px]"
+                                            className="btn-primary min-w-[44px] min-h-[44px]"
                                             aria-label="Send message"
                                         >
-                                            <FiSend className="w-4 h-4" />
+                                            <FiSend className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>
                             )}
+
                             {chatMode === 'private' && (
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Private Chat:</h2>
-                                    <div className="flex flex-col gap-2 mb-4">
+                                <div className="flex flex-col flex-1">
+                                    <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Private Chat</h2>
+                                    <div className="flex flex-col gap-3 mb-4">
                                         <input
                                             type="text"
                                             value={privateSearchQuery}
                                             onChange={(e) => setPrivateSearchQuery(e.target.value)}
                                             placeholder="Search users..."
-                                            className="form-input w-full text-base"
+                                            className="form-input"
                                             aria-label="Search users"
                                         />
                                         <select
@@ -1205,7 +994,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                                 setMessages([]);
                                                 console.log('Selected user:', userId);
                                             }}
-                                            className="form-input w-full text-base"
+                                            className="form-input"
                                             disabled={users.length === 0}
                                         >
                                             <option value="">Select a user</option>
@@ -1216,25 +1005,27 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="max-h-[50vh] overflow-y-auto mb-4">
+                                    <div className="message-container">
                                         {messages.length > 0 ? (
                                             messages.map((msg) => (
                                                 <div
                                                     key={msg.id || msg.tempId}
-                                                    className={`p-2 my-2 border-b border-[var(--border-color)] ${msg.senderId === user.id ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--bg-secondary)]'} rounded-lg`}
+                                                    className={`message ${msg.senderId === user.id ? 'sent' : 'received'}`}
                                                 >
-                                                    <span className="font-medium text-base text-[var(--text-primary)]">
-                                                        {getSenderName(msg.senderId)}:
-                                                    </span>
-                                                    <span className="text-base text-[var(--text-secondary)]"> {msg.content}</span>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="font-semibold text-sm">
+                                                            {getSenderName(msg.senderId)}:
+                                                        </span>
+                                                        <span className="text-sm">{msg.content}</span>
+                                                    </div>
                                                     <p className="text-xs text-[var(--text-secondary)] mt-1">{msg.timestamp}</p>
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className="text-sm text-[var(--text-secondary)]">No messages yet.</p>
+                                            <p className="text-sm text-[var(--text-secondary)] text-center">No messages yet.</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex items-center gap-3 mt-4">
                                         <input
                                             type="text"
                                             value={newMessage}
@@ -1246,85 +1037,84 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                         />
                                         <button
                                             onClick={handleSendMessage}
-                                            className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[40px] min-h-[40px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="btn-primary min-w-[44px] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                                             disabled={!selectedUserId}
                                             aria-label="Send message"
                                         >
-                                            <FiSend className="w-4 h-4" />
+                                            <FiSend className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>
                             )}
+
                             {chatMode === 'createGroup' && (
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Manage Groups:</h2>
-                                    <div className="flex flex-col">
-                                        <div className="max-h-48 overflow-y-auto mt-2">
-                                            {groups.map((g) => (
-                                                <div key={g.id} className="flex items-center justify-between p-2 bg-[var(--bg-tertiary)] rounded-lg mb-2">
-                                                    <span className="text-base text-[var(--text-primary)] truncate max-w-[150px]">
-                                                        {g.name}
-                                                    </span>
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                setEditGroupId(g.id);
-                                                                setEditGroupName(g.name);
-                                                                fetchGroupUsers(g.id);
-                                                            }}
-                                                            className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] flex items-center justify-center min-w-[60px] min-h-[36px]"
-                                                            aria-label={`View users in group ${g.name}`}
-                                                        >
-                                                            {user && g.creatorId === user.id ? (
-                                                                <FiUser className="w-4 h-4" />
-                                                            ) : (
-                                                                <FiEye className="w-4 h-4" />
-                                                            )}
-                                                        </button>
-                                                        {user && g.creatorId === user.id && (
-                                                            <button
-                                                                onClick={() => openDeleteModal(g.id)}
-                                                                className="px-2 py-1 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-red-300 flex items-center justify-center min-w-[36px] min-h-[36px]"
-                                                                aria-label={`Delete group ${g.name}`}
-                                                            >
-                                                                <FiTrash2 className="w-4 h-4 text-red-600" />
-                                                            </button>
+                                <div className="flex flex-col flex-1">
+                                    <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Manage Groups</h2>
+                                    <div className="max-h-[300px] overflow-y-auto mb-4">
+                                        {groups.map((g) => (
+                                            <div key={g.id} className="flex items-center justify-between p-3 bg-[var(--bg-tertiary)] rounded-lg mb-2">
+                                                <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[200px]">
+                                                    {g.name}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditGroupId(g.id);
+                                                            setEditGroupName(g.name);
+                                                            fetchGroupUsers(g.id);
+                                                        }}
+                                                        className="btn-secondary min-w-[40px] min-h-[40px]"
+                                                        aria-label={`View users in group ${g.name}`}
+                                                    >
+                                                        {user && g.creatorId === user.id ? (
+                                                            <FiUser className="w-5 h-5" />
+                                                        ) : (
+                                                            <FiEye className="w-5 h-5" />
                                                         )}
-                                                    </div>
+                                                    </button>
+                                                    {user && g.creatorId === user.id && (
+                                                        <button
+                                                            onClick={() => openDeleteModal(g.id)}
+                                                            className="btn-secondary min-w-[40px] min-h-[40px] hover:bg-red-500 hover:text-white"
+                                                            aria-label={`Delete group ${g.name}`}
+                                                        >
+                                                            <FiTrash2 className="w-5 h-5" />
+                                                        </button>
+                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)] mt-4">Create New Group</h3>
-                                    <div className="flex flex-col gap-2 mb-4">
+                                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Create New Group</h3>
+                                    <div className="flex flex-col gap-3 mb-4">
                                         <input
                                             type="text"
                                             value={groupName}
                                             onChange={(e) => setGroupName(e.target.value)}
                                             placeholder="Enter group name..."
-                                            className="form-input w-full text-base"
+                                            className="form-input"
                                             aria-label="Group name"
                                         />
                                         <input
                                             type="text"
                                             value={createGroupSearchQuery}
                                             onChange={(e) => setCreateGroupSearchQuery(e.target.value)}
-                                            placeholder="Click SpaceBar to search..."
-                                            className="form-input w-full text-base"
+                                            placeholder="Search users..."
+                                            className="form-input"
                                             aria-label="Search users"
                                         />
                                         {createGroupSearchQuery && (
-                                            <div className="max-h-48 overflow-y-auto">
+                                            <div className="max-h-[200px] overflow-y-auto">
                                                 {users.map((u) => (
                                                     <div key={u.id} className="flex items-center p-2 border-b border-[var(--border-color)]">
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedMemberIds.includes(u.id)}
                                                             onChange={() => toggleMember(u.id)}
-                                                            className="mr-4"
+                                                            className="mr-3 h-4 w-4"
                                                             aria-label={`Select ${u.firstName} ${u.lastName}`}
                                                         />
-                                                        <span className="text-base text-[var(--text-primary)]">
+                                                        <span className="text-sm text-[var(--text-primary)]">
                                                             {u.firstName} {u.lastName}
                                                         </span>
                                                     </div>
@@ -1334,13 +1124,14 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                     </div>
                                     <button
                                         onClick={handleCreateGroup}
-                                        className="px-3 py-2 bg-[var(--bg-tertiary)] text-base text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
+                                        className="btn-primary w-full sm:w-auto"
                                         aria-label="Create group"
                                     >
                                         Create Group
                                     </button>
                                 </div>
                             )}
+
                             {editGroupId && (
                                 <GroupUsersModal
                                     editGroupId={editGroupId}
@@ -1356,6 +1147,7 @@ const Chatroom = ({ user, isCollapsed = true, setIsCollapsed, darkMode, setDarkM
                                     currentUserId={user.id}
                                 />
                             )}
+
                             <ConfirmationModal
                                 isOpen={isModalOpen}
                                 onClose={closeModal}
