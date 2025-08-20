@@ -154,6 +154,7 @@ h3.text-white {
 }
 
 /* Responsive adjustments */
+
 @media (max-width: 768px) {
     .max-w-6xl {
         margin: 20px;

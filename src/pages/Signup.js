@@ -252,7 +252,7 @@ const Signup = () => {
                         <h2 className="text-3xl font-bold text-white text-center mb-2">
                             {showOTPPopup ? 'Verify Your Email' : 'Join Revision Hub'}
                         </h2>
-                        <p className="text-gray-300 text-center mb-6">
+                        <p className="text-gray-300 text-center mb-8 md:mb-6">
                             {showOTPPopup ? 'Enter your email and the OTP sent to you.' : 'Start your study journey today!'}
                         </p>
                         {!showOTPPopup ? (
