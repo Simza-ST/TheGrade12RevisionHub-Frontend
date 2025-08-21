@@ -243,5 +243,20 @@ h3.text-white {
     }
 
 
+    /* ✅ Custom label fix for mobile */
+    .form-label {
+        font-size: 0.75rem !important;
+        top: 0; /* start lower so it doesn’t collide */
+        transform: translateY(0);
+        /*transition: font-size 0.2s, transform 0.2s, top 0.2s;*/
+    }
+
+    /* when input is focused or has value */
+    input:focus ~ .form-label,
+    input:not(:placeholder-shown) ~ .form-label {
+        transform: translateY(-1rem) !important; /* float up, but not too high */
+        font-size: 0.7rem !important;
+        color: #9ca3af; /* Tailwind gray-400 */
+    }
 
 }
