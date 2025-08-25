@@ -1,87 +1,100 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import './ForgotPassword.css'; // Use ForgotPassword.css for consistent styling
+import './ForgotPassword.css';
 
 const Login = ({ setIsAuthenticated }) => {
     const [error, setError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [showOTPForm, setShowOTPForm] = useState(false); // State for OTP form
+    const [showOTPForm, setShowOTPForm] = useState(false);
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [otpError, setOtpError] = useState('');
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
+    const validateEmail = (email) => {
+        if (!email.trim()) return 'Email is required.';
+        if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address.';
+        return '';
+    };
+
+    const validatePassword = (password) => {
+        if (!password) return 'Password is required.';
+        if (password.length < 8) return 'Password must be at least 8 characters long.';
+        return '';
+    };
+
+    const validateOtp = (otp) => {
+        if (!otp.trim()) return 'OTP is required.';
+        if (!/^\d{6}$/.test(otp)) return 'Please enter a valid 6-digit OTP.';
+        return '';
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'email') {
+            setEmail(value);
+            setEmailError(validateEmail(value));
+        } else if (name === 'password') {
+            setPasswordError(validatePassword(value));
+        } else if (name === 'otp') {
+            setOtp(value);
+            setOtpError(validateOtp(value));
+        }
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
         setError('');
         setShowOTPForm(false);
-
         const form = event.target;
         const formData = new FormData(form);
         const formEmail = formData.get('email');
         const password = formData.get('password');
-
-        // Client-side validation
-        if (!/^\S+@\S+\.\S+$/.test(formEmail)) {
-            setError('Please enter a valid email address.');
-            setTimeout(() => setIsLoading(false), 2000);
+        const emailValidation = validateEmail(formEmail);
+        if (emailValidation) {
+            setEmailError(emailValidation);
+            setError(emailValidation);
+            setIsLoading(false);
             return;
         }
-        setEmail(formEmail); // Store email for OTP form
-
-        const payload = { email: formEmail, password };
-        console.log('Login: Sending payload:', payload);
-        const startTime = Date.now();
-
+        const passwordValidation = validatePassword(password);
+        if (passwordValidation) {
+            setPasswordError(passwordValidation);
+            setError(passwordValidation);
+            setIsLoading(false);
+            return;
+        }
+        setEmail(formEmail.trim());
+        const payload = { email: formEmail.trim(), password };
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
-            });
-            console.log('Login: Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries()),
+                credentials: 'include',
             });
             const data = await response.json();
-            console.log('Login: Response Data:', data);
-
             if (!response.ok) {
                 throw new Error(data.message || `HTTP error! Status: ${response.status}`);
             }
-
             sessionStorage.setItem('jwt', data.token);
             setIsAuthenticated(true);
-            const elapsedTime = Date.now() - startTime;
-            const remainingDelay = Math.max(0, 10000 - elapsedTime);
-            setTimeout(() => {
-                form.reset();
-                setIsLoading(false);
-                if (data.role.toUpperCase() === 'ADMIN') {
-                    navigate('/admin-Dashboard');
-                } else {
-                    navigate('/dashboard');
-                }
-            }, remainingDelay);
+            form.reset();
+            setIsLoading(false);
+            navigate(data.role.toUpperCase() === 'ADMIN' ? '/admin-Dashboard' : '/dashboard');
         } catch (err) {
-            console.error('Login: Error:', err);
-            const elapsedTime = Date.now() - startTime;
-            const remainingDelay = Math.max(0, 2000 - elapsedTime);
-            setTimeout(() => {
-                const errMsg = err.message || 'An error occurred during login. Please try again.';
-                setError(errMsg);
-                if (errMsg.includes('Email not verified')) {
-                    // Automatically send OTP and show OTP form
-                    handleResendOTP(formEmail);
-                    setShowOTPForm(true);
-                }
-                setIsLoading(false);
-            }, remainingDelay);
+            setError(err.message || 'An error occurred during login. Please try again.');
+            if (err.message.includes('Email not verified')) {
+                handleResendOTP(formEmail.trim());
+                setShowOTPForm(true);
+            }
+            setIsLoading(false);
         }
     };
 
@@ -90,24 +103,23 @@ const Login = ({ setIsAuthenticated }) => {
         setOtpError('');
         setError('');
         setIsLoading(true);
-
-        // Client-side validation
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-            setOtpError('Please enter a valid email address.');
+        const emailValidation = validateEmail(email);
+        if (emailValidation) {
+            setOtpError(emailValidation);
             setIsLoading(false);
             return;
         }
-        if (!/^\d{6}$/.test(otp)) {
-            setOtpError('Please enter a valid 6-digit OTP.');
+        const otpValidation = validateOtp(otp);
+        if (otpValidation) {
+            setOtpError(otpValidation);
             setIsLoading(false);
             return;
         }
-
         try {
             const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp }),
+                body: JSON.stringify({ email: email.trim(), otp }),
                 credentials: 'include',
             });
             const data = await response.json();
@@ -134,37 +146,26 @@ const Login = ({ setIsAuthenticated }) => {
         setIsLoading(true);
         setError('');
         setOtpError('');
-
-        // Validate email
-        if (!emailToSend || !/^\S+@\S+\.\S+$/.test(emailToSend)) {
-            console.log('Resend OTP: Invalid email', emailToSend);
-            setOtpError('Please enter a valid email address to resend OTP.');
+        const emailValidation = validateEmail(emailToSend);
+        if (emailValidation) {
+            setOtpError(emailValidation);
             setIsLoading(false);
             return;
         }
-
         try {
-            console.log('Resend OTP: Sending request for email:', emailToSend);
             const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailToSend }),
-            });
-            console.log('Resend OTP: Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries()),
+                body: JSON.stringify({ email: emailToSend.trim() }),
+                credentials: 'include',
             });
             const data = await response.json();
-            console.log('Resend OTP: Response Data:', data);
-
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to resend OTP.');
             }
             setError('OTP resent successfully. Check your email.');
-            setOtp(''); // Clear OTP input for new code
+            setOtp('');
         } catch (err) {
-            console.error('Resend OTP: Error:', err);
             setOtpError(err.message || 'Unable to resend OTP. Please try again.');
         } finally {
             setIsLoading(false);
@@ -177,8 +178,15 @@ const Login = ({ setIsAuthenticated }) => {
 
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
+            <style>{`
+        .form-input[type="password"]::-ms-reveal,
+        .form-input[type="password"]::-ms-clear,
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `}</style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
-                {/* Left: Login or OTP Verification Form */}
                 <div className="w-1/2 p-10 bg-teal-800 relative">
                     <div className="content">
                         <div className="flex justify-center mb-6">
@@ -200,7 +208,10 @@ const Login = ({ setIsAuthenticated }) => {
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Email Address"
+                                        onChange={handleInputChange}
                                         disabled={isLoading}
+                                        aria-invalid={emailError ? 'true' : 'false'}
+                                        aria-describedby={emailError ? 'emailError' : undefined}
                                     />
                                     <label
                                         htmlFor="email"
@@ -208,6 +219,11 @@ const Login = ({ setIsAuthenticated }) => {
                                     >
                                         Email Address
                                     </label>
+                                    {emailError && (
+                                        <p id="emailError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {emailError}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="relative">
                                     <input
@@ -217,7 +233,10 @@ const Login = ({ setIsAuthenticated }) => {
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                         placeholder="Password"
+                                        onChange={handleInputChange}
                                         disabled={isLoading}
+                                        aria-invalid={passwordError ? 'true' : 'false'}
+                                        aria-describedby={passwordError ? 'passwordError' : undefined}
                                     />
                                     <label
                                         htmlFor="password"
@@ -234,6 +253,11 @@ const Login = ({ setIsAuthenticated }) => {
                                     >
                                         {showPassword ? '👁️' : '👁️‍🗨️'}
                                     </button>
+                                    {passwordError && (
+                                        <p id="passwordError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {passwordError}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="text-right">
                                     <Link to="/forgot-password" className="text-sm text-teal-400 hover:underline">
@@ -242,10 +266,11 @@ const Login = ({ setIsAuthenticated }) => {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="btn-submit w-full flex items-center justify-center bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"
-                                    disabled={isLoading}
+                                    className="btn-submit w-full flex items-center justify-center bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isLoading || emailError || passwordError}
+                                    aria-label="Log In"
                                 >
-                                    Log In
+                                    {isLoading ? 'Logging In...' : 'Log In'}
                                 </button>
                             </form>
                         ) : (
@@ -256,11 +281,13 @@ const Login = ({ setIsAuthenticated }) => {
                                         id="email"
                                         name="email"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Email Address"
                                         disabled={isLoading}
+                                        aria-invalid={otpError.includes('email') ? 'true' : 'false'}
+                                        aria-describedby={otpError.includes('email') ? 'otpEmailError' : undefined}
                                     />
                                     <label
                                         htmlFor="email"
@@ -268,6 +295,11 @@ const Login = ({ setIsAuthenticated }) => {
                                     >
                                         Email Address
                                     </label>
+                                    {otpError.includes('email') && (
+                                        <p id="otpEmailError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {otpError}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="relative">
                                     <input
@@ -275,11 +307,13 @@ const Login = ({ setIsAuthenticated }) => {
                                         id="otp"
                                         name="otp"
                                         value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Enter OTP"
                                         disabled={isLoading}
+                                        aria-invalid={otpError && !otpError.includes('email') ? 'true' : 'false'}
+                                        aria-describedby={otpError && !otpError.includes('email') ? 'otpError' : undefined}
                                     />
                                     <label
                                         htmlFor="otp"
@@ -287,23 +321,29 @@ const Login = ({ setIsAuthenticated }) => {
                                     >
                                         Enter OTP
                                     </label>
+                                    {otpError && !otpError.includes('email') && (
+                                        <p id="otpError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {otpError}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="submit"
-                                    className="btn-submit w-full flex items-center justify-center bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"
-                                    disabled={isLoading}
+                                    className="btn-submit w-full flex items-center justify-center bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isLoading || otpError}
+                                    aria-label="Verify OTP"
                                 >
                                     {isLoading ? 'Verifying OTP...' : 'Verify OTP'}
                                 </button>
                             </form>
                         )}
                         {error && !showOTPForm && (
-                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center">
+                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center" role="alert">
                                 {error}
                             </p>
                         )}
                         {otpError && showOTPForm && (
-                            <p id="otpErrorMessage" className="text-red-400 text-sm mt-4 text-center">
+                            <p id="otpErrorMessage" className="text-red-400 text-sm mt-4 text-center" role="alert">
                                 {otpError}
                             </p>
                         )}
@@ -312,6 +352,7 @@ const Login = ({ setIsAuthenticated }) => {
                                 onClick={() => handleResendOTP(email)}
                                 className="text-teal-400 hover:underline text-sm mt-4 text-center w-full"
                                 disabled={isLoading}
+                                aria-label="Resend OTP"
                             >
                                 Resend OTP
                             </button>
@@ -332,13 +373,12 @@ const Login = ({ setIsAuthenticated }) => {
                                     aria-label={showOTPForm ? 'Verifying OTP...' : 'Logging in...'}
                                 ></div>
                                 <span className="text-white text-lg font-medium mt-3">
-                                    {showOTPForm ? 'Verifying OTP...' : 'Logging In...'}
-                                </span>
+                  {showOTPForm ? 'Verifying OTP...' : 'Logging In...'}
+                </span>
                             </div>
                         </div>
                     )}
                 </div>
-                {/* Right: Animated Services */}
                 <div className="w-1/2 bg-gradient-to-b from-teal-600 to-red-600 p-6 relative overflow-hidden flex flex-col justify-center items-center">
                     <h3 className="text-2xl font-semibold text-white mb-6 z-10">Why Revision Hub?</h3>
                     <br />

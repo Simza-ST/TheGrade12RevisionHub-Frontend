@@ -13,6 +13,7 @@ const ResetPassword = () => {
     const [loadingMessage, setLoadingMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [otpError, setOtpError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
@@ -20,18 +21,47 @@ const ResetPassword = () => {
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
 
     useEffect(() => {
-        console.log('ResetPassword mounted, email:', email);
         if (!email) {
             setError('Email is missing. Please start the process from forgot password.');
         }
-        setPasswordError(validatePasswordMatch(newPassword, confirmPassword));
+        const passwordValidation = validatePassword(newPassword);
+        const passwordMatch = validatePasswordMatch(newPassword, confirmPassword);
+        setPasswordError(passwordValidation || passwordMatch);
     }, [email, newPassword, confirmPassword]);
 
-    const validatePasswordMatch = (password, confirmPassword) => {
-        if (password && confirmPassword && password !== confirmPassword) {
-            return 'Passwords do not match.';
-        }
+    const validateOtp = (otp) => {
+        if (!otp.trim()) return 'OTP is required.';
+        if (!/^\d{6}$/.test(otp)) return 'Please enter a valid 6-digit OTP.';
         return '';
+    };
+
+    const validatePassword = (password) => {
+        if (!password) return 'Password is required.';
+        if (password.length < 8) return 'Password must be at least 8 characters long.';
+        if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter.';
+        if (!/[0-9]/.test(password)) return 'Password must contain at least one number.';
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Password must contain at least one special character.';
+        return '';
+    };
+
+    const validatePasswordMatch = (password, confirmPassword) => {
+        if (!confirmPassword) return 'Confirm password is required.';
+        if (password !== confirmPassword) return 'Passwords do not match.';
+        return '';
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'otp') {
+            setOtp(value);
+            setOtpError(validateOtp(value));
+        } else if (name === 'password') {
+            setNewPassword(value);
+            setPasswordError(validatePassword(value));
+        } else if (name === 'confirmPassword') {
+            setConfirmPassword(value);
+            setPasswordError(validatePasswordMatch(newPassword, value));
+        }
     };
 
     const handleOtpSubmit = async (event) => {
@@ -41,52 +71,37 @@ const ResetPassword = () => {
         setLoadingMessage('Verifying OTP...');
         setError('');
         setSuccess('');
-
-        if (!/^\d{6}$/.test(otp)) {
-            setError('Please enter a valid 6-digit OTP.');
+        const otpValidation = validateOtp(otp);
+        if (otpValidation) {
+            setOtpError(otpValidation);
+            setError(otpValidation);
             setIsLoading(false);
             return;
         }
-
         if (!email) {
             setError('Email is missing. Please start the process from forgot password.');
             setIsLoading(false);
             return;
         }
-
         try {
-            console.log('Sending OTP verification request:', { email, otp });
             const response = await fetch(`${API_BASE_URL}/auth/password/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp }),
+                body: JSON.stringify({ email: email.trim(), otp }),
                 credentials: 'include',
             });
-
-            console.log('OTP verify response status:', response.status);
-            const contentType = response.headers.get('Content-Type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned a non-JSON response.');
-            }
-
             const data = await response.json();
-            console.log('OTP verify response data:', data);
-
             if (!response.ok) {
                 throw new Error(data.message || 'OTP verification failed');
             }
-
             if (data.success) {
-                setSuccess(data.message || 'OTP verified successfully! Please set your new password.');
+                setSuccess('OTP verified successfully! Please set your new password.');
                 setIsOtpVerified(true);
             } else {
-                setError(data.message || 'Invalid or expired OTP');
+                setOtpError(data.message || 'Invalid or expired OTP');
             }
         } catch (error) {
-            console.error('OTP verification error:', error.message);
-            setError(error.message || 'An error occurred during OTP verification.');
+            setOtpError(error.message || 'An error occurred during OTP verification.');
         } finally {
             setIsLoading(false);
         }
@@ -99,91 +114,66 @@ const ResetPassword = () => {
         setLoadingMessage('Setting Password...');
         setError('');
         setSuccess('');
-
-        if (newPassword.length < 8) {
-            setError('Password must be at least 8 characters long.');
+        const passwordValidation = validatePassword(newPassword);
+        if (passwordValidation) {
+            setPasswordError(passwordValidation);
+            setError(passwordValidation);
             setIsLoading(false);
             return;
         }
-
-        if (newPassword !== confirmPassword) {
-            setError('Passwords do not match.');
+        const passwordMatch = validatePasswordMatch(newPassword, confirmPassword);
+        if (passwordMatch) {
+            setPasswordError(passwordMatch);
+            setError(passwordMatch);
             setIsLoading(false);
             return;
         }
-
         try {
-            console.log('Sending password reset request:', { email, otp, newPassword });
-            const response = await fetch(`${API_BASE_URL}/auth/password/reset-password`, {
-                method: 'PUT',
+            const response = await fetch(`${API_BASE_URL}/auth/password/reset`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp, newPassword }),
+                body: JSON.stringify({ email: email.trim(), otp, newPassword }),
                 credentials: 'include',
             });
-
-            console.log('Password reset response status:', response.status);
-            const contentType = response.headers.get('Content-Type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned a non-JSON response.');
-            }
-
             const data = await response.json();
-            console.log('Password reset response data:', data);
-
             if (!response.ok) {
                 throw new Error(data.message || 'Password reset failed');
             }
-
-            setSuccess(data.message || 'Password reset successful! Redirecting to login...');
-            setError('');
-            event.target.reset();
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            if (data.success) {
+                setSuccess('Password reset successfully! Redirecting to login...');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+            } else {
+                setError(data.message || 'Failed to reset password.');
+            }
         } catch (error) {
-            console.error('Password reset error:', error.message);
-            setError(error.message || 'An error occurred. Please try again.');
+            setError(error.message || 'An error occurred while resetting the password.');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleResendOTP = async () => {
-        if (isLoading || !email) return;
+        if (isLoading) return;
         setIsLoading(true);
         setLoadingMessage('Resending OTP...');
         setError('');
-        setSuccess('');
-
+        setOtpError('');
         try {
-            console.log('Sending resend OTP request:', { email });
-            const response = await fetch(`${API_BASE_URL}/auth/password/send-otp/${encodeURIComponent(email)}`, {
+            const response = await fetch(`${API_BASE_URL}/auth/password/send-otp/${encodeURIComponent(email.trim())}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-
-            console.log('Resend OTP response status:', response.status);
-            const contentType = response.headers.get('Content-Type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned a non-JSON response.');
-            }
-
             const data = await response.json();
-            console.log('Resend OTP response data:', data);
-
             if (!response.ok) {
-                throw new Error(data.message || 'Resend OTP failed');
+                throw new Error(data.message || 'Failed to resend OTP.');
             }
-
-            setSuccess(data.message || 'OTP resent successfully. Check your email.');
-        } catch (error) {
-            console.error('Resend OTP error:', error.message);
-            setError(error.message || 'An error occurred during OTP resend.');
+            setSuccess('OTP resent successfully. Check your email.');
+            setOtp('');
+        } catch (err) {
+            setOtpError(err.message || 'Unable to resend OTP. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -199,6 +189,14 @@ const ResetPassword = () => {
 
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
+            <style>{`
+        .form-input[type="password"]::-ms-reveal,
+        .form-input[type="password"]::-ms-clear,
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `}</style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
                 <div className="w-1/2 p-10 bg-teal-800 relative">
                     <div className="content">
@@ -217,25 +215,33 @@ const ResetPassword = () => {
                                         id="otp"
                                         name="otp"
                                         value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Enter OTP"
                                         disabled={isLoading}
+                                        aria-invalid={otpError ? 'true' : 'false'}
+                                        aria-describedby={otpError ? 'otpError' : undefined}
                                     />
                                     <label
                                         htmlFor="otp"
-                                        className="form-label absolute left-4 top-2 text-gray-300 transition-all peer-focus:-translate-y-7 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 peer-[&:not(:placeholder-shown)]:-translate-y-7 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-gray-400"
+                                        className="form-label absolute left-4 top-2 text-gray-300 transition-all peer-focus:-translate-y-8 peer-focus:text-sm peer-focus:text-gray-400 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-300 peer-valid:-translate-y-8 peer-valid:text-sm peer-valid:text-gray-400"
                                     >
                                         Enter OTP
                                     </label>
+                                    {otpError && (
+                                        <p id="otpError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {otpError}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="submit"
-                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50"
-                                    disabled={isLoading}
+                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isLoading || otpError}
+                                    aria-label="Verify OTP"
                                 >
-                                    Verify OTP
+                                    {isLoading ? 'Verifying OTP...' : 'Verify OTP'}
                                 </button>
                             </form>
                         ) : (
@@ -246,11 +252,13 @@ const ResetPassword = () => {
                                         id="password"
                                         name="password"
                                         value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                         placeholder="New Password"
                                         disabled={isLoading}
+                                        aria-invalid={passwordError ? 'true' : 'false'}
+                                        aria-describedby={passwordError ? 'passwordError' : undefined}
                                     />
                                     <label
                                         htmlFor="password"
@@ -267,6 +275,11 @@ const ResetPassword = () => {
                                     >
                                         {showPassword ? '👁️' : '👁️‍🗨️'}
                                     </button>
+                                    {passwordError && newPassword && (
+                                        <p id="passwordError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {passwordError}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="relative">
                                     <input
@@ -274,11 +287,13 @@ const ResetPassword = () => {
                                         id="confirmPassword"
                                         name="confirmPassword"
                                         value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent pr-10"
                                         placeholder="Confirm Password"
                                         disabled={isLoading}
+                                        aria-invalid={passwordError ? 'true' : 'false'}
+                                        aria-describedby={passwordError ? 'confirmPasswordError' : undefined}
                                     />
                                     <label
                                         htmlFor="confirmPassword"
@@ -295,14 +310,19 @@ const ResetPassword = () => {
                                     >
                                         {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                                     </button>
-                                    {passwordError && <p className="text-red-400 text-sm mt-1">{passwordError}</p>}
+                                    {passwordError && confirmPassword && (
+                                        <p id="confirmPasswordError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {passwordError}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="submit"
-                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50"
+                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={isLoading || passwordError}
+                                    aria-label="Set New Password"
                                 >
-                                    Set New Password
+                                    {isLoading ? 'Setting Password...' : 'Set New Password'}
                                 </button>
                             </form>
                         )}
@@ -311,12 +331,13 @@ const ResetPassword = () => {
                                 onClick={handleResendOTP}
                                 className="text-teal-400 hover:underline text-sm mt-4 text-center block w-full"
                                 disabled={isLoading || !email}
+                                aria-label="Resend OTP"
                             >
                                 Resend OTP
                             </button>
                         )}
                         {error && (
-                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center">
+                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center" role="alert">
                                 {error}{' '}
                                 {(!email && !isOtpVerified) && (
                                     <Link to="/forgot-password" className="text-teal-400 hover:underline">
@@ -326,7 +347,7 @@ const ResetPassword = () => {
                             </p>
                         )}
                         {success && (
-                            <p id="successMessage" className="text-teal-400 text-sm mt-4 text-center">
+                            <p id="successMessage" className="text-teal-400 text-sm mt-4 text-center" role="alert">
                                 {success}
                             </p>
                         )}
@@ -345,9 +366,7 @@ const ResetPassword = () => {
                                     role="status"
                                     aria-label={loadingMessage}
                                 ></div>
-                                <span className="text-white text-lg font-medium mt-3">
-                                    {loadingMessage}
-                                </span>
+                                <span className="text-white text-lg font-medium mt-3">{loadingMessage}</span>
                             </div>
                         </div>
                     )}
