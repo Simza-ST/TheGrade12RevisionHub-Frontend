@@ -14,7 +14,7 @@ const paperComponents = {
     "Mathematics P1 Nov 2022 Eng": MathematicsP1Nov2022Eng,
     "Mathematics P2 Nov 2022 Eng": MathematicsP2Nov2022Eng,
     "Mathematical Literacy P1 Nov 2022 Eng": MathLitP1Nov2022,
-    "Mathematical Literacy P2 Nov 2022 Eng": MathLitP2Nov2020,
+    "Mathematical Literacy P2 Nov 2020 Eng": MathLitP2Nov2020,
     "EnglishFALP12020": EnglishFALP12020,
     // Add more filename mappings as needed:
     // "PhysicsP1May2023": PhysicsP1May2023,
