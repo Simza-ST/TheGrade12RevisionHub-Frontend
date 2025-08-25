@@ -6,9 +6,22 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/auth';
+
+    const validateEmail = (email) => {
+        if (!email.trim()) return 'Email is required.';
+        if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address.';
+        return '';
+    };
+
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        setEmailError(validateEmail(value));
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -16,46 +29,27 @@ const ForgotPassword = () => {
         setIsLoading(true);
         setError('');
         setSuccess('');
-
-        const form = event.target;
-        const formData = new FormData(form);
-        const emailInput = formData.get('email');
-
-        if (!/^\S+@\S+\.\S+$/.test(emailInput)) {
-            setError('Please enter a valid email address.');
+        const emailValidation = validateEmail(email);
+        if (emailValidation) {
+            setEmailError(emailValidation);
+            setError(emailValidation);
             setIsLoading(false);
             return;
         }
-
         try {
-            console.log('Sending OTP request for email:', emailInput);
-            const response = await fetch(`${API_BASE_URL}/password/send-otp/${encodeURIComponent(emailInput)}`, {
+            const response = await fetch(`${API_BASE_URL}/password/send-otp/${encodeURIComponent(email.trim())}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-
-            console.log('Send OTP response status:', response.status);
-            const contentType = response.headers.get('Content-Type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Non-JSON response:', text);
-                throw new Error('Server returned a non-JSON response.');
-            }
-
             const data = await response.json();
-            console.log('Send OTP response data:', data);
-
             if (!response.ok) {
                 throw new Error(data.message || `Failed to send OTP (status: ${response.status})`);
             }
-
             setSuccess('OTP sent! Please check your email.');
-            setEmail(emailInput);
-            console.log('Email set:', emailInput);
-            form.reset();
+            setEmail('');
+            setEmailError('');
         } catch (error) {
-            console.error('Send OTP exception:', error.message);
             setError(error.message || 'An error occurred while sending OTP.');
         } finally {
             setIsLoading(false);
@@ -63,24 +57,25 @@ const ForgotPassword = () => {
     };
 
     const handleProceedToReset = () => {
-        console.log('Proceed clicked, email:', email);
-        if (email) {
-            console.log('Navigating to /reset-password with email:', email);
-            navigate('/reset-password', { state: { email } });
-        } else {
-            setError('Please enter your email and send OTP first.');
+        const emailValidation = validateEmail(email);
+        if (emailValidation) {
+            setEmailError(emailValidation);
+            setError(emailValidation);
+            return;
         }
-    };
-
-    const validatePasswordMatch = (password, confirmPassword) => {
-        if (password !== confirmPassword) {
-            return 'Passwords do not match.';
-        }
-        return '';
+        navigate('/reset-password', { state: { email: email.trim() } });
     };
 
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
+            <style>{`
+        .form-input[type="password"]::-ms-reveal,
+        .form-input[type="password"]::-ms-clear,
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `}</style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
                 <div className="w-1/2 p-10 bg-teal-800 relative">
                     <div className="content">
@@ -98,10 +93,14 @@ const ForgotPassword = () => {
                                         type="email"
                                         id="email"
                                         name="email"
+                                        value={email}
+                                        onChange={handleInputChange}
                                         required
                                         className="form-input peer w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-teal-700 text-white placeholder-transparent"
                                         placeholder="Email Address"
                                         disabled={isLoading}
+                                        aria-invalid={emailError ? 'true' : 'false'}
+                                        aria-describedby={emailError ? 'emailError' : undefined}
                                     />
                                     <label
                                         htmlFor="email"
@@ -109,32 +108,40 @@ const ForgotPassword = () => {
                                     >
                                         Email Address
                                     </label>
+                                    {emailError && (
+                                        <p id="emailError" className="text-red-400 text-sm mt-1" role="alert">
+                                            {emailError}
+                                        </p>
+                                    )}
                                 </div>
                                 <button
                                     type="submit"
                                     id="requestOtpButton"
-                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 mt-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50"
-                                    disabled={isLoading}
+                                    className="btn-submit w-full flex items-center justify-center py-3 px-4 mt-2 bg-gradient-to-r from-teal-600 to-red-600 text-white rounded-lg font-medium hover:from-teal-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isLoading || emailError}
+                                    aria-label="Send OTP"
                                 >
-                                    Send OTP
+                                    {isLoading ? 'Sending OTP...' : 'Send OTP'}
                                 </button>
                             </div>
                         </form>
                         {success && (
                             <div className="mt-4 text-center">
-                                <p id="successMessage" className="text-teal-400 text-sm">
+                                <p id="successMessage" className="text-teal-400 text-sm" role="alert">
                                     {success}
                                 </p>
                                 <button
                                     onClick={handleProceedToReset}
-                                    className="mt-2 inline-block py-2 px-4 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200"
+                                    className="mt-2 inline-block py-2 px-4 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={isLoading || emailError}
+                                    aria-label="Proceed to Reset Password"
                                 >
                                     Proceed to Reset Password
                                 </button>
                             </div>
                         )}
                         {error && (
-                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center">
+                            <p id="errorMessage" className="text-red-400 text-sm mt-4 text-center" role="alert">
                                 {error}
                             </p>
                         )}
@@ -159,9 +166,7 @@ const ForgotPassword = () => {
                                     role="status"
                                     aria-label="Sending OTP..."
                                 ></div>
-                                <span className="text-white text-lg font-medium mt-3">
-                                    Sending OTP...
-                                </span>
+                                <span className="text-white text-lg font-medium mt-3">Sending OTP...</span>
                             </div>
                         </div>
                     )}
