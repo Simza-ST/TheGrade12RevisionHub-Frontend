@@ -323,6 +323,9 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     .mt-4 {
                         margin-top: clamp(8px, 2vw, 16px);
                     }
+                    .mt-1 {
+                        margin-top: clamp(2px, 0.5vw, 4px);
+                    }
                     .shadow-xl {
                         box-shadow: 0 clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 20px) rgba(0,0,0,0.1);
                     }
@@ -350,6 +353,9 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     .font-medium {
                         font-weight: 500;
                     }
+                    .form-input-container {
+                        position: relative;
+                    }
                     .form-input, select {
                         width: 100%;
                         padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 14px);
@@ -359,6 +365,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                         background-color: var(--bg-secondary);
                         color: var(--text-primary);
                         transition: border-color 0.2s ease;
+                        padding-right: clamp(30px, 7.5vw, 40px);
                     }
                     .form-input:focus, select:focus {
                         border-color: var(--accent-primary);
@@ -531,6 +538,19 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
+                    }
+                    .password-toggle {
+                        position: absolute;
+                        right: clamp(8px, 2vw, 12px);
+                        top: 50%;
+                        transform: translateY(-50%);
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        color: var(--text-secondary);
+                    }
+                    .password-toggle:hover {
+                        color: var(--accent-primary);
                     }
                     @media (max-width: 639px) {
                         .header h1 {
@@ -740,52 +760,100 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                     {showCurrentPassword ? '👁️' : '👁️‍🗨️'}
                                                 </button>
                                             </div>
-                                            <div className="form-input-container">
+                                            {/*<div className="form-input-container">*/}
+                                            {/*    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">*/}
+                                            {/*        New Password*/}
+                                            {/*    </label>*/}
+                                            {/*    <input*/}
+                                            {/*        type={showNewPassword ? 'text' : 'password'}*/}
+                                            {/*        name="newPassword"*/}
+                                            {/*        value={password.newPassword}*/}
+                                            {/*        onChange={handlePasswordChange}*/}
+                                            {/*        className="form-input"*/}
+                                            {/*        placeholder="New password"*/}
+                                            {/*        aria-label="New Password"*/}
+                                            {/*    />*/}
+                                            {/*    <button*/}
+                                            {/*        type="button"*/}
+                                            {/*        className="password-toggle"*/}
+                                            {/*        onClick={toggleNewPasswordVisibility}*/}
+                                            {/*        aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}*/}
+                                            {/*    >*/}
+                                            {/*        {showNewPassword ? '👁️' : '👁️‍🗨️'}*/}
+                                            {/*    </button>*/}
+                                            {/*</div>*/}
+                                            {/*<div className="form-input-container">*/}
+                                            {/*    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">*/}
+                                            {/*        Confirm Password*/}
+                                            {/*    </label>*/}
+                                            {/*    <input*/}
+                                            {/*        type={showConfirmPassword ? 'text' : 'password'}*/}
+                                            {/*        name="confirmPassword"*/}
+                                            {/*        value={password.confirmPassword}*/}
+                                            {/*        onChange={handlePasswordChange}*/}
+                                            {/*        className="form-input"*/}
+                                            {/*        placeholder="Confirm new password"*/}
+                                            {/*        aria-label="Confirm Password"*/}
+                                            {/*    />*/}
+                                            {/*    <button*/}
+                                            {/*        type="button"*/}
+                                            {/*        className="password-toggle"*/}
+                                            {/*        onClick={toggleConfirmPasswordVisibility}*/}
+                                            {/*        aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}*/}
+                                            {/*    >*/}
+                                            {/*        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}*/}
+                                            {/*    </button>*/}
+                                            {/*    {passwordMatchError && (*/}
+                                            {/*        <p className="text-red-800 text-sm mt-1">{passwordMatchError}</p>*/}
+                                            {/*    )}*/}
+                                            {/*</div>*/}
+
+                                            <div className="relative">
                                                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    New Password
-                                                </label>
-                                                <input
-                                                    type={showNewPassword ? 'text' : 'password'}
-                                                    name="newPassword"
-                                                    value={password.newPassword}
-                                                    onChange={handlePasswordChange}
-                                                    className="form-input"
-                                                    placeholder="New password"
-                                                    aria-label="New Password"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="password-toggle"
-                                                    onClick={toggleNewPasswordVisibility}
-                                                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
-                                                >
-                                                    {showNewPassword ? '👁️' : '👁️‍🗨️'}
-                                                </button>
+                                                            New Password
+                                                        </label>
+                                                        <input
+                                                            type={showNewPassword ? 'text' : 'password'}
+                                                            name="newPassword"
+                                                            value={password.newPassword}
+                                                            onChange={handlePasswordChange}
+                                                            className="form-input"
+                                                            placeholder="New password"
+                                                            aria-label="New Password"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="password-toggle"
+                                                            onClick={toggleNewPasswordVisibility}
+                                                            aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                                                        >
+                                                            {showNewPassword ? '👁️' : '👁️‍🗨️'}
+                                                        </button>
                                             </div>
-                                            <div className="form-input-container">
+                                            <div className="relative">
                                                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                                                    Confirm Password
-                                                </label>
-                                                <input
-                                                    type={showConfirmPassword ? 'text' : 'password'}
-                                                    name="confirmPassword"
-                                                    value={password.confirmPassword}
-                                                    onChange={handlePasswordChange}
-                                                    className="form-input"
-                                                    placeholder="Confirm new password"
-                                                    aria-label="Confirm Password"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="password-toggle"
-                                                    onClick={toggleConfirmPasswordVisibility}
-                                                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                                                >
-                                                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                                                </button>
-                                                {passwordMatchError && (
-                                                    <p className="text-red-800 text-sm mt-1">{passwordMatchError}</p>
-                                                )}
+                                                            Confirm Password
+                                                        </label>
+                                                        <input
+                                                            type={showConfirmPassword ? 'text' : 'password'}
+                                                            name="confirmPassword"
+                                                            value={password.confirmPassword}
+                                                            onChange={handlePasswordChange}
+                                                            className="form-input"
+                                                            placeholder="Confirm new password"
+                                                            aria-label="Confirm Password"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="password-toggle"
+                                                            onClick={toggleConfirmPasswordVisibility}
+                                                            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                                                        >
+                                                            {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                                        </button>
+                                                        {passwordMatchError && (
+                                                            <p className="text-red-800 text-sm mt-1">{passwordMatchError}</p>
+                                                        )}
                                             </div>
                                         </div>
                                         <br />

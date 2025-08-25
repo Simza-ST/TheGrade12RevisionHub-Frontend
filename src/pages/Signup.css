@@ -148,4 +148,115 @@ h3.text-white {
         font-size: 14px;
         padding: 10px 16px;
     }
+    .w-1/2 {
+    width: 100%;
+}
+    .p-10 {
+        padding: 1.5rem;
+    }
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+    .h-24 {
+        height: 20rem;
+    }
+    .text-3xl {
+        font-size: 2rem;
+    }
+    .mb-6 {
+        margin-bottom: 1rem;
+    }
+    .space-y-5 > * {
+        margin-bottom: 1rem;
+    }
+    .service-card {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    .text-2xl {
+        font-size: 1.5rem;
+    }
+    .p-6 {
+        padding: 1rem;
+    }
+}
+@media (max-width: 480px) {
+    .max-w-6xl {
+        margin: 10px;
+        width: 95%; /* Ensure full width */
+        flex-direction: column; /* Stack children vertically */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+    }
+    .form-input {
+        font-size: 12px;
+        padding: 10px 20px; /* Increased padding to make input boxes appear wider */
+        margin:0;
+    }
+    .btn-submit {
+        font-size: 12px;
+        padding: 8px 14px;
+        margin:0;
+
+    }
+    .w-1/2.bg-gradient-to-b.from-teal-600.to-red-600 {
+    display: none; /* Hide the right section on mobile */
+}
+    .w-1/2.p-10.bg-teal-800 {
+    width: 100%; /* Slightly less than 100% for padding/margin effect */
+    padding: 16px;
+    /*max-width: none; *//* Optional: limit max width for better centering */
+}
+    .p-10 {
+        padding: 1rem;
+    }
+    .h-24 {
+        width: 100px;   /* adjust based on what looks good */
+        height: auto;
+    }
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+    .mb-6 {
+        margin-bottom: 0.75rem;
+    }
+    .space-y-5 > * {
+        margin-bottom: 0.75rem;
+    }
+    .service-card {
+        display: none;
+    }
+    .text-2xl {
+        font-size: 1.25rem;
+    }
+    .p-6 {
+        padding: 0.75rem;
+    }
+    .text-lg {
+        font-size: 1rem;
+    }
+    .text-sm {
+        font-size: 0.75rem;
+    }
+    h3 {
+        display: none;
+    }
+
+
+    /* ✅ Custom label fix for mobile */
+    .form-label {
+        font-size: 0.75rem !important;
+        top: 0; /* start lower so it doesn’t collide */
+        transform: translateY(0);
+        /*transition: font-size 0.2s, transform 0.2s, top 0.2s;*/
+    }
+
+    /* when input is focused or has value */
+    input:focus ~ .form-label,
+    input:not(:placeholder-shown) ~ .form-label {
+        transform: translateY(-1rem) !important; /* float up, but not too high */
+        font-size: 0.7rem !important;
+        color: #9ca3af; /* Tailwind gray-400 */
+    }
+
 }
