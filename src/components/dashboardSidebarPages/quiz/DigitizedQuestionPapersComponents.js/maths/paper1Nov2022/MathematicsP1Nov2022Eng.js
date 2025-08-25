@@ -276,7 +276,7 @@ const MathematicsP1Nov2022Eng = ({ paperId }) => {
             }
         });
 
-        const percentage = Math.round((correct / total) * 100);
+        const percentage = ((correct / total) * 100).toFixed(2);
         return { correct, total, percentage };
     };
 
