@@ -20,14 +20,17 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
-    const sidebarRef = useRef(null);
     const [settings, setSettings] = useState({
         emailNotifications: true,
         chatNotifications: true,
         notificationSound: true,
         fontSize: localStorage.getItem('fontSize') || 'medium',
+        theme: darkMode ? 'dark' : 'light',
     });
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+    const [initialSettings, setInitialSettings] = useState(settings);
+    const [initialDarkMode, setInitialDarkMode] = useState(darkMode);
+    const sidebarRef = useRef(null);
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -58,6 +61,36 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             try {
                 const token = sessionStorage.getItem('jwt');
                 if (!token) throw new Error('No JWT token found');
+                console.log('Fetching user data with token:', token); // Debug JWT
+                // Fetch user details
+                const userResponse = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    method: 'GET',
+                });
+                if (!userResponse.ok) {
+                    const contentType = userResponse.headers.get('content-type');
+                    let errorMessage = `Failed to fetch user: HTTP ${userResponse.status}`;
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await userResponse.json();
+                        errorMessage = data.message || errorMessage;
+                    }
+                    throw new Error(errorMessage);
+                }
+                const userData = await userResponse.json();
+                setUser((prev) => ({
+                    ...prev,
+                    id: userData.id,
+                    email: userData.email,
+                    name: `${userData.firstName} ${userData.lastName}`,
+                    role: userData.role,
+                    createdAt: userData.createdAt,
+                    twoFactorEnabled: userData.twoFactorEnabled,
+                    phoneNumber: userData.phoneNumber,
+                    idNumber: userData.idNumber,
+                    profilePicture: userData.profilePicture,
+                }));
+
+                // Fetch settings
                 const settingsResponse = await fetch(`${API_BASE_URL}/users/settings`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                     method: 'GET',
@@ -66,12 +99,23 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 if (settingsResponse.ok) {
                     userSettings = await settingsResponse.json();
                 } else {
+                    const contentType = settingsResponse.headers.get('content-type');
+                    let errorMessage = `Failed to load settings: HTTP ${settingsResponse.status}`;
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await settingsResponse.json();
+                        errorMessage = data.message || errorMessage;
+                    }
                     userSettings = {
                         emailNotifications: true,
                         chatNotifications: true,
                         notificationSound: true,
                         fontSize: localStorage.getItem('fontSize') || 'medium',
                         theme: darkMode ? 'dark' : 'light',
+                        pushNotifications: false,
+                        mentionNotifications: true,
+                        language: 'en',
+                        profileVisibility: 'public',
+                        dataSharing: false,
                     };
                 }
                 setSettings({
@@ -79,16 +123,25 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                     chatNotifications: userSettings.chatNotifications ?? true,
                     notificationSound: userSettings.notificationSound ?? true,
                     fontSize: localStorage.getItem('fontSize') || userSettings.fontSize || 'medium',
+                    theme: userSettings.theme ?? (darkMode ? 'dark' : 'light'),
+                });
+                setInitialSettings({
+                    emailNotifications: userSettings.emailNotifications ?? true,
+                    chatNotifications: userSettings.chatNotifications ?? true,
+                    notificationSound: userSettings.notificationSound ?? true,
+                    fontSize: localStorage.getItem('fontSize') || userSettings.fontSize || 'medium',
+                    theme: userSettings.theme ?? (darkMode ? 'dark' : 'light'),
                 });
                 setDarkMode(userSettings.theme === 'dark');
+                setInitialDarkMode(userSettings.theme === 'dark');
             } catch (err) {
-                setError(`Failed to load settings: ${err.message}`);
+                setError(`Failed to load data: ${err.message}`);
             } finally {
                 setLoading(false);
             }
         };
         fetchUserData();
-    }, [setDarkMode]);
+    }, [setDarkMode, setUser]);
 
     const validateCurrentPassword = (password) => {
         if (!password.trim()) return 'Current password is required.';
@@ -124,44 +177,116 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
     };
 
     const handleSettingChange = (key, value) => {
+        setSettings((prev) => ({ ...prev, [key]: value }));
         if (key === 'theme') {
             setDarkMode(value === 'dark');
-        } else {
-            setSettings((prev) => ({ ...prev, [key]: value }));
-            if (key === 'fontSize') {
-                document.documentElement.style.fontSize = value === 'small' ? '14px' : value === 'large' ? '18px' : '16px';
-                localStorage.setItem('fontSize', value);
-            }
+        }
+        if (key === 'fontSize') {
+            document.documentElement.style.fontSize = value === 'small' ? '14px' : value === 'large' ? '18px' : '16px';
+            localStorage.setItem('fontSize', value);
         }
     };
 
+    const hasSettingsChanged = () => {
+        return (
+            settings.emailNotifications !== initialSettings.emailNotifications ||
+            settings.chatNotifications !== initialSettings.chatNotifications ||
+            settings.notificationSound !== initialSettings.notificationSound ||
+            settings.fontSize !== initialSettings.fontSize ||
+            settings.theme !== initialSettings.theme
+        );
+    };
+
     const handleSaveSettings = async () => {
-        if (loading) return;
+        if (loading || !hasSettingsChanged()) return; // Prevent multiple clicks or no changes
         setLoading(true);
         setError('');
         setSuccess('');
         try {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('No JWT token found');
+            console.log('Saving settings with payload:', { // Debug payload
+                username: user.email, // Added username
+                emailNotifications: settings.emailNotifications,
+                chatNotifications: settings.chatNotifications,
+                notificationSound: settings.notificationSound,
+                fontSize: settings.fontSize,
+                theme: settings.theme,
+            });
             const response = await fetch(`${API_BASE_URL}/users/settings`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
+                    username: user.email, // Added username
                     emailNotifications: settings.emailNotifications,
                     chatNotifications: settings.chatNotifications,
                     notificationSound: settings.notificationSound,
                     fontSize: settings.fontSize,
-                    theme: darkMode ? 'dark' : 'light',
+                    theme: settings.theme,
+                    pushNotifications: false,
+                    mentionNotifications: true,
+                    language: 'en',
+                    profileVisibility: 'public',
+                    dataSharing: false,
                 }),
             });
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || `Failed to save settings: HTTP ${response.status}`);
+                const contentType = response.headers.get('content-type');
+                let errorMessage = `Failed to save settings: HTTP ${response.status}`;
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    errorMessage = data.message || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
-            setSuccess('Settings saved successfully');
-            onActivity('Updated settings');
+            const data = await response.json();
+            setInitialSettings(settings);
+            setInitialDarkMode(darkMode);
+            localStorage.setItem('fontSize', settings.fontSize);
+            localStorage.setItem('theme', settings.theme);
+            setSuccess(data.message || 'Settings saved successfully');
+            setTimeout(() => setSuccess(''), 3000);
+            onActivity('Saved settings'); // Log activity
         } catch (err) {
+            console.error('Save settings error:', err); // Debug error
             setError(err.message || 'An error occurred while saving settings.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleClearNotifications = async () => {
+        if (loading || notifications.length === 0 || !user.id) return;
+        setLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const token = sessionStorage.getItem('jwt');
+            if (!token) throw new Error('No JWT token found');
+            console.log('Clearing notifications for user ID:', user.id); // Debug
+            const response = await fetch(`${API_BASE_URL}/users/notifications/${user.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                let errorMessage = `Failed to clear notifications: HTTP ${response.status}`;
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    errorMessage = data.message || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+            setNotifications([]);
+            setSuccess('Notifications cleared successfully');
+            setTimeout(() => setSuccess(''), 3000);
+            onActivity('Cleared notifications');
+        } catch (err) {
+            console.error('Clear notifications error:', err); // Debug
+            setError(err.message || 'An error occurred while clearing notifications.');
         } finally {
             setLoading(false);
         }
@@ -205,7 +330,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
         try {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('No JWT token found');
-            const response = await fetch(`${API_BASE_URL}/user/profile/change-password`, {
+            const response = await fetch(`${API_BASE_URL}/users/profile/change-password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -214,8 +339,13 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                 }),
             });
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || `Failed to change password: HTTP ${response.status}`);
+                const contentType = response.headers.get('content-type');
+                let errorMessage = `Failed to change password: HTTP ${response.status}`;
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    errorMessage = data.message || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
             setSuccess('Password changed successfully');
             setPassword({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -225,32 +355,6 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             onActivity('Changed password');
         } catch (err) {
             setError(err.message || 'An error occurred while changing password.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleClearNotifications = async () => {
-        if (loading) return;
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        try {
-            const token = sessionStorage.getItem('jwt');
-            if (!token) throw new Error('No JWT token found');
-            const response = await fetch(`${API_BASE_URL}/users/notifications`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || `Failed to clear notifications: HTTP ${response.status}`);
-            }
-            setNotifications([]);
-            setSuccess('Notifications cleared successfully');
-            onActivity('Cleared notifications');
-        } catch (err) {
-            setError(err.message || 'An error occurred while clearing notifications.');
         } finally {
             setLoading(false);
         }
@@ -350,6 +454,9 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
           }
           .hover\\:bg-gray-100:hover {
             background-color: var(--hover-gray, ${darkMode ? '#4b5563' : '#f3f4f6'});
+          }
+          .hover\\:bg-[var(--hover-tertiary)]:hover {
+            background-color: var(--hover-tertiary, ${darkMode ? '#4b5563' : '#d1d5db'});
           }
           .flex {
             display: flex;
@@ -460,6 +567,19 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             font-weight: 500;
             border: none;
             cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+          }
+          .btn-primary:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+          }
+          .btn-primary:not(:disabled):hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+          }
+          .btn-primary:not(:disabled):active {
+            transform: translateY(0);
           }
           .btn-secondary {
             background-color: var(--bg-tertiary);
@@ -480,15 +600,19 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
             font-weight: 500;
             border: none;
             cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
           }
-          .btn-primary:hover {
-            background-color: #2563eb;
+          .btn-danger:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
           }
-          .btn-secondary:hover {
-            background-color: var(--hover-gray);
-          }
-          .btn-danger:hover {
+          .btn-danger:not(:disabled):hover {
             background-color: #dc2626;
+            transform: translateY(-1px);
+          }
+          .btn-danger:not(:disabled):active {
+            transform: translateY(0);
           }
           .tabs {
             display: flex;
@@ -926,7 +1050,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         <br />
                                         <button
                                             onClick={handleChangePassword}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
+                                            className="btn-primary flex gap-2"
                                             aria-label="Change Password"
                                             disabled={loading || currentPasswordError || newPasswordError || confirmPasswordError}
                                         >
@@ -984,24 +1108,34 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                         </label>
                                     </div>
                                     <div className="flex gap-4">
-                                        <button
-                                            onClick={handleSaveSettings}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                            aria-label="Save Notification Settings"
-                                            disabled={loading}
-                                        >
-                                            <PencilIcon className="w-4 h-4" />
-                                            {loading ? 'Saving Settings...' : 'Save Settings'}
-                                        </button>
-                                        <button
-                                            onClick={handleClearNotifications}
-                                            className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                            aria-label="Clear Notifications"
-                                            disabled={loading}
-                                        >
-                                            <TrashIcon className="w-4 h-4" />
-                                            {loading ? 'Clearing Notifications...' : 'Clear Notifications'}
-                                        </button>
+                                        <div className="tooltip">
+                                            {/*<button*/}
+                                            {/*    onClick={handleSaveSettings}*/}
+                                            {/*    className="btn-primary flex gap-2"*/}
+                                            {/*    aria-label="Save Notification Settings"*/}
+                                            {/*    disabled={loading || !hasSettingsChanged()}*/}
+                                            {/*>*/}
+                                            {/*    <PencilIcon className="w-4 h-4" />*/}
+                                            {/*    {loading ? 'Saving...' : 'Save Settings'}*/}
+                                            {/*</button>*/}
+                                            <span className="tooltip-text">
+                                                {hasSettingsChanged() ? 'Save changes to notification settings' : 'No changes to save'}
+                                            </span>
+                                        </div>
+                                        <div className="tooltip">
+                                            {/*<button*/}
+                                            {/*    onClick={handleClearNotifications}*/}
+                                            {/*    className="btn-danger flex gap-2"*/}
+                                            {/*    aria-label="Clear Notifications"*/}
+                                            {/*    disabled={loading || notifications.length === 0 || !user.id}*/}
+                                            {/*>*/}
+                                            {/*    <TrashIcon className="w-4 h-4" />*/}
+                                            {/*    {loading ? 'Clearing...' : 'Clear Notifications'}*/}
+                                            {/*</button>*/}
+                                            <span className="tooltip-text">
+                                                {notifications.length === 0 ? 'No notifications to clear' : 'Clear all notifications'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1014,7 +1148,7 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                                 Theme
                                             </label>
                                             <select
-                                                value={darkMode ? 'dark' : 'light'}
+                                                value={settings.theme}
                                                 onChange={(e) => handleSettingChange('theme', e.target.value)}
                                                 className="form-input"
                                                 aria-label="Select Theme"
@@ -1041,15 +1175,20 @@ const Settings = ({ user, setUser, isCollapsed, setIsCollapsed, darkMode, setDar
                                             </select>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={handleSaveSettings}
-                                        className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)] transition-colors duration-200 flex gap-2"
-                                        aria-label="Save Appearance Settings"
-                                        disabled={loading}
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                        {loading ? 'Saving Settings...' : 'Save Settings'}
-                                    </button>
+                                    <div className="tooltip">
+                                        {/*<button*/}
+                                        {/*    onClick={handleSaveSettings}*/}
+                                        {/*    className="btn-primary flex gap-2"*/}
+                                        {/*    aria-label="Save Appearance Settings"*/}
+                                        {/*    disabled={loading || !hasSettingsChanged()}*/}
+                                        {/*>*/}
+                                        {/*    <PencilIcon className="w-4 h-4" />*/}
+                                        {/*    {loading ? 'Saving...' : 'Save Settings'}*/}
+                                        {/*</button>*/}
+                                        <span className="tooltip-text">
+                                            {hasSettingsChanged() ? 'Save changes to appearance settings' : 'No changes to save'}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -1067,6 +1206,7 @@ Settings.propTypes = {
         title: PropTypes.string,
         profilePicture: PropTypes.string,
         createdAt: PropTypes.string,
+        id: PropTypes.number,
     }).isRequired,
     setUser: PropTypes.func.isRequired,
     isCollapsed: PropTypes.bool.isRequired,
