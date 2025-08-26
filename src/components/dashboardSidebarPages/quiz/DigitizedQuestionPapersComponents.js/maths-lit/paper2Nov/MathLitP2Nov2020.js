@@ -31,31 +31,27 @@ const MathLitP2Nov2020 = ({paperId}) => {
         }
     }, [score]);
 
-    const recordPerformance = async (scoreData) => {
+    const recordPerformance = async (correctCount) => {
         setRecording(true);
         setRecordError(null);
-
         try {
+            const percentage = totalQuestions > 0 ? ((correctCount / totalQuestions) * 100).toFixed(2) : 0;
+            const scoreData = { score: parseFloat(percentage) }; // Store as percentage (0-100)
             const response = await fetch(`${API_BASE_URL}/user/record`, {
                 method: 'POST',
                 headers: {
                     ...getAuthHeaders(),
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    paperId: paperId,
-                    score: scoreData
-                })
+                body: JSON.stringify({ paperId: paperId, ...scoreData }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to record performance');
             }
-
             const result = await response.json();
             console.log('Performance recorded:', result);
-            console.log(' recorded:', scoreData);
+            console.log('recorded:', scoreData);
         } catch (err) {
             setRecordError(err.message);
             console.error('Recording error:', err);
@@ -75,26 +71,20 @@ const MathLitP2Nov2020 = ({paperId}) => {
     const checkAnswers = () => {
         let correctCount = 0;
         const feedbackState = {};
-
         document.querySelectorAll('.input-group input[data-answer]').forEach((input) => {
             const questionId = input.closest('.input-group').id;
             const userAnswer = normalizeAnswer(answers[questionId] || '');
             const correctAnswer = normalizeAnswer(input.getAttribute('data-answer'));
             const isCorrect = userAnswer === correctAnswer;
-
             feedbackState[questionId] = { isCorrect, userAnswer };
-
             if (isCorrect && answers[questionId]?.trim()) {
                 correctCount++;
             }
         });
-
         setScore(correctCount);
         setShowFeedback(feedbackState);
-
-        recordPerformance((totalQuestions > 0 ? ((score / totalQuestions) * 100).toFixed(2) : 0));
+        recordPerformance(correctCount); // Pass correctCount to calculate percentage
     };
-
     return (
         <main className="p-4 sm:p-6 bg-gray-100 min-h-screen max-w-6xl mx-auto">
             <h1 className="text-center text-3xl sm:text-4xl font-bold text-teal-900 border-b-2 border-teal-900 pb-2 mb-8">
@@ -1131,7 +1121,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             }`}
                             data-answer="262"
                             value={answers['q3-2-4'] || ''}
-                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                            onChange={(e) => handleAnswerChange('q3-2-4', e.target.value)}
                         />
                         <div
                             className={`mt-2 p-2 rounded-md text-sm ${
@@ -1170,7 +1160,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             }`}
                             data-answer="Parked for more than 1 hour"
                             value={answers['q3-2-5a'] || ''}
-                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                            onChange={(e) => handleAnswerChange('q3-2-5a', e.target.value)}
                         />
                         <div
                             className={`mt-2 p-2 rounded-md text-sm ${
@@ -1203,7 +1193,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             }`}
                             data-answer="33"
                             value={answers['q3-2-5b'] || ''}
-                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                            onChange={(e) => handleAnswerChange('q3-2-5b', e.target.value)}
                         />
                         <div
                             className={`mt-2 p-2 rounded-md text-sm ${
