@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, getAuthHeaders } from '../../../../../../utils/api';
+import Question1_1_1 from "../diagrams-images/mathsP22020/Q1-1.1.png";
+import Question1_1_2 from "../diagrams-images/mathsP22020/Q1-1.2.png";
+import Question2_2_1 from "../diagrams-images/mathsP22020/Q2.1.png";
+import Question2_2_2 from "../diagrams-images/mathsP22020/Q2-2.2.png";
+import Question3_3_1 from "../diagrams-images/mathsP22020/Q3-3.1.png";
+import Question4_4_1 from "../diagrams-images/mathsP22020/Q4-4.1.png";
+import AnnexureA from "../diagrams-images/mathsP22020/AnnexureA.png";
+import AnnexureB from "../diagrams-images/mathsP22020/AnnexureB.png";
+import AnnexureC from "../diagrams-images/mathsP22020/AnnexureC.png";
+import AnnexureD from "../diagrams-images/mathsP22020/AnnexureD.png";
 
 const MathLitP2Nov2020 = ({paperId}) => {
     const [answers, setAnswers] = useState({});
@@ -95,7 +105,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
             <div className="bg-white rounded-lg p-5 mb-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div className="sub-question" id="q1-1">
                     <p className="mb-4">1.1 Use TABLE 1 to answer the following questions about learners enrolled in early childhood education from 2014 to 2016.</p>
-                    <img src="/static/images/mathlitP2_Q1_1_table1.png" alt="Table 1 for Question 1.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question1_1_1} alt="Table 1 for Question 1.1" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q1-1-1">
                         <p className="mb-2">1.1.1 Determine the difference in the number of learners enrolled in Slovakia in 2015 and 2016.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
@@ -321,7 +331,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                 </div>
                 <div className="sub-question" id="q1-2">
                     <p className="mb-4">1.2 Use the information about Lindiwe’s marbles and cylindrical container.</p>
-                    <img src="/static/images/mathlitP2_Q1_2_diagram.png" alt="Diagram for Question 1.2" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question1_1_2} alt="Diagram for Question 1.2" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q1-2-1">
                         <p className="mb-2">1.2.1 Calculate the selling price of EACH marble (120% profit on R30 per bag of 100 marbles).</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
@@ -442,7 +452,8 @@ const MathLitP2Nov2020 = ({paperId}) => {
             <div className="bg-white rounded-lg p-5 mb-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div className="sub-question" id="q2-1">
                     <p className="mb-4">2.1 Use ANNEXURE A and TABLE 3 to answer questions about marking 2,808 Mathematical Literacy scripts.</p>
-                    <img src="/static/images/mathlitP2_Q2_1_annexureA.png" alt="Annexure A for Question 2.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question2_2_1} alt="Annexure A for Question 2.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={AnnexureA} alt="Annexure A for Question 2.1" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q2-1-1">
                         <p className="mb-2">2.1.1 Determine the total amount claimed by the chief moderator (CM) and internal moderator (IM).</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
@@ -676,7 +687,8 @@ const MathLitP2Nov2020 = ({paperId}) => {
                 </div>
                 <div className="sub-question" id="q2-2">
                     <p className="mb-4">2.2 Use ANNEXURE B for semicircular table tops.</p>
-                    <img src="/static/images/mathlitP2_Q2_2_annexureB.png" alt="Annexure B for Question 2.2" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question2_2_2} alt="Annexure B for Question 2.2" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={AnnexureB} alt="Annexure B for Question 2.2" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q2-2-1">
                         <p className="mb-2">2.2.1 Verify if 2.01 m² of wood is cut off for two semicircular table tops.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
@@ -763,7 +775,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
             <div className="bg-white rounded-lg p-5 mb-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div className="sub-question" id="q3-1">
                     <p className="mb-4">3.1 Use TABLE 4 to answer questions about nursing students’ test scores.</p>
-                    <img src="/static/images/mathlitP2_Q3_1_table4.png" alt="Table 4 for Question 3.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question3_3_1} alt="Table 4 for Question 3.1" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q3-1-1">
                         <p className="mb-2">3.1.1 Explain whether the data is discrete or continuous.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
@@ -787,8 +799,8 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-1'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Test scores are whole numbers (e.g., 50%).<br />
-                            Discrete data has distinct values.<br />
+                            Percentages run from 0 to 100 and depends on the total of the test and the mark obtained.<br />
+                            It is presented as whole numbers.<br />
                             Therefore, the data is Discrete.
                             {!showFeedback['q3-1-1']?.isCorrect && answers['q3-1-1']?.trim() && (
                                 <>
@@ -803,7 +815,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Score (e.g., 50)"
+                            placeholder="Score (e.g., 66.5)"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-1-2'] && answers['q3-1-2']?.trim()
                                     ? showFeedback['q3-1-2'].isCorrect
@@ -811,7 +823,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="50"
+                            data-answer="66.5"
                             value={answers['q3-1-2'] || ''}
                             onChange={(e) => handleAnswerChange('q3-1-2', e.target.value)}
                         />
@@ -821,23 +833,22 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-2'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Test 2 scores: 30, 40, 45, 50, 50, 55, 65, 70, 80.<br />
-                            Median = 5th score = 50.<br />
-                            Therefore, the median is 50.
+                            Median = 66+67/2 = 66.5.<br />
+                            Therefore, the median is 66.5.
                             {!showFeedback['q3-1-2']?.isCorrect && answers['q3-1-2']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 50
+                                    <strong>Correct Answer:</strong> 66.5
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-1-3">
-                        <p className="mb-2">3.1.3 Calculate the mean score for Test 1.</p>
+                        <p className="mb-2">3.1.3 The mean score for Test 1 was 84%. Calculate the value of Y.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Mean (e.g., 60.3)"
+                            placeholder="Mean (e.g., 69)"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-1-3'] && answers['q3-1-3']?.trim()
                                     ? showFeedback['q3-1-3'].isCorrect
@@ -845,7 +856,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="60.3"
+                            data-answer="69"
                             value={answers['q3-1-3'] || ''}
                             onChange={(e) => handleAnswerChange('q3-1-3', e.target.value)}
                         />
@@ -855,24 +866,24 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-3'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Test 1 scores: 45, 50, 55, 60, 60, 65, 70, 75, 80.<br />
-                            Sum = 543.<br />
-                            Mean = 543 / 9 ≈ 60.3.<br />
-                            Therefore, the mean is 60.3.
+                            18 × 84 = 1 512<br />
+                            Y + 1443 = 1 512<br />
+                            Y = 1 512 – 1 443<br />
+                            Therefore, the mean is 69.
                             {!showFeedback['q3-1-3']?.isCorrect && answers['q3-1-3']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 60.3
+                                    <strong>Correct Answer:</strong> 69
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-1-4">
-                        <p className="mb-2">3.1.4 Calculate the mode score for Test 2.</p>
+                        <p className="mb-2">3.1.4 Identify the candidates whose test scores in both tests differed by 30%.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Mode (e.g., 50)"
+                            placeholder="Mode (e.g., Helen and Kevin)"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-1-4'] && answers['q3-1-4']?.trim()
                                     ? showFeedback['q3-1-4'].isCorrect
@@ -880,7 +891,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="50"
+                            data-answer="Helen and Kevin"
                             value={answers['q3-1-4'] || ''}
                             onChange={(e) => handleAnswerChange('q3-1-4', e.target.value)}
                         />
@@ -890,23 +901,23 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-4'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Test 2 scores: 30, 40, 45, 50, 50, 55, 65, 70, 80.<br />
-                            Mode = 50 (appears twice).<br />
-                            Therefore, the mode is 50.
+                            Helen : 87% – 57% = 30%.<br />
+                            Kevin : 97% –67% = 30%.<br />
+                            Therefore, the candidates are Helen and Kevin.
                             {!showFeedback['q3-1-4']?.isCorrect && answers['q3-1-4']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 50
+                                    <strong>Correct Answer:</strong> Helen and Kevin
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-1-5">
-                        <p className="mb-2">3.1.5 Calculate the standard deviation of Test 1 scores to two decimal places.</p>
+                        <p className="mb-2">3.1.5 Calculate the value of the interquartile range for Test 2</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Standard Deviation (e.g., 11.09)"
+                            placeholder="Standard Deviation (e.g., 10)"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-1-5'] && answers['q3-1-5']?.trim()
                                     ? showFeedback['q3-1-5'].isCorrect
@@ -914,7 +925,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="11.09"
+                            data-answer="10"
                             value={answers['q3-1-5'] || ''}
                             onChange={(e) => handleAnswerChange('q3-1-5', e.target.value)}
                         />
@@ -924,26 +935,25 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-5'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Mean = 60.3.<br />
-                            Deviations squared: (45-60.3)² = 234.09, (50-60.3)² = 106.09, (55-60.3)² = 28.09, (60-60.3)² = 0.09, (60-60.3)² = 0.09, (65-60.3)² = 22.09, (70-60.3)² = 94.09, (75-60.3)² = 216.09, (80-60.3)² = 388.09.<br />
-                            Sum = 1089.09.<br />
-                            Variance = 1089.09 / 8 ≈ 136.14.<br />
-                            Standard deviation = √136.14 ≈ 11.09.<br />
-                            Therefore, the standard deviation is 11.09.
+                            Q3 = 71% , Q1= 61%.<br />
+                            IQR = Q3 – Q1.<br />
+                                = 71% – 61%.<br />
+                                = 10%.<br />
+                            Therefore, the interquartile range is 10%.
                             {!showFeedback['q3-1-5']?.isCorrect && answers['q3-1-5']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 11.09
+                                    <strong>Correct Answer:</strong> 10
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-1-6">
-                        <p className="mb-2">3.1.6 Determine the probability that a randomly selected student scored above 80% on Test 2.</p>
+                        <p className="mb-2">3.1.6 Express, in simplified fractional form, the probability of randomly selecting a candidate who did not get a distinction for Test 1.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Probability (e.g., 0.111)"
+                            placeholder="Probability (e.g., 4/9)"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-1-6'] && answers['q3-1-6']?.trim()
                                     ? showFeedback['q3-1-6'].isCorrect
@@ -951,7 +961,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="0.111"
+                            data-answer="4/9"
                             value={answers['q3-1-6'] || ''}
                             onChange={(e) => handleAnswerChange('q3-1-6', e.target.value)}
                         />
@@ -961,28 +971,60 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-1-6'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            Test 2 scores: 30, 40, 45, 50, 50, 55, 65, 70, 80.<br />
-                            Scores > 80%: 1 (80).<br />
-                            Probability = 1 / 9 ≈ 0.111.<br />
-                            Therefore, the probability is 0.111.
+                            P(non distinction) = 8/18<br />
+                                               = 4/9.<br />
+                            Therefore, the probability is 4/9.
                             {!showFeedback['q3-1-6']?.isCorrect && answers['q3-1-6']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 0.111
+                                    <strong>Correct Answer:</strong> 4/9
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="input-group" id="q3-1-7">
+                        <p className="mb-2">3.1.7 Determine the mode test score for Test 1</p>
+                        <label className="font-medium text-gray-700 block mt-2">Answer:</label>
+                        <input
+                            type="text"
+                            placeholder="Probability (e.g., 73)"
+                            className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
+                                showFeedback['q3-1-7'] && answers['q3-1-7']?.trim()
+                                    ? showFeedback['q3-1-6'].isCorrect
+                                        ? 'bg-green-50 border-green-500'
+                                        : 'bg-red-50 border-red-500'
+                                    : ''
+                            }`}
+                            data-answer="73"
+                            value={answers['q3-1-7'] || ''}
+                            onChange={(e) => handleAnswerChange('q3-1-6', e.target.value)}
+                        />
+                        <div
+                            className={`mt-2 p-2 rounded-md text-sm ${
+                                showFeedback['q3-1-7']?.isCorrect ? 'bg-green-100 border border-green-500 text-green-700' : 'bg-red-100 border border-red-500 text-red-700'
+                            } ${showFeedback['q3-1-7'] ? 'block' : 'hidden'}`}
+                        >
+                            <strong>Step-by-Step Solution:</strong><br />
+                            Mode = 73%.<br />
+                            Therefore, the mode is 73%.
+                            {!showFeedback['q3-1-7']?.isCorrect && answers['q3-1-7']?.trim() && (
+                                <>
+                                    <br />
+                                    <strong>Correct Answer:</strong> 73
                                 </>
                             )}
                         </div>
                     </div>
                 </div>
                 <div className="sub-question" id="q3-2">
-                    <p className="mb-4">3.2 Use ANNEXURE C to answer questions about body mass calculations.</p>
-                    <img src="/static/images/mathlitP2_Q3_2_annexureC.png" alt="Annexure C for Question 3.2" className="block max-w-full h-auto mx-auto my-2" />
+                    <p className="mb-4">3.2 Use ANNEXURE C to answer the questions that follow.</p>
+                    <img src={AnnexureC} alt="Annexure C for Question 3.2" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q3-2-1">
-                        <p className="mb-2">3.2.1 Calculate the Body Mass Index (BMI) for a patient with mass 70 kg and height 1.6 m.</p>
+                        <p className="mb-2">3.2.1 Identify the road in which parking is not allowed.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="BMI (e.g., 27.34)"
+                            placeholder="View Terrace"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-2-1'] && answers['q3-2-1']?.trim()
                                     ? showFeedback['q3-2-1'].isCorrect
@@ -990,7 +1032,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="27.34"
+                            data-answer="View Terrace"
                             value={answers['q3-2-1'] || ''}
                             onChange={(e) => handleAnswerChange('q3-2-1', e.target.value)}
                         />
@@ -1000,23 +1042,21 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-2-1'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            BMI = Mass / (Height²).<br />
-                            = 70 / (1.6)² = 70 / 2.56 ≈ 27.34.<br />
-                            Therefore, the BMI is 27.34.
+                            View Terrace OR View OR Terrace
                             {!showFeedback['q3-2-1']?.isCorrect && answers['q3-2-1']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 27.34
+                                    <strong>Correct Answer:</strong> View Terrace
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-2-2">
-                        <p className="mb-2">3.2.2 Determine if the patient in 3.2.1 is overweight (BMI ≥ 25).</p>
+                        <p className="mb-2">3.2.2 Mangiwe travels from Keswick to Rydal Road.<b/>Give ONE reason why she cannot turn right into Compston Road.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Statement (e.g., Yes)"
+                            placeholder="Two way road"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-2-2'] && answers['q3-2-2']?.trim()
                                     ? showFeedback['q3-2-2'].isCorrect
@@ -1024,7 +1064,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="yes"
+                            data-answer="One way road"
                             value={answers['q3-2-2'] || ''}
                             onChange={(e) => handleAnswerChange('q3-2-2', e.target.value)}
                         />
@@ -1034,23 +1074,22 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-2-2'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            BMI = 27.34.<br />
-                            27.34 ≥ 25, so the patient is overweight.<br />
-                            Therefore, the answer is Yes.
+                            One way road or<br />
+                            Facing oncoming traffic.
                             {!showFeedback['q3-2-2']?.isCorrect && answers['q3-2-2']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> Yes
+                                    <strong>Correct Answer:</strong> One way road
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="input-group" id="q3-2-3">
-                        <p className="mb-2">3.2.3 Calculate the mass required for a BMI of 22 with height 1.8 m.</p>
+                        <p className="mb-2">3.2.3 Give the general direction of the Queens Hotel from the tennis courts.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
                         <input
                             type="text"
-                            placeholder="Mass (e.g., 71.28)"
+                            placeholder="e.g North south"
                             className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
                                 showFeedback['q3-2-3'] && answers['q3-2-3']?.trim()
                                     ? showFeedback['q3-2-3'].isCorrect
@@ -1058,7 +1097,7 @@ const MathLitP2Nov2020 = ({paperId}) => {
                                         : 'bg-red-50 border-red-500'
                                     : ''
                             }`}
-                            data-answer="71.28"
+                            data-answer="North west"
                             value={answers['q3-2-3'] || ''}
                             onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
                         />
@@ -1068,14 +1107,122 @@ const MathLitP2Nov2020 = ({paperId}) => {
                             } ${showFeedback['q3-2-3'] ? 'block' : 'hidden'}`}
                         >
                             <strong>Step-by-Step Solution:</strong><br />
-                            BMI = Mass / (Height²).<br />
-                            22 = Mass / (1.8)².<br />
-                            Mass = 22 × 3.24 = 71.28 kg.<br />
-                            Therefore, the mass is 71.28 kg.
+                            North west
                             {!showFeedback['q3-2-3']?.isCorrect && answers['q3-2-3']?.trim() && (
                                 <>
                                     <br />
-                                    <strong>Correct Answer:</strong> 71.28
+                                    <strong>Correct Answer:</strong> North west
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="input-group" id="q3-2-4">
+                        <p className="mb-2">3.2.4 Use the scale on the map to calculate,in yards, the straight-line distance from X to Y.</p>
+                        <label className="font-medium text-gray-700 block mt-2">Answer:</label>
+                        <input
+                            type="text"
+                            placeholder="distance (e.g., 262)"
+                            className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
+                                showFeedback['q3-2-4'] && answers['q3-2-4']?.trim()
+                                    ? showFeedback['q3-2-4'].isCorrect
+                                        ? 'bg-green-50 border-green-500'
+                                        : 'bg-red-50 border-red-500'
+                                    : ''
+                            }`}
+                            data-answer="262"
+                            value={answers['q3-2-4'] || ''}
+                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                        />
+                        <div
+                            className={`mt-2 p-2 rounded-md text-sm ${
+                                showFeedback['q3-2-4']?.isCorrect ? 'bg-green-100 border border-green-500 text-green-700' : 'bg-red-100 border border-red-500 text-red-700'
+                            } ${showFeedback['q3-2-4'] ? 'block' : 'hidden'}`}
+                        >
+                            <strong>Step-by-Step Solution:</strong><br />
+                            21 mm = 110 yards.<br />
+                            XY = 50 * 110 / 21.<br />
+                            XY = 261,904…yards.<br />
+                            Therefore, the distance is 262 yards.
+                            {!showFeedback['q3-2-4']?.isCorrect && answers['q3-2-4']?.trim() && (
+                                <>
+                                    <br />
+                                    <strong>Correct Answer:</strong> 262
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="input-group" id="q3-2-5">
+                        <p className="mb-2">3.2.5 Mangiwe parked in Church Street from 12:00 to 15:25. A traffic officer who monitors the area issued her with a fine.<b/>
+                        <strong>NOTE: </strong> A fine is the amount of money that someone has to pay if there is an offence.</p>
+                    </div>
+                    <div className="input-group" id="q3-2-5a">
+                        <p className="mb-2">3.2.5(a) Write down for which offence the traffic officer issued her with a fine.</p>
+                        <label className="font-medium text-gray-700 block mt-2">Answer:</label>
+                        <input
+                            type="text"
+                            placeholder="Mass (e.g., Parked for more than 1 hour)"
+                            className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
+                                showFeedback['q3-2-5a'] && answers['q3-2-5a']?.trim()
+                                    ? showFeedback['q3-2-5a'].isCorrect
+                                        ? 'bg-green-50 border-green-500'
+                                        : 'bg-red-50 border-red-500'
+                                    : ''
+                            }`}
+                            data-answer="Parked for more than 1 hour"
+                            value={answers['q3-2-5a'] || ''}
+                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                        />
+                        <div
+                            className={`mt-2 p-2 rounded-md text-sm ${
+                                showFeedback['q3-2-5a']?.isCorrect ? 'bg-green-100 border border-green-500 text-green-700' : 'bg-red-100 border border-red-500 text-red-700'
+                            } ${showFeedback['q3-2-5a'] ? 'block' : 'hidden'}`}
+                        >
+                            <strong>Step-by-Step Solution:</strong><br />
+                            Street parking is limited to 1 hour before 5 pm or<b />
+                            Parked for more than 1 hour
+                            {!showFeedback['q3-2-5a']?.isCorrect && answers['q3-2-5a']?.trim() && (
+                                <>
+                                    <br />
+                                    <strong>Correct Answer:</strong> Parked for more than 1 hour
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="input-group" id="q3-2-5b">
+                        <p className="mb-2">3.2.5(b) Mangiwe was fined $79.75 by the traffic officer.<b/> Calculate, to the nearest $,the rate per hour for this fine.</p>
+                        <label className="font-medium text-gray-700 block mt-2">Answer:</label>
+                        <input
+                            type="text"
+                            placeholder="Mass (e.g., 33)"
+                            className={`w-full max-w-[350px] p-2 border border-gray-300 rounded-md text-base focus:border-teal-900 focus:ring-1 focus:ring-teal-900 ${
+                                showFeedback['q3-2-5b'] && answers['q3-2-5b']?.trim()
+                                    ? showFeedback['q3-2-5b'].isCorrect
+                                        ? 'bg-green-50 border-green-500'
+                                        : 'bg-red-50 border-red-500'
+                                    : ''
+                            }`}
+                            data-answer="33"
+                            value={answers['q3-2-5b'] || ''}
+                            onChange={(e) => handleAnswerChange('q3-2-3', e.target.value)}
+                        />
+                        <div
+                            className={`mt-2 p-2 rounded-md text-sm ${
+                                showFeedback['q3-2-5b']?.isCorrect ? 'bg-green-100 border border-green-500 text-green-700' : 'bg-red-100 border border-red-500 text-red-700'
+                            } ${showFeedback['q3-2-5b'] ? 'block' : 'hidden'}`}
+                        >
+                            <strong>Step-by-Step Solution:</strong><br />
+                            From 12:00 - 15:25 = 3 h 25 min.<br />
+                            Hours she was charged for.<br />
+                            3 h 25 min – 1 h = 2 h 25 min.<br />
+                            2h 25 min = 145 min.<br />
+                            Rate per hour = 79.75*60 /145.<br />
+                             = 4785 /145.<br />
+                             = 33.<br />
+                            Therefore, the rate per hour is £33.
+                            {!showFeedback['q3-2-5b']?.isCorrect && answers['q3-2-5b']?.trim() && (
+                                <>
+                                    <br />
+                                    <strong>Correct Answer:</strong> 33
                                 </>
                             )}
                         </div>
@@ -1088,7 +1235,8 @@ const MathLitP2Nov2020 = ({paperId}) => {
             <div className="bg-white rounded-lg p-5 mb-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div className="sub-question" id="q4-1">
                     <p className="mb-4">4.1 Use ANNEXURE D to answer questions about a map of a town.</p>
-                    <img src="/static/images/mathlitP2_Q4_1_annexureD.png" alt="Annexure D for Question 4.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={Question4_4_1} alt="Annexure D for Question 4.1" className="block max-w-full h-auto mx-auto my-2" />
+                    <img src={AnnexureD} alt="Annexure D for Question 4.1" className="block max-w-full h-auto mx-auto my-2" />
                     <div className="input-group" id="q4-1-1">
                         <p className="mb-2">4.1.1 Calculate the actual distance between points A and B if the map distance is 5 cm and the scale is 1:50,000.</p>
                         <label className="font-medium text-gray-700 block mt-2">Answer:</label>
