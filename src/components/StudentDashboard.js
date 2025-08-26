@@ -325,7 +325,7 @@ import MotivationalQuote from './onDashboardPages/MotivationalQuote';
 import ProgressOverview from './onDashboardPages/ProgressOverview';
 import Header from './common/Header';
 import PerformanceChart from './onDashboardPages/PerformanceChart';
-import { recordActivity } from '../utils/activityUtil.js';
+
 
 const StatsCard = ({ title, value, icon, color = 'text-[var(--text-normal)]' }) => (
     <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-4 rounded-2xl shadow-2xl flex items-center space-x-4 hover:shadow-lg transition-shadow">
@@ -434,6 +434,15 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(activitiesData.message || 'Failed to fetch activities');
                 }
 
+                const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
+                const subjectsData = await subjectsResponse.json();
+                if (subjectsResponse.ok && subjectsData.success) {
+                    setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
+                    setNumberOfSubjects(subjectsData.data);
+                } else {
+                    console.error(subjectsData.message || 'Failed to fetch number of subjects');
+                }
+
                 setSchedule([
                     { day: 'T', course: 'Mathematics', time: '11:00-12:30', location: 'Room 101' },
                     { day: 'T', course: 'Geography', time: '08:00-09:30', location: 'Room 202' },
@@ -452,7 +461,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
             }
         };
         fetchData();
-    }, [API_BASE_URL, setActivities]);
+    }, [API_BASE_URL, setDarkMode, setActivities]);
 
     useEffect(() => {
         const checkRating = async () => {
