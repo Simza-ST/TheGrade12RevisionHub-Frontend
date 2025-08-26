@@ -24,7 +24,8 @@ const Home = () => {
                     </ul>
                 </div>
                 <div className="image-placeholder">
-                    <img src="/images/studentImage.jpg" alt="Students preparing for exams" />
+                    {/*<img src="/images/studentImage.jpg" alt="Students preparing for exams" />*/}
+                    <img src="/images/image4.jpg" alt="Students preparing for exams" />
                 </div>
                 <div className="support">
                     <a href="/support" className="support-link">Need Help? Contact Support</a>

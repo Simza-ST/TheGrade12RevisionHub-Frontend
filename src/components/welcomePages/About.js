@@ -9,8 +9,14 @@ const About = () => {
                 <div className="title"><span>About the Revision Hub</span></div>
                 <div className="about-details">
                     <div className="left">
-                        <img src="/images/aboutImage.jpeg" alt="About" /> {/* Replace with "https://via.placeholder.com/400" if missing */}
+                        {/*<img src="/images/aboutImage.jpeg" alt="About" /> /!* Replace with "https://via.placeholder.com/400" if missing *!/*/}
+                        <img src="/images/image6.jpg" alt="About" />
                     </div>
+                    <br />
+                    {/*<div className="left">*/}
+                    {/*    <img src="/images/image7.jpg" alt="About" />*/}
+                    {/*</div>*/}
+
                     <div className="right">
                         <div className="topic">Designing Is My Passion</div>
                         <p>
