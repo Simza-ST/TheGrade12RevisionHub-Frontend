@@ -18,7 +18,7 @@ const ResetPassword = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const email = location.state?.email || '';
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/auth';
 
     useEffect(() => {
         if (!email) {
@@ -71,6 +71,7 @@ const ResetPassword = () => {
         setLoadingMessage('Verifying OTP...');
         setError('');
         setSuccess('');
+
         const otpValidation = validateOtp(otp);
         if (otpValidation) {
             setOtpError(otpValidation);
@@ -78,24 +79,41 @@ const ResetPassword = () => {
             setIsLoading(false);
             return;
         }
+
         if (!email) {
             setError('Email is missing. Please start the process from forgot password.');
             setIsLoading(false);
             return;
         }
+
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/password/verify-otp`, {
+            const response = await fetch(`${API_BASE_URL}/password/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email.trim(), otp }),
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || 'OTP verification failed');
+                const text = await response.text();
+                let errorMessage = 'OTP verification failed';
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
             if (data.success) {
-                setSuccess('OTP verified successfully! Please set your new password.');
+                setSuccess(data.message || 'OTP verified successfully! Please set your new password.');
                 setIsOtpVerified(true);
             } else {
                 setOtpError(data.message || 'Invalid or expired OTP');
@@ -114,6 +132,7 @@ const ResetPassword = () => {
         setLoadingMessage('Setting Password...');
         setError('');
         setSuccess('');
+
         const passwordValidation = validatePassword(newPassword);
         if (passwordValidation) {
             setPasswordError(passwordValidation);
@@ -121,6 +140,7 @@ const ResetPassword = () => {
             setIsLoading(false);
             return;
         }
+
         const passwordMatch = validatePasswordMatch(newPassword, confirmPassword);
         if (passwordMatch) {
             setPasswordError(passwordMatch);
@@ -128,22 +148,36 @@ const ResetPassword = () => {
             setIsLoading(false);
             return;
         }
+
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/password/reset`, {
+            const response = await fetch(`${API_BASE_URL}/password/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email.trim(), otp, newPassword }),
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || 'Password reset failed');
+                const text = await response.text();
+                let errorMessage = 'Password reset failed';
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
             if (data.success) {
-                setSuccess('Password reset successfully! Redirecting to login...');
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                setSuccess(data.message || 'Password reset successfully! Redirecting to login...');
+                setTimeout(() => navigate('/login'), 2000);
             } else {
                 setError(data.message || 'Failed to reset password.');
             }
@@ -160,17 +194,33 @@ const ResetPassword = () => {
         setLoadingMessage('Resending OTP...');
         setError('');
         setOtpError('');
+
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/password/send-otp/${encodeURIComponent(email.trim())}`, {
+            const response = await fetch(`${API_BASE_URL}/password/send-otp/${encodeURIComponent(email.trim())}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to resend OTP.');
+                const text = await response.text();
+                let errorMessage = 'Failed to resend OTP';
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
-            setSuccess('OTP resent successfully. Check your email.');
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
+            setSuccess(data.message || 'OTP resent successfully. Check your email.');
             setOtp('');
         } catch (err) {
             setOtpError(err.message || 'Unable to resend OTP. Please try again.');
@@ -190,11 +240,11 @@ const ResetPassword = () => {
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
             <style>{`
-        .form-input[type="password"]::-ms-reveal,
-        .form-input[type="password"]::-ms-clear,
-        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
-          display: none !important;
-          visibility: hidden !important;
+        .form-input[type="password"]::-ms-reveal, 
+        .form-input[type="password"]::-ms-clear, 
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button { 
+          display: none !important; 
+          visibility: hidden !important; 
         }
       `}</style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
