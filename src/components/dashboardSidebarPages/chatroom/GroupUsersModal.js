@@ -111,7 +111,7 @@ const GroupUsersModal = ({
                                     <div className="flex items-center space-x-2">
                                         <FiUser className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-primary)]" />
                                         <span className="text-sm sm:text-base text-[var(--text-primary)] truncate max-w-[150px] sm:max-w-[200px]">
-                                            {user.firstName} {user.lastName}
+                                            {user.email} {user.lastName}
                                             {user.isAdmin && (
                                                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--hover-tertiary)] text-[var(--text-primary)]">
                                                     Admin

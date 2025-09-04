@@ -6,7 +6,7 @@ body {
   font-family: 'Inter', sans-serif;
   margin: 0;
   padding: 0;
-  background: linear-gradient(to bottom right, #134e4a, #7f1d1d); /* Match section background */
+  /*background: linear-gradient(to bottom right, #134e4a, #7f1d1d); !* Match section background *!*/
 }
 
 .form-input {

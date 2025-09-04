@@ -2,8 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const ProgressOverview = ({ courses }) => {
-    const averageProgress =
-        courses.reduce((sum, course) => sum + course.progress, 0) / courses.length || 0;
+    const averageProgress = Math.round( courses.reduce((sum, course) => sum + course.progress, 0) / courses.length || 0);
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
@@ -18,7 +17,7 @@ const ProgressOverview = ({ courses }) => {
                     </div>
                 </div>
                 <div className="w-1/2 text-center">
-                    <p className="text-2xl font-semibold text-[var(--accent-primary)]">{averageProgress.toFixed(1)}%</p>
+                    <p className="text-2xl font-semibold text-[var(--accent-primary)]">{averageProgress}%</p>
                     <p className="text-sm text-[var(--text-secondary)]">Overall Progress</p>
                 </div>
             </div>

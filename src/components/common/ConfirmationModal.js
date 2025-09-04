@@ -17,7 +17,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="px-4 py-2 bg-[var(--accent-red)] text-white rounded-lg hover:bg-red-600"
+                        className="px-4 py-2 bg-[var(--accent-red)] ext-[var(--text-primary)] rounded-lg hover:bg-red-600"
                     >
                         Confirm
                     </button>

@@ -1,5 +1,7 @@
+/* Services page styles with teal color scheme */
+
 .services {
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    background: #f8fafc; /* Light grayish-white background */
     font-family: 'Inter', sans-serif;
 }
 
@@ -18,19 +20,19 @@
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
     cursor: default;
     transition: all 0.4s ease;
-    background: rgba(255, 255, 255, 0.05);
-    color: #e5e7eb;
+    background: #e1e7ff; /* Light blue for service boxes */
+    color: #333; /* Dark gray for text */
 }
 
 .box:hover {
-    background: #f87171;
-    color: #fff;
+    background: #d1d5db; /* Light gray on hover for contrast */
+    color: #333;
 }
 
 .box .icon {
     height: 50px;
     width: 50px;
-    background: linear-gradient(to right, #0d9488, #dc2626);
+    background: #2DD4BF; /* Teal for icons */
     border-radius: 50%;
     text-align: center;
     line-height: 50px;
@@ -41,12 +43,12 @@
 }
 
 .box:hover .icon {
-    background: #fff;
-    color: #f87171;
+    background: #fff; /* White on hover */
+    color: #26A69A; /* Darker teal for icon text */
 }
 
 .box .topic {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 1.2em;
     font-weight: 500;
     margin-bottom: 10px;
@@ -54,14 +56,14 @@
 }
 
 .box p {
-    color: #e5e7eb;
+    color: #666; /* Medium gray for secondary text */
     font-size: 0.9em;
     font-family: 'Inter', sans-serif;
 }
 
 .box:hover .topic,
 .box:hover p {
-    color: #fff;
+    color: #333; /* Dark gray for text on hover */
 }
 
 .title {
@@ -71,7 +73,7 @@
 }
 
 .title span {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 30px;
     font-weight: 600;
     position: relative;
@@ -85,7 +87,7 @@
     position: absolute;
     height: 3px;
     width: 100%;
-    background: #f87171;
+    background: #2DD4BF; /* Teal for underlines */
     left: 0;
     bottom: 0;
 }
@@ -95,4 +97,63 @@
     width: 70%;
     left: 50%;
     transform: translateX(-50%);
+}
+
+/* Media query for tablets and smaller screens */
+@media (max-width: 768px) {
+    .services {
+        padding: 1.5rem;
+    }
+
+    .box {
+        width: calc(50% - 10px); /* Two columns for tablets */
+    }
+
+    .title span {
+        font-size: 26px;
+    }
+
+    .box .topic {
+        font-size: 1.1em;
+    }
+
+    .box p {
+        font-size: 0.85em;
+    }
+}
+
+/* Media query for mobile devices */
+@media (max-width: 480px) {
+    .services {
+        padding: 1rem;
+    }
+
+    .boxes {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .box {
+        width: 100%; /* Full width for mobile */
+        margin: 15px 0;
+    }
+
+    .title span {
+        font-size: 22px;
+    }
+
+    .box .topic {
+        font-size: 1em;
+    }
+
+    .box p {
+        font-size: 0.8em;
+    }
+
+    .box .icon {
+        height: 40px;
+        width: 40px;
+        line-height: 40px;
+        font-size: 16px;
+    }
 }

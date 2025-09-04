@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Tooltip from './Tooltip';
 
-const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewPdf, onDownloadPdf }) => {
+const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewPdf, onDownloadPdf, onActivity }) => {
     const filteredPapers = papers.filter(
         (paper) => paper.subject === selectedSubject && (!selectedYear || paper.year === selectedYear)
     );
@@ -28,7 +28,10 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                         <div className="mt-4 flex gap-2">
                             <Tooltip text="Preview in browser">
                                 <button
-                                    onClick={() => onViewPdf(paper.id)}
+                                    onClick={() => {
+                                        onActivity(`Viewed past paper: ${paper.title}`);
+                                        onViewPdf(paper.id);
+                                    }}
                                     disabled={pdfLoading}
                                     className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label={`View ${paper.title}`}
@@ -38,7 +41,10 @@ const PapersList = ({ papers, selectedSubject, selectedYear, pdfLoading, onViewP
                             </Tooltip>
                             <Tooltip text="Save offline">
                                 <button
-                                    onClick={() => onDownloadPdf(paper.id, paper.title)}
+                                    onClick={() => {
+                                        onActivity(`Downloaded past paper: ${paper.title}`);
+                                        onDownloadPdf(paper.id, paper.title);
+                                    }}
                                     disabled={pdfLoading}
                                     className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--hover-tertiary)]"
                                     aria-label={`Download ${paper.title}`}
@@ -155,6 +161,7 @@ PapersList.propTypes = {
     pdfLoading: PropTypes.bool.isRequired,
     onViewPdf: PropTypes.func.isRequired,
     onDownloadPdf: PropTypes.func.isRequired,
+    onActivity: PropTypes.func.isRequired,
 };
 
 export default PapersList;

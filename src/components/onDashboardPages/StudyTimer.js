@@ -33,8 +33,8 @@ const StudyTimer = ({ onTimerFinish }) => {
     };
 
     return (
-        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl">
-            <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Study Timer</h2>
+        <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl ">
+            <h2 className="text-xl font-semibold mb-4 text-[var(--text-primary)] text-center">Study Timer</h2>
             <div className="text-4xl font-mono text-[var(--accent-primary)] mb-4">{formatTime()}</div>
             <div className="flex gap-2 mb-2">
                 <button

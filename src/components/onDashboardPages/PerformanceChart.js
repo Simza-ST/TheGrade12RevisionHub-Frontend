@@ -2,38 +2,53 @@ import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
-import ChartDataLabels from 'chartjs-plugin-datalabels'; // for bar percentages
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-const PerformanceChart = ({ darkMode }) => {
+const PerformanceChart = ({ darkMode, API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262' }) => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/user';
 
-    // Use darkMode to set text color
     const textColor = useMemo(() => (darkMode ? '#e2e8f0' : '#1A202C'), [darkMode]);
-
-    // Use darkMode to set bar colors
     const barColor = useMemo(() => (darkMode ? '#5EEAD4' : '#2DD4BF'), [darkMode]);
 
     useEffect(() => {
         const fetchPerformanceData = async () => {
             setLoading(true);
-            setError(null);
             try {
+                const jwt = sessionStorage.getItem('jwt');
+                if (!jwt) {
+                    console.error('No JWT token found in sessionStorage');
+                    setCourses([]);
+                    return;
+                }
                 const headers = {
-                    Authorization: `Bearer ${sessionStorage.getItem('jwt')}`,
+                    Authorization: `Bearer ${jwt}`,
                     'Content-Type': 'application/json',
                 };
-                const response = await fetch(`${API_BASE_URL}/performance-overview`, { headers });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    setCourses(data.data.map(item => ({ name: item.name, progress: item.progress })));
-                } else {
-                    setError(data.message || 'Failed to fetch performance data');
+                console.log('Fetching from:', `${API_BASE_URL}/api/user/subject-mastery`);
+                const response = await fetch(`${API_BASE_URL}/api/user/subject-mastery`, { headers });
+                console.log('Response status:', response.status);
+                const text = await response.text();
+                console.log('Raw response:', text);
+                try {
+                    const data = JSON.parse(text);
+                    console.log('Parsed response:', data);
+                    if (response.ok && data.success) {
+                        setCourses(data.data.map(item => ({
+                            subjectName: item.subjectName,
+                            progress: Math.round(item.progress)
+                        })));
+                    } else {
+                        console.error(data.message || 'No mastery data available');
+                        setCourses([]);
+                    }
+                } catch (jsonError) {
+                    console.error(`JSON parse error: ${jsonError.message}, Raw response: ${text}`);
+                    setCourses([]);
                 }
             } catch (error) {
-                setError(`Error fetching performance data: ${error.message}`);
+                console.error(`Error fetching subject mastery data: ${error.message}`);
+                setCourses([]);
             } finally {
                 setLoading(false);
             }
@@ -41,12 +56,10 @@ const PerformanceChart = ({ darkMode }) => {
         fetchPerformanceData();
     }, [API_BASE_URL]);
 
-    // Sorting per progress
     const sortedCourses = useMemo(() => [...courses].sort((a, b) => b.progress - a.progress), [courses]);
 
-    // Shorten course names for x-axis labels
     const shortLabels = useMemo(() => sortedCourses.map((course) => {
-        const name = course.name;
+        const name = course.subjectName;
         if (name.includes(' ')) {
             const [firstWord, secondWord] = name.split(' ');
             return `${firstWord}.${secondWord[0]}`;
@@ -55,11 +68,11 @@ const PerformanceChart = ({ darkMode }) => {
     }), [sortedCourses]);
 
     const data = useMemo(() => ({
-        labels: shortLabels,
+        labels: sortedCourses.length > 0 ? shortLabels : [],
         datasets: [
             {
                 label: 'Progress (%)',
-                data: sortedCourses.map((course) => course.progress),
+                data: sortedCourses.length > 0 ? sortedCourses.map((course) => course.progress) : [],
                 backgroundColor: barColor,
                 borderColor: barColor,
                 borderWidth: 1,
@@ -69,10 +82,9 @@ const PerformanceChart = ({ darkMode }) => {
         ],
     }), [shortLabels, barColor, sortedCourses]);
 
-    // Chart configuration
     const options = useMemo(() => ({
         responsive: true,
-        maintainAspectRatio: false, // Allow flexible height
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top',
@@ -90,6 +102,10 @@ const PerformanceChart = ({ darkMode }) => {
             tooltip: {
                 titleColor: textColor,
                 bodyColor: textColor,
+                enabled: sortedCourses.length > 0,
+                callbacks: {
+                    label: (context) => `${context.dataset.label}: ${Math.round(context.raw)}%`,
+                },
             },
             datalabels: {
                 anchor: 'end',
@@ -99,17 +115,19 @@ const PerformanceChart = ({ darkMode }) => {
                     size: 10,
                     weight: 'bold',
                 },
-                formatter: (value) => ` ${value}%`,
+                formatter: (value) => sortedCourses.length > 0 ? `${Math.round(value)}%` : '',
             },
         },
         scales: {
             x: {
                 ticks: {
                     color: textColor,
-                    maxRotation: 45, // Rotate labels 45 degrees
+                    maxRotation: 45,
                     minRotation: 45,
+                    padding: 10,
                 },
                 grid: { color: 'var(--border)' },
+                display: true,
             },
             y: {
                 min: 0,
@@ -117,17 +135,16 @@ const PerformanceChart = ({ darkMode }) => {
                 ticks: {
                     color: textColor,
                     stepSize: 10,
-                    count: 10, // 10 ticks (0, 10, ..., 100)
+                    count: 10,
                     autoSkip: false,
-                    callback: (value) => `${value}%`,
+                    callback: (value) => `${Math.round(value)}%`,
                 },
                 grid: { color: 'var(--border)' },
             },
         },
-    }), [textColor]);
+    }), [textColor, sortedCourses]);
 
     if (loading) return <div className="text-center py-10 text-[var(--text-normal)]">Loading chart data...</div>;
-    if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
     return (
         <div className="bg-[var(--bg-secondary)] bg-opacity-90 backdrop-blur-md p-6 rounded-2xl shadow-2xl h-[500px] flex flex-col">
@@ -141,6 +158,11 @@ const PerformanceChart = ({ darkMode }) => {
 
 PerformanceChart.propTypes = {
     darkMode: PropTypes.bool.isRequired,
+    API_BASE_URL: PropTypes.string,
+};
+
+PerformanceChart.defaultProps = {
+    API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:6262',
 };
 
 export default PerformanceChart;

@@ -1,8 +1,10 @@
+/* Skills page styles with teal color scheme */
+
 .skills {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    background: #f8fafc; /* Light grayish-white background */
     gap: 10px;
     font-family: 'Inter', sans-serif;
 }
@@ -24,7 +26,7 @@
     position: absolute;
     height: 3px;
     width: 100%;
-    background: #f87171;
+    background: #2DD4BF; /* Teal for underlines */
     left: 0;
     bottom: 0;
 }
@@ -38,7 +40,7 @@
 
 .skills .left p {
     text-align: justify;
-    color: #e5e7eb;
+    color: #333; /* Dark gray for primary text */
     font-size: 1em;
     line-height: 1.6;
     margin-top: 0;
@@ -56,4 +58,65 @@
     border-radius: 12px;
     max-width: 100%;
     height: 100%;
+}
+
+/* Media query for tablets and smaller screens */
+@media (max-width: 768px) {
+    .skills {
+        padding: 1.5rem;
+    }
+
+    .skills-details {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center;
+    }
+
+    .skills .left {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .skills .right {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .skills .right img {
+        max-width: 100%;
+    }
+
+    .skills .left .topic {
+        font-size: 1.3rem;
+    }
+
+    .skills .left p {
+        font-size: 0.95rem;
+    }
+}
+
+/* Media query for mobile devices */
+@media (max-width: 480px) {
+    .skills {
+        padding: 1rem;
+    }
+
+    .skills .left {
+        min-width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .skills .right {
+        min-width: 100%;
+    }
+
+    .skills .left .topic {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .skills .left p {
+        font-size: 0.9rem;
+    }
 }

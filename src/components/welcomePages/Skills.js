@@ -23,8 +23,12 @@ const Skills = () => {
                         <br />
                     </div>
 
-                    <div className="right">
-                        <img src="/images/skillsImage.jpg" alt="Study Tips" /> {/* Replace with "https://via.placeholder.com/400" if missing */}
+                    {/*<div className="right">*/}
+                    {/*    <img src="/images/skillsImage.jpg" alt="Study Tips" /> /!* Replace with "https://via.placeholder.com/400" if missing *!/*/}
+
+                    {/*</div>*/}
+                    <div className = "right">
+                        <img src="/images/image5.jpg" alt="Study Tips" />
                     </div>
                 </div>
             </div>

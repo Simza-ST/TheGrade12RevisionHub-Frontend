@@ -7,13 +7,12 @@ const Navbar = () => {
 
     useEffect(() => {
         const typed = new Typed('.TheRevisionHub-text', {
-            strings: ['The Revision Hub.', 'Where You Can Make Your Own Future.'],
+            strings: ['The Revision Hub.', 'Where You Can Make','Your Own Future.'],
             typeSpeed: 70,
             backSpeed: 70,
             backDelay: 2000,
             loop: true,
         });
-
         return () => typed.destroy();
     }, []);
 
@@ -38,8 +37,11 @@ const Navbar = () => {
     return (
         <nav className="sticky">
             <div className="navbar">
-                <div className="logo">
-                    <span className="TheRevisionHub-text"></span>
+                <div className="logo-container">
+                    <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="logo-image" />
+                    <div className="logo">
+                        <span className="TheRevisionHub-text"></span>
+                    </div>
                 </div>
                 <ul className={`menu ${isMenuActive ? 'active' : ''}`}>
                     <li>
@@ -68,7 +70,9 @@ const Navbar = () => {
                         </button>
                     </li>
                     <li>
-                        <a href="/login" onClick={closeMenu}>Login</a>
+                        <a href="/login" onClick={closeMenu}>
+                            Login
+                        </a>
                     </li>
                     <div className="cancel-btn" onClick={closeMenu}>
                         <i className="fas fa-times"></i>

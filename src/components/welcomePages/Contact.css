@@ -1,5 +1,7 @@
+/* Contact page styles with teal color scheme */
+
 .contact {
-    background: linear-gradient(to bottom right, #134e4a, #7f1d1d);
+    background: #f8fafc; /* Light grayish-white background */
     font-family: 'Inter', sans-serif;
     margin-bottom: 0;
 }
@@ -16,7 +18,7 @@
 }
 
 .contact .topic {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 10px;
@@ -24,13 +26,13 @@
 }
 
 .contact p {
-    color: #e5e7eb;
+    color: #666; /* Medium gray for secondary text */
     font-size: 1em;
     font-family: 'Inter', sans-serif;
 }
 
 .contact .button button {
-    background: linear-gradient(to right, #0d9488, #dc2626);
+    background: #2DD4BF !important; /* Teal button, force override */
     color: #fff;
     border: none;
     padding: 12px 18px;
@@ -42,7 +44,7 @@
 }
 
 .contact .button button:hover {
-    background: #f87171;
+    background: #26A69A !important; /* Darker teal on hover */
 }
 
 .popup {
@@ -60,7 +62,7 @@
 }
 
 .popup-content {
-    background: #1a4543;
+    background: #fff; /* White popup background */
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -75,13 +77,13 @@
     top: 15px;
     right: 20px;
     font-size: 22px;
-    color: #e5e7eb;
+    color: #666; /* Medium gray */
     cursor: pointer;
     transition: 0.3s;
 }
 
 .close-btn:hover {
-    color: #f87171;
+    color: #26A69A; /* Darker teal on hover */
 }
 
 .form-group {
@@ -93,26 +95,26 @@
     display: block;
     font-weight: 600;
     margin-bottom: 5px;
-    color: #fff;
+    color: #333; /* Dark gray for labels */
     font-family: 'Inter', sans-serif;
 }
 
 .form-control {
     width: 100%;
     padding: 10px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #d1d5db; /* Light gray border */
     border-radius: 6px;
     font-size: 16px;
     outline: none;
     transition: border 0.3s;
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: #fff; /* White input background */
+    color: #333;
     font-family: 'Inter', sans-serif;
 }
 
 .form-control:focus {
-    border-color: #f87171;
-    box-shadow: 0 0 5px rgba(248, 113, 113, 0.2);
+    border-color: #2DD4BF; /* Teal for focus */
+    box-shadow: 0 0 5px rgba(45, 212, 191, 0.2);
 }
 
 textarea.form-control {
@@ -121,7 +123,7 @@ textarea.form-control {
 }
 
 .btn-submit {
-    background: linear-gradient(to right, #0d9488, #dc2626);
+    background: #2DD4BF !important; /* Teal button, force override */
     color: #fff;
     border: none;
     padding: 12px 18px;
@@ -133,23 +135,23 @@ textarea.form-control {
 }
 
 .btn-submit:hover {
-    background: #f87171;
+    background: #26A69A !important; /* Darker teal on hover */
 }
 
 .email-copy p {
     margin-top: 20px;
-    color: #e5e7eb;
+    color: #666; /* Medium gray for secondary text */
     font-family: 'Inter', sans-serif;
 }
 
 .email-copy span {
-    color: #f87171;
+    color: #2DD4BF; /* Teal for clickable text */
     cursor: pointer;
     text-decoration: underline;
 }
 
 .email-copy span:hover {
-    color: #fff;
+    color: #26A69A; /* Darker teal on hover */
 }
 
 .title {
@@ -159,7 +161,7 @@ textarea.form-control {
 }
 
 .title span {
-    color: #fff;
+    color: #26A69A; /* Darker teal for headings */
     font-size: 30px;
     font-weight: 600;
     position: relative;
@@ -173,7 +175,7 @@ textarea.form-control {
     position: absolute;
     height: 3px;
     width: 100%;
-    background: #f87171;
+    background: #2DD4BF; /* Teal for underlines */
     left: 0;
     bottom: 0;
 }

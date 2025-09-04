@@ -35,8 +35,12 @@ import QuizViewer from "./components/adminDashboardSideBarPages/AdminQuiz/QuizVi
 import Chat from "./components/adminDashboardSideBarPages/EmailChat/Chat";
 import QuizView from "./components/dashboardSidebarPages/quiz/QuizView";
 import MathematicsP1Nov2022Eng
-    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/MathematicsP1Nov2022Eng";
+    from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths/paper1Nov2022/MathematicsP1Nov2022Eng";
 import DigitizedQuestionPaperView from "./components/dashboardSidebarPages/quiz/DigitizedQuestionPaperView";
+import UploadResources from "./components/adminDashboardSideBarPages/UploadingResourses/UploadResources";
+import { recordActivity } from './utils/activityUtil.js';
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
 
 const PublicLayout = () => (
     <div>
@@ -137,12 +141,9 @@ function ProtectedRoute({ children }) {
 const App = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, message: 'New quiz available in Mathematics', date: '2025-05-20', read: false },
-        { id: 2, message: 'Assignment due in Physics', date: '2025-05-21', read: false },
-        { id: 3, message: 'Study group meeting scheduled', date: '2025-05-19', read: true },
-    ]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [notifications, setNotifications] = useState([]); // Added state for notifications
+    const [activities, setActivities] = useState([]); //activities state
 
     useEffect(() => {
         const validateToken = async () => {
@@ -170,6 +171,10 @@ const App = () => {
         validateToken();
     }, []);
 
+    const handleRecordActivity = (description) => {
+        recordActivity(description, API_BASE_URL, setActivities);
+    };
+
     const commonProps = {
         isCollapsed,
         setIsCollapsed,
@@ -177,6 +182,9 @@ const App = () => {
         setDarkMode,
         notifications,
         setNotifications,
+        onActivity: handleRecordActivity, //add on activity
+        activities, //add activities
+        setActivities,
     };
 
     return (
@@ -203,6 +211,8 @@ const App = () => {
                     <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/verify-otp" element={<VerifyOTP {...commonProps} />} />
+                    <Route path="/reset-password" element={<ResetPassword {...commonProps} />} />
 
                     {/* Protected routes */}
                     <Route
@@ -327,6 +337,14 @@ const App = () => {
                         }
                     />
                     <Route
+                        path="/uploading-resources"
+                        element={
+                            <ProtectedRoute >
+                                <UploadResources {...commonProps} />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/schedule"
                         element={
                             <ProtectedRoute isAuthenticated={isAuthenticated}>
@@ -382,6 +400,7 @@ const App = () => {
                             </ProtectedRoute>
                         }
                     />
+
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </Router>
