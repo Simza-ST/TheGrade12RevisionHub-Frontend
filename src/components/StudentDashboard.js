@@ -127,23 +127,13 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(activitiesData.message || 'Failed to fetch activities');
                 }
 
-                const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
-                const subjectsData = await subjectsResponse.json();
-                if (subjectsResponse.ok && subjectsData.success) {
-                    setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
-                    setNumberOfSubjects(subjectsData.data);
-                } else {
-                    console.error(subjectsData.message || 'Failed to fetch number of subjects');
-                }
-
                 const achievementsResponse = await fetch(`${API_BASE_URL}/api/user/certificates/count`, { headers });
                 const achievementsData = await achievementsResponse.json();
-                if (achievementsResponse.ok && achievementsData.success) {
-                    setStats(prev => ({ ...prev, achievements: achievementsData.data }));
-                    setAchievements(achievementsData.data);
-                    console.log(achievements);
+                if (achievementsResponse.ok ) {
+                    setStats(prev => ({ ...prev, achievements: achievementsData }));
+                    setAchievements(achievementsData);
                 } else {
-                    console.error(achievementsData.message || 'Failed to fetch achievements count');
+                    console.error( 'Failed to fetch achievements count');
                     setStats(prev => ({ ...prev, achievements: 0 })); // Fallback value
                 }
 

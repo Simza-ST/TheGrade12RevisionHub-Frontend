@@ -72,10 +72,12 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
 
         try {
             // Replace with your backend endpoint
-            const response = await fetch("http://localhost:6262/api/certificates/save", {
+            const token = sessionStorage.getItem("jwt");
+            const response = await fetch("http://localhost:6262/api/admin/certificates/save", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(certificateData),
             });
