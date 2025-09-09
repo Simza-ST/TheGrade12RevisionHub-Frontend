@@ -18,6 +18,8 @@ import MathLitP2Nov2020
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths-lit/paper2Nov/MathLitP2Nov2020";
 import MathLitP1Nov2022
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/maths-lit/paper1Nov/MathLitP1Nov2022";
+import catPaper2_2020
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2020/catPaper2_2020";
 
 // Map filenames to components
 const paperComponents = {
@@ -31,6 +33,7 @@ const paperComponents = {
     "Mathematical Literacy P1 Nov 2022 Eng": MathLitP1Nov2022,
     "Mathematical Literacy P2 Nov 2020 Eng": MathLitP2Nov2020,
     "EnglishFALP12020": EnglishFALP12020,
+    "Computer Applications Technology P2 Nov 2022 Eng": catPaper2_2020,
     // Add more filename mappings as needed:
     // "PhysicsP1May2023": PhysicsP1May2023,
     // "ChemistryP2Sep2022": ChemistryP2Sep2022,
