@@ -1,10 +1,16 @@
 import React, { useState } from "react";
+import { API_BASE_URL, getAuthHeaders } from '../../../../../../../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const CatP1Nov2020 = () => {
+    const navigate = useNavigate();
+    const paperId = 'cat-p1-nov-2020'; // Define a unique paper ID
     const [answers, setAnswers] = useState({});
     const [showResults, setShowResults] = useState(false);
     const [feedbacks, setFeedbacks] = useState({});
     const [totalScore, setTotalScore] = useState(0);
+    const [recording, setRecording] = useState(false);
+    const [recordError, setRecordError] = useState(null);
 
     const markingGuidelines = {
         '1_1': { maxMarks: 3, criteria: [
@@ -271,6 +277,66 @@ const CatP1Nov2020 = () => {
         setAnswers(prev => ({ ...prev, [id]: value }));
     };
 
+    const recordPerformance = async (scoreData) => {
+        setRecording(true);
+        setRecordError(null);
+
+        try {
+            const authHeaders = getAuthHeaders();
+            if (!authHeaders.Authorization) {
+                throw new Error('No authentication token found');
+            }
+
+            console.log('Sending score data:', scoreData);
+            console.log('Auth Headers:', authHeaders);
+
+            const response = await fetch(`${API_BASE_URL}/user/record`, {
+                method: 'POST',
+                headers: {
+                    ...authHeaders,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    paperId: paperId,
+                    score: scoreData.score,
+                    maxScore: scoreData.maxScore
+                })
+            });
+
+            let errorMessage = 'Failed to record performance';
+
+            if (!response.ok) {
+                console.log('Response Status:', response.status);
+                const errorText = await response.text();
+                console.log('Response Text:', errorText);
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch {
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const text = await response.text();
+            let result = null;
+            if (text) {
+                try {
+                    result = JSON.parse(text);
+                } catch {
+                    console.log('Response is not JSON:', text);
+                }
+            }
+            console.log('Performance recorded:', result || 'success');
+
+        } catch (err) {
+            setRecordError(err.message);
+            console.error('Recording error:', err);
+        } finally {
+            setRecording(false);
+        }
+    };
+
     const submitAnswers = () => {
         let newFeedbacks = {};
         let score = 0;
@@ -298,6 +364,13 @@ const CatP1Nov2020 = () => {
         setFeedbacks(newFeedbacks);
         setTotalScore(score);
         setShowResults(true);
+
+        // Record performance
+        const scoreData = {
+            score: score,
+            maxScore: totalPossible
+        };
+        recordPerformance(scoreData);
     };
 
     const renderTextarea = (questionId) => {
@@ -318,6 +391,18 @@ const CatP1Nov2020 = () => {
         return (
             <div className="feedback" dangerouslySetInnerHTML={{ __html: feedbacks[questionId] }}></div>
         );
+    };
+
+    const handleRetry = () => {
+        setAnswers({});
+        setShowResults(false);
+        setFeedbacks({});
+        setTotalScore(0);
+        setRecordError(null);
+    };
+
+    const handleExit = () => {
+        navigate('/digitized-question-papers'); // Adjust path as needed
     };
 
     return (
@@ -941,9 +1026,9 @@ const CatP1Nov2020 = () => {
                 <button
                     className="submit-button"
                     onClick={submitAnswers}
-                    disabled={showResults}
+                    disabled={showResults || recording}
                 >
-                    Submit Answers
+                    {recording ? 'Submitting...' : 'Submit Answers'}
                 </button>
 
                 {showResults && (
@@ -954,17 +1039,21 @@ const CatP1Nov2020 = () => {
                         ) : (
                             <p className="fail">Keep practicing! You'll improve!</p>
                         )}
-                        <button
-                            className="retry-button"
-                            onClick={() => {
-                                setAnswers({});
-                                setShowResults(false);
-                                setFeedbacks({});
-                                setTotalScore(0);
-                            }}
-                        >
-                            Retry Exam
-                        </button>
+                        {recordError && <p className="error">Error: {recordError}</p>}
+                        <div className="action-buttons">
+                            <button
+                                className="retry-button"
+                                onClick={handleRetry}
+                            >
+                                Retry Exam
+                            </button>
+                            <button
+                                className="exit-button"
+                                onClick={handleExit}
+                            >
+                                Exit
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -1030,8 +1119,13 @@ const CatP1Nov2020 = () => {
                     cursor: pointer;
                 }
 
-                .submit-button:hover {
+                .submit-button:hover:not(:disabled) {
                     background-color: #45a049;
+                }
+
+                .submit-button:disabled {
+                    background-color: #bbbbbb;
+                    cursor: not-allowed;
                 }
 
                 .score-display {
@@ -1056,7 +1150,20 @@ const CatP1Nov2020 = () => {
                     margin-top: 10px;
                 }
 
-                .retry-button {
+                .error {
+                    color: #f44336;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+
+                .action-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 15px;
+                    margin-top: 20px;
+                }
+
+                .retry-button, .exit-button {
                     padding: 10px 20px;
                     border: none;
                     border-radius: 4px;
@@ -1064,13 +1171,24 @@ const CatP1Nov2020 = () => {
                     cursor: pointer;
                     transition: all 0.3s;
                     font-weight: bold;
+                }
+
+                .retry-button {
                     background-color: #4CAF50;
                     color: white;
-                    margin-top: 10px;
                 }
 
                 .retry-button:hover {
                     background-color: #3e8e41;
+                }
+
+                .exit-button {
+                    background-color: #f44336;
+                    color: white;
+                }
+
+                .exit-button:hover {
+                    background-color: #d32f2f;
                 }
 
                 table {
