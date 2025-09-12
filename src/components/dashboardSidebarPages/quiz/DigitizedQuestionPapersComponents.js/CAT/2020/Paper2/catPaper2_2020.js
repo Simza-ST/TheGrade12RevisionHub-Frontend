@@ -1,11 +1,17 @@
 import React, { useState } from "react";
+import { API_BASE_URL, getAuthHeaders } from '../../../../../../../utils/api';
+import { useNavigate } from 'react-router-dom';
 
-const CatP2Nov2020 = () => {
+const CatP2Nov2020 = ({ paperId }) => {
+    const navigate = useNavigate();
+   /* const paperId = 'cat-p2-nov-2020';*/
     const [answers, setAnswers] = useState({});
     const [showResults, setShowResults] = useState(false);
     const [score, setScore] = useState(null);
     const [correctness, setCorrectness] = useState({});
     const [revealedAnswers, setRevealedAnswers] = useState({});
+    const [recording, setRecording] = useState(false);
+    const [recordError, setRecordError] = useState(null);
 
     const correctAnswers = {
         'q1.1': 'D',
@@ -157,7 +163,7 @@ const CatP2Nov2020 = () => {
         'input-7.3': ['unknown', 'personal', 'links', 'spam', 'public'],
         'input-7.4': ['bugs', 'hacked', 'weather', 'internet'],
         'input-7.5': ['completed', 'profit', 'scammed'],
-        'input-7.6': ['limited', 'storage', 'features', 'privacy'],
+        'input-7.6': ['limited', 'storage', 'features', 'privacy', 'negative'],
         'input-8.1': ['font', 'format'],
         'input-8.2': ['margin', 'tab', 'indentation', 'header', 'table'],
         'input-8.3': ['sources', 'citation'],
@@ -313,6 +319,66 @@ const CatP2Nov2020 = () => {
         setAnswers(prev => ({ ...prev, [id]: value }));
     };
 
+    const recordPerformance = async (scoreData) => {
+        setRecording(true);
+        setRecordError(null);
+
+        try {
+            const authHeaders = getAuthHeaders();
+            if (!authHeaders.Authorization) {
+                throw new Error('No authentication token found');
+            }
+
+            console.log('Sending score data:', scoreData);
+            console.log('Auth Headers:', authHeaders);
+
+            const response = await fetch(`${API_BASE_URL}/user/record`, {
+                method: 'POST',
+                headers: {
+                    ...authHeaders,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    paperId: paperId,
+                    score: scoreData.total,
+                    maxScore: 150
+                })
+            });
+
+            let errorMessage = 'Failed to record performance';
+
+            if (!response.ok) {
+                console.log('Response Status:', response.status);
+                const errorText = await response.text();
+                console.log('Response Text:', errorText);
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch {
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const text = await response.text();
+            let result = null;
+            if (text) {
+                try {
+                    result = JSON.parse(text);
+                } catch {
+                    console.log('Response is not JSON:', text);
+                }
+            }
+            console.log('Performance recorded:', result || 'success');
+
+        } catch (err) {
+            setRecordError(err.message);
+            console.error('Recording error:', err);
+        } finally {
+            setRecording(false);
+        }
+    };
+
     const submitAnswers = () => {
         let scoreA = 0;
         let correctnessTemp = {};
@@ -353,6 +419,10 @@ const CatP2Nov2020 = () => {
         setScore({ a: scoreA, b: scoreB, c: scoreC, total, percentage });
         setCorrectness(correctnessTemp);
         setShowResults(true);
+
+        // Record performance
+        const scoreData = { total, maxScore: 150 };
+        recordPerformance(scoreData);
     };
 
     const handleRetry = () => {
@@ -361,6 +431,11 @@ const CatP2Nov2020 = () => {
         setScore(null);
         setCorrectness({});
         setRevealedAnswers({});
+        setRecordError(null);
+    };
+
+    const handleExit = () => {
+        navigate('/digitized-question-papers');
     };
 
     const showAnswer = (questionId) => {
@@ -1086,9 +1161,9 @@ const CatP2Nov2020 = () => {
                 <button
                     className="submit-button"
                     onClick={submitAnswers}
-                    disabled={showResults}
+                    disabled={showResults || recording}
                 >
-                    Submit Answers
+                    {recording ? 'Submitting...' : 'Submit Answers'}
                 </button>
 
                 {score && (
@@ -1103,13 +1178,19 @@ const CatP2Nov2020 = () => {
                         ) : (
                             <p className="fail">Keep practicing! You'll improve!</p>
                         )}
-
+                        {recordError && <p className="error">Error: {recordError}</p>}
                         <div className="action-buttons">
                             <button
                                 className="retry-button"
                                 onClick={handleRetry}
                             >
                                 Retry Exam
+                            </button>
+                            <button
+                                className="exit-button"
+                                onClick={handleExit}
+                            >
+                                Exit
                             </button>
                         </div>
                     </div>
@@ -1259,6 +1340,12 @@ const CatP2Nov2020 = () => {
                     margin-top: 10px;
                 }
 
+                .error {
+                    color: #f44336;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+
                 .action-buttons {
                     display: flex;
                     justify-content: center;
@@ -1266,7 +1353,7 @@ const CatP2Nov2020 = () => {
                     margin-top: 20px;
                 }
 
-                .retry-button {
+                .retry-button, .exit-button {
                     padding: 10px 20px;
                     border: none;
                     border-radius: 4px;
@@ -1274,12 +1361,24 @@ const CatP2Nov2020 = () => {
                     cursor: pointer;
                     transition: all 0.3s;
                     font-weight: bold;
+                }
+
+                .retry-button {
                     background-color: #4CAF50;
                     color: white;
                 }
 
                 .retry-button:hover {
                     background-color: #3e8e41;
+                }
+
+                .exit-button {
+                    background-color: #f44336;
+                    color: white;
+                }
+
+                .exit-button:hover {
+                    background-color: #d32f2f;
                 }
 
                 table {
@@ -1299,7 +1398,7 @@ const CatP2Nov2020 = () => {
                 }
             `}</style>
         </div>
-);
+    );
 };
 
 export default CatP2Nov2020;
