@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { API_BASE_URL, getAuthHeaders } from '../../../../../../../utils/api';
 import { useNavigate } from 'react-router-dom';
 
-const CatP1Nov2020 = () => {
+const CatP1Nov2020 = ({ paperId }) => {
     const navigate = useNavigate();
-    const paperId = 'cat-p1-nov-2020'; // Define a unique paper ID
     const [answers, setAnswers] = useState({});
     const [showResults, setShowResults] = useState(false);
     const [feedbacks, setFeedbacks] = useState({});
