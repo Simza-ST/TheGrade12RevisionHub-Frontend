@@ -38,6 +38,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [courses, setCourses] = useState([]);
     const [completedTasks, setCompletedTasks] = useState(0);
     const [numberOfSubjects, setNumberOfSubjects] = useState(0);
+    const [achievements, setAchievements] = useState(0);
     const [quote, setQuote] = useState({ text: '', author: '' });
     const [schedule, setSchedule] = useState([]);
     const [showSidebar, setShowSidebar] = useState(false);
@@ -46,7 +47,7 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     const [stats, setStats] = useState({
         numberOfSubjects: 0,
         attendance: '0%',
-        achievements: '18',
+        achievements: 0,
         completedTasks: 0,
     });
 
@@ -126,13 +127,14 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     console.error(activitiesData.message || 'Failed to fetch activities');
                 }
 
-                const subjectsResponse = await fetch(`${API_BASE_URL}/api/user/count-subjects`, { headers });
-                const subjectsData = await subjectsResponse.json();
-                if (subjectsResponse.ok && subjectsData.success) {
-                    setStats(prev => ({ ...prev, numberOfSubjects: subjectsData.data }));
-                    setNumberOfSubjects(subjectsData.data);
+                const achievementsResponse = await fetch(`${API_BASE_URL}/api/user/certificates/count`, { headers });
+                const achievementsData = await achievementsResponse.json();
+                if (achievementsResponse.ok ) {
+                    setStats(prev => ({ ...prev, achievements: achievementsData }));
+                    setAchievements(achievementsData);
                 } else {
-                    console.error(subjectsData.message || 'Failed to fetch number of subjects');
+                    console.error( 'Failed to fetch achievements count');
+                    setStats(prev => ({ ...prev, achievements: 0 })); // Fallback value
                 }
 
                 setSchedule([
@@ -550,21 +552,30 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
                     />
                     <div className={`flex-1 min-w-0 p-6 sm:p-8 transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'} dashboard-content ${showSidebar ? 'sidebar-open' : ''}`}>
                         <div className="grid md:grid-cols-4 gap-6 mb-6">
+                            {/*<div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">*/}
+                            {/*    <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊"/>*/}
+                            {/*    <StatsCard title="Attendance" value={stats.attendance} icon="✅"/>*/}
+                            {/*    <StatsCard title="Achievements" value={stats.achievements} icon="🏆"/>*/}
+                            {/*    <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️"/>*/}
+                            {/*</div>*/}
+
+
                             <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊" />
-                                <StatsCard title="Attendance" value={stats.attendance} icon="✅" />
-                                <StatsCard title="Achievements" value={stats.achievements} icon="🏆" />
-                                <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️" />
+                                <StatsCard title="Number Of Subjects" value={stats.numberOfSubjects} icon="📊"/>
+                                <StatsCard title="Attendance" value={stats.attendance} icon="✅"/>
+                                <StatsCard title="Achievements" value={stats.achievements} icon="🏆"/>
+                                <StatsCard title="Tasks Completed" value={stats.completedTasks} icon="✔️"/>
                             </div>
+
                             <div className="md:col-span-4">
-                                <ProgressOverview courses={courses} />
+                                <ProgressOverview courses={courses}/>
                             </div>
                         </div>
 
                         <div className="grid lg:grid-cols-3 gap-6 mb-6">
-                            <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} courses={courses} />
-                            <Schedule schedule={schedule} />
-                            <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL} />
+                            <CourseMastery enrolledSubjects={enrolledSubjects} darkMode={darkMode} courses={courses}/>
+                            <Schedule schedule={schedule}/>
+                            <PerformanceChart darkMode={darkMode} API_BASE_URL={API_BASE_URL}/>
                         </div>
 
                         <div className="grid lg:grid-cols-2 gap-6 mb-6">

@@ -29,6 +29,7 @@ const ForgotPassword = () => {
         setIsLoading(true);
         setError('');
         setSuccess('');
+
         const emailValidation = validateEmail(email);
         if (emailValidation) {
             setEmailError(emailValidation);
@@ -36,19 +37,38 @@ const ForgotPassword = () => {
             setIsLoading(false);
             return;
         }
+
         try {
             const response = await fetch(`${API_BASE_URL}/password/send-otp/${encodeURIComponent(email.trim())}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || `Failed to send OTP (status: ${response.status})`);
+                const text = await response.text();
+                let errorMessage = `Failed to send OTP (status: ${response.status})`;
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
-            setSuccess('OTP sent! Please check your email.');
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
+            setSuccess(data.message || 'OTP sent! Please check your email.');
             setEmail('');
             setEmailError('');
+            setTimeout(() => {
+                navigate('/reset-password', { state: { email: email.trim() } });
+            }, 2000);
         } catch (error) {
             setError(error.message || 'An error occurred while sending OTP.');
         } finally {
@@ -69,11 +89,11 @@ const ForgotPassword = () => {
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
             <style>{`
-        .form-input[type="password"]::-ms-reveal,
-        .form-input[type="password"]::-ms-clear,
-        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
-          display: none !important;
-          visibility: hidden !important;
+        .form-input[type="password"]::-ms-reveal, 
+        .form-input[type="password"]::-ms-clear, 
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button { 
+          display: none !important; 
+          visibility: hidden !important; 
         }
       `}</style>
             <div className="max-w-6xl w-full bg-teal-800 rounded-2xl shadow-2xl m-4 flex overflow-hidden relative">
@@ -83,9 +103,7 @@ const ForgotPassword = () => {
                             <img src="/images/appLogo.png" alt="Grade 12 Revision Hub" className="h-24" />
                         </div>
                         <h2 className="text-3xl font-bold text-white text-center mb-2">Reset Your Password</h2>
-                        <p className="text-gray-300 text-center mb-6" id="formSubtitle">
-                            Enter your email to receive an OTP.
-                        </p>
+                        <p className="text-gray-300 text-center mb-6" id="formSubtitle">Enter your email to receive an OTP.</p>
                         <form id="forgotPasswordForm" className="space-y-5" onSubmit={handleSubmit}>
                             <div id="emailSection">
                                 <div className="relative">

@@ -402,6 +402,9 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         }
                     }
                     @media (max-width: 480px) {
+                    .text-lg {
+                            display:block;
+                        }
                         .grid {
                             grid-template-columns: 1fr;
                         }
@@ -426,6 +429,9 @@ const Subjects = ({ user, isCollapsed, setIsCollapsed, darkMode, setDarkMode, no
                         }
                     }
                     @media (min-width: 481px) and (max-width: 639px) {
+                        
+                        
+                    
                         .grid {
                             grid-template-columns: 1fr;
                         }

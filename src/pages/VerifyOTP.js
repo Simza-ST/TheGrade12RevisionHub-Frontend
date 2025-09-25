@@ -10,7 +10,7 @@ const VerifyOTP = () => {
     const [infoMessage, setInfoMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:6262/api/auth';
     const queryParams = new URLSearchParams(location.search);
     const rawEmail = queryParams.get('email') || '';
     const decodedEmail = decodeURIComponent(rawEmail);
@@ -44,28 +44,43 @@ const VerifyOTP = () => {
         setSuccessMessage('');
         setInfoMessage('');
         setIsLoading(true);
+
         const otpValidation = validateOtp(otp);
         if (otpValidation) {
             setOtpError(otpValidation);
             setIsLoading(false);
             return;
         }
+
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+            const response = await fetch(`${API_BASE_URL}/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: decodedEmail.trim(), otp }),
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || 'OTP verification failed');
+                const text = await response.text();
+                let errorMessage = 'OTP verification failed';
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
             if (data.success) {
-                setSuccessMessage('Email verified successfully! Redirecting to login...');
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                setSuccessMessage(data.message || 'Email verified successfully! Redirecting to login...');
+                setTimeout(() => navigate('/login'), 2000);
             } else {
                 setOtpError(data.message || 'Invalid or expired OTP');
             }
@@ -80,18 +95,34 @@ const VerifyOTP = () => {
         setIsLoading(true);
         setInfoMessage('');
         setOtpError('');
+
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+            const response = await fetch(`${API_BASE_URL}/resend-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: decodedEmail.trim() }),
                 credentials: 'include',
             });
-            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(data.message || 'Resend OTP failed');
+                const text = await response.text();
+                let errorMessage = 'Resend OTP failed';
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.message || errorMessage;
+                } catch {
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
-            setInfoMessage('OTP resent successfully. Check your email.');
+
+            const contentType = response.headers.get('content-type');
+            let data = {};
+            if (contentType?.includes('application/json') && response.status !== 204) {
+                data = await response.json();
+            }
+
+            setInfoMessage(data.message || 'OTP resent successfully. Check your email.');
             setOtp('');
         } catch (err) {
             setOtpError(err.message || 'An error occurred during OTP resend.');
@@ -103,66 +134,66 @@ const VerifyOTP = () => {
     return (
         <div className="bg-gradient-to-br from-teal-900 via-gray-900 to-red-900 min-h-screen flex items-center justify-center">
             <style>{`
-        .form-input[type="password"]::-ms-reveal,
-        .form-input[type="password"]::-ms-clear,
-        .form-input[type="password"]::-webkit-credentials-auto-fill-button {
-          display: none !important;
-          visibility: hidden !important;
+        .form-input[type="password"]::-ms-reveal, 
+        .form-input[type="password"]::-ms-clear, 
+        .form-input[type="password"]::-webkit-credentials-auto-fill-button { 
+          display: none !important; 
+          visibility: hidden !important; 
         }
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.7);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          opacity: 0;
-          animation: fadeIn 0.3s ease-in-out forwards;
+        .modal-overlay { 
+          position: fixed; 
+          top: 0; 
+          left: 0; 
+          right: 0; 
+          bottom: 0; 
+          background: rgba(0, 0, 0, 0.7); 
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          z-index: 1000; 
+          opacity: 0; 
+          animation: fadeIn 0.3s ease-in-out forwards; 
         }
-        .modal-content {
-          background: #1f7a6e;
-          padding: 24px;
-          border-radius: 12px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          transform: scale(0.7);
-          animation: scaleIn 0.3s ease-in-out forwards;
+        .modal-content { 
+          background: #1f7a6e; 
+          padding: 24px; 
+          border-radius: 12px; 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); 
+          transform: scale(0.7); 
+          animation: scaleIn 0.3s ease-in-out forwards; 
         }
-        .spinner {
-          width: 36px;
-          height: 36px;
-          border: 4px solid transparent;
-          border-top-color: #ffffff;
-          border-right-color: #134e48;
-          border-radius: 50%;
-          animation: spin 0.8s ease-in-out infinite, pulse 1.6s ease-in-out infinite;
+        .spinner { 
+          width: 36px; 
+          height: 36px; 
+          border: 4px solid transparent; 
+          border-top-color: #ffffff; 
+          border-right-color: #134e48; 
+          border-radius: 50%; 
+          animation: spin 0.8s ease-in-out infinite, pulse 1.6s ease-in-out infinite; 
         }
-        .loading-text {
-          color: #ffffff;
-          font-size: 1.25rem;
-          font-weight: 500;
-          margin-top: 12px;
-          text-align: center;
+        .loading-text { 
+          color: #ffffff; 
+          font-size: 1.25rem; 
+          font-weight: 500; 
+          margin-top: 12px; 
+          text-align: center; 
         }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes spin { 
+          0% { transform: rotate(0deg); } 
+          100% { transform: rotate(360deg); } 
         }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.15); opacity: 0.8; }
+        @keyframes pulse { 
+          0%, 100% { transform: scale(1); opacity: 1; } 
+          50% { transform: scale(1.15); opacity: 0.8; } 
         }
-        @keyframes fadeIn {
-          to { opacity: 1; }
+        @keyframes fadeIn { 
+          to { opacity: 1; } 
         }
-        @keyframes scaleIn {
-          to { transform: scale(1); }
+        @keyframes scaleIn { 
+          to { transform: scale(1); } 
         }
       `}</style>
             <div className="max-w-md w-full bg-teal-800 rounded-2xl shadow-2xl m-4 p-10 relative">

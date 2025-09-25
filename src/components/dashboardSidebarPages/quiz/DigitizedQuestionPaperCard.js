@@ -11,7 +11,7 @@ const DigitizedQuestionPaperCard = ({ paper, onView, darkMode }) => (
             Subject: {paper.subject?.subjectName || paper.subjectName || 'Unknown'}
         </p>
         <p className="text-sm text-[var(--text-secondary)]">
-            Type: {paper.isInteractive ? 'Interactive' : 'PDF'}
+            Type: {!paper.isInteractive ? 'Interactive' : 'PDF'}
         </p>
         <div className="mt-4">
             <button

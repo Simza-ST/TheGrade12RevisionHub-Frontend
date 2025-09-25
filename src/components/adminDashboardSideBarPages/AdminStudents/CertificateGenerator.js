@@ -10,6 +10,7 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
+        idNumber: '',
         reason: '',
         score: '',
     });
@@ -43,18 +44,66 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
         setShowCertificate(true);
     };
 
-    const handleDownloadPDF = () => {
-        const element = certificateRef.current;
-        html2pdf()
-            .from(element)
-            .set({
-                margin: 0.5,
-                filename: `${formData.name}_${formData.surname}_certificate.pdf`,
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-            })
-            .save();
+    // const handleDownloadPDF = () => {
+    //     const element = certificateRef.current;
+    //     html2pdf()
+    //         .from(element)
+    //         .set({
+    //             margin: 0.5,
+    //             filename: `${formData.name}_${formData.surname}_certificate.pdf`,
+    //             html2canvas: { scale: 2 },
+    //             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    //         })
+    //         .save();
+    // };
+
+    const handleDownloadPDF = async () => {
+        const certificateData = {
+            name: formData.name,
+            surname: formData.surname,
+            idNumber: formData.idNumber,   // ✅ include id number
+            reason: formData.reason,
+            score: formData.score,
+            grade: grade,
+            issueDate: today,
+        };
+
+        console.log("Preparing to save certificate:", certificateData);
+
+        try {
+            // Replace with your backend endpoint
+            const token = sessionStorage.getItem("jwt");
+            const response = await fetch("http://localhost:6262/api/admin/certificates/save", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(certificateData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save certificate");
+            }
+
+            console.log("Certificate saved successfully!");
+
+            // Generate and download the PDF
+            const element = certificateRef.current;
+            html2pdf()
+                .from(element)
+                .set({
+                    margin: 0.5,
+                    filename: `${formData.name}_${formData.surname}_certificate.pdf`,
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+                })
+                .save();
+        } catch (error) {
+            console.error("Error saving certificate:", error);
+        }
     };
+
 
     const today = new Date().toLocaleDateString();
 
@@ -83,7 +132,8 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
                             <h2 className="text-3xl font-bold mb-6 text-center text-[var(--text-primary)]">🎓 Generate Certificate</h2>
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Student Name</label>
+                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Student
+                                        Name</label>
                                     <input
                                         type="text"
                                         name="name"
@@ -94,7 +144,8 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Student Surname</label>
+                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Student
+                                        Surname</label>
                                     <input
                                         type="text"
                                         name="surname"
@@ -105,7 +156,20 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Reason for Certificate</label>
+                                    <label className="block text-[var(--text-normal)] font-medium mb-1">ID
+                                        Number</label>
+                                    <input
+                                        type="text"
+                                        name="idNumber"
+                                        className="w-full border border-[var(--border)] rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] bg-[var(--bg-primary)] text-[var(--text-normal)]"
+                                        value={formData.idNumber}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Reason for
+                                        Certificate</label>
                                     <input
                                         type="text"
                                         name="reason"
@@ -116,7 +180,8 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Score (%)</label>
+                                    <label className="block text-[var(--text-normal)] font-medium mb-1">Score
+                                        (%)</label>
                                     <input
                                         type="number"
                                         name="score"
@@ -142,16 +207,21 @@ const CertificateGenerator = ({ user, notifications, onLogout }) => {
                                     ref={certificateRef}
                                     className="bg-[var(--bg-primary)] border-4 border-[var(--accent-primary)] p-10 rounded-xl text-center shadow-xl"
                                 >
-                                    <h3 className="text-2xl font-bold mb-4 text-[var(--accent-primary)] uppercase">Certificate of Achievement</h3>
-                                    <p className="text-lg mb-2 text-[var(--text-normal)]">This is proudly awarded to:</p>
+                                    <h3 className="text-2xl font-bold mb-4 text-[var(--accent-primary)] uppercase">Certificate
+                                        of Achievement</h3>
+                                    <p className="text-lg mb-2 text-[var(--text-normal)]">This is proudly awarded
+                                        to:</p>
                                     <p className="text-3xl font-bold mb-4 text-[var(--text-primary)]">{formData.name} {formData.surname}</p>
+                                    <p className="text-lg mb-2 text-[var(--text-normal)]">ID Number: {formData.idNumber}</p>
                                     <p className="italic mb-2 text-[var(--text-normal)]">For: {formData.reason}</p>
-                                    <p className="text-xl mb-2 text-[var(--text-normal)]">Score: <strong>{formData.score}%</strong></p>
-                                    <p className="text-xl font-semibold text-[var(--text-primary)]">Grade Achieved: <span className="text-[var(--accent-primary)]">{grade}</span></p>
+                                    <p className="text-xl mb-2 text-[var(--text-normal)]">Score: <strong>{formData.score}%</strong>
+                                    </p>
+                                    <p className="text-xl font-semibold text-[var(--text-primary)]">Grade
+                                        Achieved: <span className="text-[var(--accent-primary)]">{grade}</span></p>
                                     <p className="mt-6 text-sm text-[var(--text-secondary)]">Issued on: {today}</p>
                                 </div>
                                 <div className="text-center mt-4">
-                                    <button
+                                <button
                                         onClick={handleDownloadPDF}
                                         className="bg-green-500 text-[var(--text-primary)] px-6 py-2 rounded hover:bg-green-600 transition"
                                     >

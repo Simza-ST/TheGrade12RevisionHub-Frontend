@@ -369,14 +369,17 @@ const DigitizedQuestionPapers = ({ user, isCollapsed, setIsCollapsed, darkMode, 
                         .paper-section {
                             padding: clamp(12px, 3vw, 16px);
                         }
+                        
                         .service-card {
                             padding: clamp(8px, 2vw, 12px);
+                            display:block;
                         }
                         .text-xl {
                             font-size: clamp(1rem, 3vw, 1.125rem);
                         }
                         .text-lg {
                             font-size: clamp(0.875rem, 2.5vw, 1rem);
+                            display:block;
                         }
                         .text-sm {
                             font-size: clamp(0.625rem, 1.8vw, 0.75rem);

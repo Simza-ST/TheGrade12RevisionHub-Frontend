@@ -14,6 +14,9 @@ const MotivationalQuote = () => {
         { text: 'Your time is limited, don’t waste it living someone else’s life.', author: 'Steve Jobs' },
         { text: 'The best way to predict the future is to create it.', author: 'Peter Drucker' },
         { text: 'What you do today can improve all your tomorrows.', author: 'Ralph Marston' },
+        { text: 'Give yourself a task', author: 'Shupe Mphofela' },
+        { text: 'Perfection is not attainable, but if we chase perfection we might as well catch excellence.', author: 'Vince Lombardi' },
+
     ];
 
     const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
