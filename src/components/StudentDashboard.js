@@ -52,6 +52,49 @@ const StudentDashboard = ({ user, isCollapsed, setIsCollapsed, darkMode, setDark
     });
 
     useEffect(() => {
+        window.sessionStorage.removeItem('notifications');
+        const fetchNotifications = async () => {
+            if (!user) return;
+            try {
+                const token = sessionStorage.getItem('jwt');
+                const response = await fetch(`${API_BASE_URL}/api/user/notifications/${user.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+                const data = await response.json();
+                console.log('Fetched Notifications:', data);
+                const savedNotifications = sessionStorage.getItem('notifications')
+                    ? JSON.parse(sessionStorage.getItem('notifications'))
+                    : [];
+                console.log('Saved notifications from sessionStorage:', savedNotifications);
+                const normalizedData = data.map((notification) => {
+                    const saved = savedNotifications.find((n) => n.id === notification.id);
+                    const readValue = notification.hasOwnProperty('read') ? notification.read : (saved?.read || false);
+                    console.log(`Normalizing ID ${notification.id}: saved.read=${saved?.read}, api.read=${notification.read}, result.read=${readValue}`);
+                    return {
+                        id: notification.id,
+                        message: notification.message,
+                        createdAt: notification.createdAt,
+                        read: readValue,
+                        type: notification.type?.toLowerCase() || 'info',
+                    };
+                });
+                setNotifications(normalizedData);
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchNotifications();
+    }, [user, setNotifications]);
+
+    useEffect(() => {
         const savedTheme = sessionStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
         setDarkMode(savedTheme === 'dark');

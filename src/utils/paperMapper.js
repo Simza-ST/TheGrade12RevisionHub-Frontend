@@ -30,6 +30,8 @@ import catP2Nov2021
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2021/Paper2/catP2Nov2021";
 import CatP2Nov2022
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2022/Paper2/catP2Nov2022";
+import LifeScienceP2Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeScienceP2Nov2022Eng";
 
 // Map filenames to components
 const paperComponents = {
@@ -49,6 +51,7 @@ const paperComponents = {
     "Computer Applications Technology P2 Nov 2023 Eng": catP2Nov2023,
     "Computer Application Technology P2 Nov 2021 Eng": catP2Nov2021,
     "Computer Applications Technology P2 Nov 2022 Eng": CatP2Nov2022,
+    "Life Sciences P2 Nov 2022 Eng": LifeScienceP2Nov2022Eng,
 
 
     // Add more filename mappings as needed:
