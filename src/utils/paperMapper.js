@@ -32,6 +32,22 @@ import CatP2Nov2022
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2022/Paper2/catP2Nov2022";
 import LifeScienceP2Nov2022Eng
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeScienceP2Nov2022Eng";
+import BusinessStudiesP1Nov2021
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2021/Paper1/BusinessStudiesP1Nov2021";
+import BusinessStudiesP2Nov2021
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2021/Paper2/BusinessStudiesP2Nov2021";
+import BusinessStudiesP1Nov2022
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2022/Paper1/BusinessStudiesP1Nov2022";
+import BusinessStudiesP2Nov2022
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2022/Paper2/BusinessStudiesP2Nov2022";
+import BusinessStudiesP1Nov2023
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2023/Paper1/BusinessStudiesP1Nov2023";
+import BusinessStudiesP2Nov2023
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2023/Paper2/BusinessStudiesP2Nov2023";
+import BusinessStudiesP1Nov2024
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2024/Paper1/BusinessStudiesP1Nov2024";
+import BusinessStudiesP2Nov2024
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2024/Paper2/BusinessStudiesP2Nov2024";
 
 // Map filenames to components
 const paperComponents = {
@@ -52,6 +68,14 @@ const paperComponents = {
     "Computer Application Technology P2 Nov 2021 Eng": catP2Nov2021,
     "Computer Applications Technology P2 Nov 2022 Eng": CatP2Nov2022,
     "Life Sciences P2 Nov 2022 Eng": LifeScienceP2Nov2022Eng,
+    "Business Studies P1 Nov 2021 Eng":BusinessStudiesP1Nov2021,
+    "Business Studies P2 Nov 2021 Eng":BusinessStudiesP2Nov2021,
+    "Business Studies P1 Nov 2022 Eng":BusinessStudiesP1Nov2022,
+    "Business Studies P2 Nov 2022 Eng":BusinessStudiesP2Nov2022,
+    "Business Studies P1 Nov 2023 Eng":BusinessStudiesP1Nov2023,
+    "Business Studies P2 Nov 2023 Eng":BusinessStudiesP2Nov2023,
+    "Business Studies P1 Nov 2024 Eng":BusinessStudiesP1Nov2024,
+    "Business Studies P2 Nov 2024 Eng":BusinessStudiesP2Nov2024,
 
 
     // Add more filename mappings as needed:
