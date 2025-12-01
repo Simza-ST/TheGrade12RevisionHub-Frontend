@@ -484,7 +484,7 @@ const BusinessStudiesP1Nov2021 = ({ darkMode = false, setDarkMode = () => {}, no
                             src={q23}
                             alt="Coat of Arms of South Africa"
                             className="coat-of-arms absolute top-4 left-4"
-                            style={{ position: 'relative', top: '100px', left: '-115px' }}
+                            style={{ position: 'relative', top: '1px', left: '480px' }}
                         />
                         <div className="header-text">
                             <strong>basic education</strong>

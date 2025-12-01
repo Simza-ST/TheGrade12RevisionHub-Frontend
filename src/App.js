@@ -138,7 +138,7 @@ function ProtectedRoute({ children }) {
     return isAuthenticated ? React.cloneElement(children, { user ,setUser}) : <Navigate to="/login" replace />;
 }
 
-const App = () => {
+const Exam = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -408,4 +408,4 @@ const App = () => {
     );
 };
 
-export default App;
+export default Exam;

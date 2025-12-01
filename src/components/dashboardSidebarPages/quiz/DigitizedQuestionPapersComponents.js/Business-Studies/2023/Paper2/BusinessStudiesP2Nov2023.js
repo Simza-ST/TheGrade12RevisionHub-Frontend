@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import q23 from "../../coatOfArm.png";
 
 function normalizeAnswer(answer) {
     return answer.toLowerCase().trim().replace(/[.,!?]/g, '');
@@ -458,15 +459,15 @@ const BusinessStudiesP2Nov2023 = ({ darkMode = false, setDarkMode = () => {}, no
             <div className="flex-1 min-w-0 p-6 sm:p-8">
                 <div className="pdf-header">
                     <img
-                        src="src/assets/coatOfArm.png"
+                        src={q23}
                         alt="Coat of Arms of South Africa"
-                        className="coat-of-arms absolute top-4 left+10"
-                        style={{ position: 'relative', top: '100px', left: '-138px' }}
+                        className="coat-of-arms absolute top-4 left-4"
+                        style={{position: 'relative', top: '1px', left: '485px'}}
                     />
                     <div className="header-text">
                         <strong>basic education</strong>
-                        <br/>Department:<br />
-                        Basic Education<br />
+                        <br/>Department:<br/>
+                        Basic Education<br/>
                         <strong>Republic of South Africa</strong>
                     </div>
                     <h1>NATIONAL SENIOR CERTIFICATE</h1>

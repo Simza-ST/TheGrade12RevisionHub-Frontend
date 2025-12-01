@@ -2,6 +2,7 @@ import "../../BusinessStudiesP1Nov2021.css";
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {useEffect, useState} from "react";
+import q23 from "../../coatOfArm.png";
 
 function normalizeAnswer(answer) {
     return answer.toLowerCase().trim().replace(/[.,!?]/g, '');
@@ -465,27 +466,32 @@ const BusinessStudiesP2Nov2021 = ({ darkMode = false, setDarkMode = () => {}, no
                 <div className="flex-1 min-w-0 p-6 sm:p-8">
                     <div className="pdf-header">
                         <img
-                            src="src/assets/coatOfArm.png"
+                            src={q23}
                             alt="Coat of Arms of South Africa"
                             className="coat-of-arms absolute top-4 left-4"
-                            style={{ position: 'relative', top: '100px', left: '-75px' }}
+                            style={{position: 'relative', top: '1px', left: '543px'}}
                         />
                         <div className="header-text">
                             <strong>basic education</strong>
-                            <br/>Department:<br />
-                            Basic Education<br />
+                            <br/>Department:<br/>
+                            Basic Education<br/>
                             <strong>Republic of South Africa</strong>
                         </div>
                         <h1>NATIONAL SENIOR CERTIFICATE</h1>
                         <h2>Business Studies P2 November 2021</h2>
-                        <p><strong>MARKS: 150</strong><br /><strong>TIME: 2 hours</strong></p>
+                        <p><strong>MARKS: 150</strong><br/><strong>TIME: 2 hours</strong></p>
                         <p>This question paper consists of 10 pages.</p>
                     </div>
-                    <Timer />
+                    <Timer/>
                     <div className="pdf-section page-break">
-                        <h2 style={{ fontSize: '14pt', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>INSTRUCTIONS AND INFORMATION</h2>
+                        <h2 style={{
+                            fontSize: '14pt',
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            marginBottom: '20px'
+                        }}>INSTRUCTIONS AND INFORMATION</h2>
                         <ol>
-                            <li>This question paper consists of THREE sections and covers TWO main topics.<br />
+                        <li>This question paper consists of THREE sections and covers TWO main topics.<br />
                                 <strong>SECTION A: COMPULSORY</strong><br />
                                 <strong>SECTION B:</strong> Consists of THREE questions. Answer any TWO of the three questions in this section.<br />
                                 <strong>SECTION C:</strong> Consists of TWO questions. Answer any ONE of the two questions in this section.</li>

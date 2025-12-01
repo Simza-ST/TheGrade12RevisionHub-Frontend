@@ -48,6 +48,40 @@ import BusinessStudiesP1Nov2024
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2024/Paper1/BusinessStudiesP1Nov2024";
 import BusinessStudiesP2Nov2024
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2024/Paper2/BusinessStudiesP2Nov2024";
+import Question
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2021/Paper1/Question";
+import ExamPaper
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2022/Paper1/ExamPaper";
+import Exam
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2023/Paper1/Exam";
+import App
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2024/Paper1/Myquestion";
+import Pape
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2021/Paper2/pape";
+import Tour
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Tourism/2022/Tour";
+import TourismExam
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Tourism/2023/TourismExam";
+import ExamPage
+from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Economics/2021/ExamPage";
+import Page
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Economics/2021/Page";
+import QuizApp
+   from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeOrientation/2022/QuizApp";
+import Life
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeOrientation/2023/Life";
+import Orenti
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeOrientation/2024/Orenti";
+import One
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeOrientation/2021/One";
+import TechnicalMathematicsP1Nov2023Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2023/Paper1/TechnicalMathematicsP1Nov2023Eng";
+import TechnicalMathematicsP2Nov2023Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2023/Paper2/TechnicalMathematicsP2Nov2023Eng";
+import TechnicalMathematicsP1Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2024/Paper1/TechnicalMathematicsP1Nov2024Eng";
+import TechnicalMathematicsP2Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2024/Paper2/TechnicalMathematicsP2Nov2024Eng";
 
 // Map filenames to components
 const paperComponents = {
@@ -76,7 +110,23 @@ const paperComponents = {
     "Business Studies P2 Nov 2023 Eng":BusinessStudiesP2Nov2023,
     "Business Studies P1 Nov 2024 Eng":BusinessStudiesP1Nov2024,
     "Business Studies P2 Nov 2024 Eng":BusinessStudiesP2Nov2024,
-
+    "Accounting P1 Nov 2021 Eng":Question,
+    "Accounting P2 Nov 2021 Eng":Pape,
+    "Accounting P1 Nov 2022 Eng":ExamPaper,
+    "Accounting P1 Nov 2023 Eng":Exam,
+    "Accounting P1 Nov 2024 Eng":App,
+    "Tourism Nov 2022 Eng":Tour,
+    "Tourism Nov 2023 Eng":TourismExam,
+    "Economics P1 Nov 2021 Eng":ExamPage,
+    "Economics P2 Nov 2021 Eng":Page,
+    "Life Orientation September 2021 Eng":One,
+    "Life Orientation September 2022 Eng":QuizApp,
+    "Life Orientation September 2023 Eng":Life,
+    "Life Orientation September 2024 Eng":Orenti,
+    "Technical Maths P1 Nov 2023 Eng":TechnicalMathematicsP1Nov2023Eng,
+    "Technical Maths P2 Nov 2023 Eng":TechnicalMathematicsP2Nov2023Eng,
+    "Technical Maths P1 Nov 2024 Eng":TechnicalMathematicsP1Nov2024Eng,
+    "Technical Maths P2 Nov 2024 Eng":TechnicalMathematicsP2Nov2024Eng,
 
     // Add more filename mappings as needed:
     // "PhysicsP1May2023": PhysicsP1May2023,
