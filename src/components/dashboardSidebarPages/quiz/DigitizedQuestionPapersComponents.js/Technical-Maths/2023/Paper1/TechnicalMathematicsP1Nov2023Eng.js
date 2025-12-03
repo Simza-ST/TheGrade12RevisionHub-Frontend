@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-
 import { useNavigate } from 'react-router-dom';
 
 const TechnicalMathematicsP1Nov2023Eng = ({ paperId }) => {

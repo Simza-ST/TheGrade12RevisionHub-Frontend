@@ -62,6 +62,8 @@ import Tour
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Tourism/2022/Tour";
 import TourismExam
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Tourism/2023/TourismExam";
+import Rism
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Tourism/2024/Rism";
 import ExamPage
 from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Economics/2021/ExamPage";
 import Page
@@ -82,6 +84,22 @@ import TechnicalMathematicsP1Nov2024Eng
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2024/Paper1/TechnicalMathematicsP1Nov2024Eng";
 import TechnicalMathematicsP2Nov2024Eng
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Technical-Maths/2024/Paper2/TechnicalMathematicsP2Nov2024Eng";
+import Physic2021
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Physical-Science/Physic2021";
+import Physic2022
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Physical-Science/Physic2022";
+import Physic2023
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Physical-Science/Physic2023";
+import Physic2024
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Physical-Science/Physic2024";
+import HistoryP1Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/History/2024/Paper1/HistoryP1Nov2024Eng";
+import AccountingP2Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2022/Paper2/AccoutingP2Nov2022Eng";
+import AccountingP2Nov2023Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2023/Paper2/AccountingP2Nov2023";
+import AccountingP2Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2024/Paper2/AccountingP2Nov2024Eng";
 
 // Map filenames to components
 const paperComponents = {
@@ -113,10 +131,14 @@ const paperComponents = {
     "Accounting P1 Nov 2021 Eng":Question,
     "Accounting P2 Nov 2021 Eng":Pape,
     "Accounting P1 Nov 2022 Eng":ExamPaper,
+    "Accounting P2 Nov 2022 Eng":AccountingP2Nov2022Eng,
     "Accounting P1 Nov 2023 Eng":Exam,
+    "Accounting P2 Nov 2023 Eng":AccountingP2Nov2023Eng,
     "Accounting P1 Nov 2024 Eng":App,
+    "Accounting P2 Nov 2024 Eng":AccountingP2Nov2024Eng,
     "Tourism Nov 2022 Eng":Tour,
     "Tourism Nov 2023 Eng":TourismExam,
+    "Tourism Nov 2024 Eng":Rism,
     "Economics P1 Nov 2021 Eng":ExamPage,
     "Economics P2 Nov 2021 Eng":Page,
     "Life Orientation September 2021 Eng":One,
@@ -124,9 +146,14 @@ const paperComponents = {
     "Life Orientation September 2023 Eng":Life,
     "Life Orientation September 2024 Eng":Orenti,
     "Technical Maths P1 Nov 2023 Eng":TechnicalMathematicsP1Nov2023Eng,
-    "Technical Maths P2 Nov 2023 Eng":TechnicalMathematicsP2Nov2023Eng,
+    //"Technical Maths P2 Nov 2023 Eng":TechnicalMathematicsP2Nov2023Eng,
     "Technical Maths P1 Nov 2024 Eng":TechnicalMathematicsP1Nov2024Eng,
     "Technical Maths P2 Nov 2024 Eng":TechnicalMathematicsP2Nov2024Eng,
+    "Physical Sciences P2 Nov 2021 Eng":Physic2021,
+    "Physical Sciences P2 Nov 2022 Eng":Physic2022,
+    "Physical Sciences P2 Nov 2023 Eng":Physic2023,
+    "Physical Sciences P2 Nov 2024 Eng":Physic2024,
+    "History P1 Nov 2024 Eng":HistoryP1Nov2024Eng,
 
     // Add more filename mappings as needed:
     // "PhysicsP1May2023": PhysicsP1May2023,
