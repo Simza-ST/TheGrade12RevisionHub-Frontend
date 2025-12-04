@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {useEffect, useState} from "react";
-//import "../../BusinessStudiesP1Nov2021.css";
+import "../../BusinessStudiesP1Nov2021.css";
 
 function normalizeAnswer(answer) {
     return answer.toLowerCase().trim().replace(/[.,!?]/g, '');

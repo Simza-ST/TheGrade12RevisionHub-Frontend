@@ -1,5 +1,5 @@
 import { correctAnswers, questionWeights } from "./examData";
-import './App.css';
+
 
 //let totalTime = 2.5 * 60 * 60; // 2.5 hours in seconds
 //let timerInterval; // declared globally
@@ -183,7 +183,7 @@ function Rism() {
                                 <input type="radio" name="q1.1.1" value="D"/> D shopping
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.2.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.2.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.2 The arrival point of a journey is called (the) …</p>
@@ -216,7 +216,7 @@ function Rism() {
                                 <input type="radio" name="q1.1.5" value="D"/> D police station
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.6.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.6.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.6 The most expensive destination for a tourist from South Africa:</p>
@@ -226,7 +226,7 @@ function Rism() {
                                 <input type="radio" name="q1.1.6" value="D"/> D England
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.7.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.7.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.7 The photo of the Black Forest is associated with this country:</p>
@@ -263,7 +263,7 @@ function Rism() {
                                 community
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.11.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.11.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.11 South Africa's brand logo usually displays the following slogan:</p>
@@ -289,7 +289,7 @@ function Rism() {
                                 <input type="radio" name="q1.1.13" value="D"/> D a former president's time in jail
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.14.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.14.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.14 Tourism businesses saving electricity is considered to be a/an … practice.</p>
@@ -331,7 +331,7 @@ function Rism() {
                                 <input type="radio" name="q1.1.18" value="D"/> D SATSA
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/1.1.19.jpg"} alt="image" />
+                                <img src={"/New folder/1.1.19.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>1.1.19 The second most popular purpose of international tourist arrivals in South Africa:</p>
@@ -358,7 +358,7 @@ function Rism() {
                     </p>
                     <p><em>natural disaster; recession; days spent; money spent; air; route planning; publicity; land; political</em></p>
                     <div className="image-placeholder">
-                        <img src={"./New folder/1.2.jpg"} alt="image" />
+                        <img src={"/New folder/1.2.jpg"} alt="image" />
                     </div>
                     <div className="options">
                         <div className="option">
@@ -455,7 +455,7 @@ function Rism() {
                     <p>Match pictures A to H with the job descriptions below.</p>
 
                     <div className="image-placeholder">
-                        <img src={"./New folder/1.5.jpg"} alt="image" />
+                        <img src={"/New folder/1.5.jpg"} alt="image" />
                     </div>
 
                     <div className="options">
@@ -488,12 +488,12 @@ function Rism() {
                 <div className="question">
                     <div className="question-number">QUESTION 2 (36 marks)</div>
                     <div className="image-placeholder">
-                        <img src={"./New folder/2.jpg"} alt="image" />
+                        <img src={"/New folder/2.jpg"} alt="image" />
                     </div>
                     <p><strong>PARIS – THIRD TIME AROUND!</strong></p>
                     <p>The Summer Olympics took place in Paris, France, from 26 July to 11 August 2024.</p>
                     <div className="image-placeholder">
-                        <img src={"./New folder/2.1.jpg"} alt="image" />
+                        <img src={"/New folder/2.1.jpg"} alt="image" />
                     </div>
                     <div className="options">
                         <div className="option">
@@ -520,7 +520,7 @@ function Rism() {
                             <textarea name="q2.1.4b" rows="3" className="answer-input"></textarea>
                         </div>
                         <div className="image-placeholder">
-                            <img src={"./New folder/2.2.jpg"} alt="image" />
+                            <img src={"/New folder/2.2.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>2.2.1 Name the visa required for their journey. (1)</p>
@@ -537,7 +537,7 @@ function Rism() {
                             <textarea name="q2.2.3" rows="4" className="answer-input"></textarea>
                         </div>
                         <div className="image-placeholder">
-                            <img src={"./New folder/2.3.jpg"} alt="image" />
+                            <img src={"/New folder/2.3.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>2.3.1 Name TWO items that the team members should have placed in the safe of the hotel room before leaving for the beach. (2)</p>
@@ -627,7 +627,7 @@ function Rism() {
                     <p>Andile, a South African globetrotter (world traveller), had a puzzle made of some of his favourite destinations in the world.</p>
 
                     <div className="image-placeholder">
-                        <img src={"./New folder/4.1.jpg"} alt="image" />
+                        <img src={"/New folder/4.1.jpg"} alt="image" />
                     </div>
 
                     <div className="options">
@@ -646,7 +646,7 @@ function Rism() {
                             <input type="text" name="q4.1.2a" className="answer-input" />
                         </div>
                         <div className="image-placeholder">
-                            <img src={"./New folder/4.2.jpg"} alt="image" />
+                            <img src={"/New folder/4.2.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>4.1.2 (b) Give ONE reason for your answer to QUESTION 4.1.2(a). (2)</p>
@@ -681,7 +681,7 @@ function Rism() {
                     <p>Study the map below and answer the questions that follow.</p>
 
                     <div className="image-placeholder">
-                        <img src={"./New folder/5.jpg"} alt="image" />
+                        <img src={"/New folder/5.jpg"} alt="image" />
                     </div>
 
                     <div className="options">
@@ -707,7 +707,7 @@ function Rism() {
 
                     <div className="options">
                         <div className="image-placeholder">
-                            <img src={"./New folder/6.1.jpg"} alt="image" />
+                            <img src={"/New folder/6.1.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>6.1.1 Give ONE reason why Siya Kolisi was selected as the brand ambassador for SATourism. (2)</p>
@@ -719,7 +719,7 @@ function Rism() {
                             <textarea name="q6.1.2" rows="4" className="answer-input" />
                         </div>
                         <div className="image-placeholder">
-                            <img src={"./New folder/6.2.jpg"} alt="image" />
+                            <img src={"/New folder/6.2.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>6.2.1 Identify the international travel trade show in the picture above. (2)</p>
@@ -743,7 +743,7 @@ function Rism() {
 
                         <div className="options">
                             <div className="image-placeholder">
-                                <img src={"./New folder/7.1.jpg"} alt="image" />
+                                <img src={"/New folder/7.1.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>
@@ -754,7 +754,7 @@ function Rism() {
 
                             <div className="option">
                                 <div className="image-placeholder">
-                                    <img src={"./New folder/7.1.2.jpg"} alt="image" />
+                                    <img src={"/New folder/7.1.2.jpg"} alt="image" />
                                 </div>
                                 <p>7.1.2 (a) Give Lydia's working hours as specified in the BCEA. (2)</p>
                                 <input type="text" name="q7.1.2a" className="answer-input" />
@@ -765,7 +765,7 @@ function Rism() {
                                 <textarea name="q7.1.2b" rows="3" className="answer-input"></textarea>
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/7.2.jpg"} alt="image" />
+                                <img src={"/New folder/7.2.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>7.2.1 Give ONE reason why a cruise line must have a code of conduct for their staff. (2)</p>
@@ -793,7 +793,7 @@ function Rism() {
 
                     <div className="options">
                         <div className="image-placeholder">
-                            <img src={"./New folder/8.1.jpg"} alt="image" />
+                            <img src={"/New folder/8.1.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>8.1.1 Explain the concept of <em>solar power</em>. (2)</p>
@@ -839,7 +839,7 @@ function Rism() {
 
                         <div className="options">
                             <div className="image-placeholder">
-                                <img src={"./New folder/9.1.jpg"} alt="image" />
+                                <img src={"/New folder/9.1.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>
@@ -859,7 +859,7 @@ function Rism() {
                                 <input type="text" name="q9.2.1" className="answer-input" />
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/9.2.jpg"} alt="image" />
+                                <img src={"/New folder/9.2.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>9.2.2 Explain how damage to infrastructure can affect communities' access to the following:</p>
@@ -870,7 +870,7 @@ function Rism() {
                                 <textarea name="q9.2.2b" rows="3" className="answer-input"></textarea>
                             </div>
                             <div className="image-placeholder">
-                                <img src={"./New folder/9.3.jpg"} alt="image" />
+                                <img src={"/New folder/9.3.jpg"} alt="image" />
                             </div>
                             <div className="option">
                                 <p>9.3.1 Discuss TWO advantages of using a digital wallet to pay for tourism products and services. (4)</p>
@@ -890,7 +890,7 @@ function Rism() {
 
                     <div className="options">
                         <div className="image-placeholder">
-                            <img src={"./New folder/10.jpg"} alt="image" />
+                            <img src={"/New folder/10.jpg"} alt="image" />
                         </div>
                         <div className="option">
                             <p>10.1 Explain the meaning of the concept customer survey. (2)</p>
@@ -925,6 +925,195 @@ function Rism() {
                 <div className="score" id="score"></div>
                 <div id="detailed-results"></div>
             </div>
+            <style jsx>
+                {`
+                    * {
+                        box-sizing: border-box;
+                        font-family: Arial, sans-serif;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #f5f5f5;
+                        color: #333;
+                    }
+                    .container {
+                        max-width: 100%;
+                        margin: 0 auto;
+                        background-color: white;
+                        padding: 20px;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        position: relative;
+                    }
+                    header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                        border-bottom: 2px solid #0066cc;
+                        padding-bottom: 10px;
+                    }
+                    h1 {
+                        color: #0066cc;
+                        margin-bottom: 5px;
+                    }
+                    .exam-info {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 20px;
+                        flex-wrap: wrap;
+                    }
+                    .section {
+                        margin-bottom: 30px;
+                        padding-bottom: 20px;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    .section-title {
+                        background-color: #0066cc;
+                        color: white;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .question {
+                        margin-bottom: 20px;
+                        padding: 15px;
+                        background-color: #f9f9f9;
+                        border-left: 4px solid #0066cc;
+                    }
+                    .question-number {
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+                    .options {
+                        margin-left: 20px;
+                    }
+                    .option {
+                        margin-bottom: 5px;
+                    }
+                    input[type="text"], input[type="number"] {
+                        padding: 5px;
+                        width: 200px;
+                        margin: 5px 0;
+                    }
+                    .submit-btn {
+                        background-color: #0066cc;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        margin-top: 20px;
+                        display: block;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+                    .submit-btn:hover {
+                        background-color: #0055aa;
+                    }
+                    .results {
+                        margin-top: 30px;
+                        padding: 20px;
+                        background-color: #e9f7fe;
+                        border-radius: 5px;
+                        display: none;
+                    }
+                    .score {
+                        font-size: 24px;
+                        font-weight: bold;
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .correct {
+                        color: green;
+                    }
+                    .incorrect {
+                        color: red;
+                    }
+                    .feedback {
+                        margin-top: 10px;
+                        font-style: italic;
+                    }
+                    .answer-input {
+                        margin: 5px 0;
+                    }
+                    textarea {
+                        width: 100%;
+                        padding: 8px;
+                        margin-top: 5px;
+                    }
+                    .instructions {
+                        background-color: #fff9e6;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                        border-left: 4px solid #ffcc00;
+                    }
+                    .time-guide {
+                        margin-top: 20px;
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    .time-guide th, .time-guide td {
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: left;
+                    }
+                    .time-guide th {
+                        background-color: #f2f2f2;
+                    }
+                    .image-placeholder {
+                        background-color: #eee;
+                        padding: 20px;
+                        text-align: center;
+                        margin: 10px 0;
+                        border: 1px dashed #ccc;
+                        width: 100%;
+                        height: 250px;
+                        overflow: hidden;
+                    }
+
+                    .image-placeholder img {
+                        width: 90%;          /* 🔥 Image = 90% of the placeholder */
+                        height: 100%;
+                        object-fit: contain;
+                    }
+
+
+                    /* Timer styles */
+                    .timer-container {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background-color: #0066cc;
+                        color: white;
+                        padding: 15px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                        z-index: 1000;
+                        text-align: center;
+                        min-width: 150px;
+                    }
+                    .timer-display {
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+                    .timer-label {
+                        font-size: 14px;
+                        opacity: 0.9;
+                    }
+                    .timer-warning {
+                        background-color: #ff9900;
+                    }
+                    .timer-critical {
+                        background-color: #cc0000;
+                        animation: pulse 1s infinite;
+                    }
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.05); }
+                        100% { transform: scale(1); }
+                    }
+
+                `}
+            </style>
         </div>
     );
 }

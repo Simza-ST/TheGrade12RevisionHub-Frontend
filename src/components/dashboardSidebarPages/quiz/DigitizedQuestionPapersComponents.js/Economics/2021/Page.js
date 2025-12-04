@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Question from "./Question";
-import "./ExamPage.css";
 import questionsData, { totalPossibleMarks } from "./EconomicsP2Nov2021";
 
 export default function Page({paperTitle, onBack }) {
@@ -265,7 +264,7 @@ export default function Page({paperTitle, onBack }) {
                             <p>Essay score: {essayTotal} / 40</p>
 
                             <h3>Feedback</h3>
-                            <p style={{ fontWeight: "bold" }}>
+                            <p style={{fontWeight: "bold"}}>
                                 {((autoGradedTotal / TOTAL_PAPER_MARKS) * 100) < 50
                                     ? "Keep practicing!! You’ll improve!!"
                                     : ((autoGradedTotal / TOTAL_PAPER_MARKS) * 100) < 75
@@ -280,6 +279,224 @@ export default function Page({paperTitle, onBack }) {
                     )}
                 </footer>
             </div>
+            <style jsx>
+                {`
+                    html, body, #root {
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    body {
+                        background: #f5f6fa;
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+                        -webkit-font-smoothing: antialiased;
+                        -moz-osx-font-smoothing: grayscale;
+                    }
+
+                    .exam-wrapper {
+                        min-height: 100vh;
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-start;
+                        padding: 40px 20px;
+                        box-sizing: border-box;
+                    }
+
+                    .exam-page {
+                        width: 100%;
+                        max-width: 980px;
+                        margin: 0 auto;
+                        padding: 28px 34px;
+                        background: #ffffff;
+                        border-radius: 12px;
+                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+                        box-sizing: border-box;
+                    }
+
+                    .exam-container, .exam-paper, .centered-paper {
+                        display: block;
+                    }
+
+                    .exam-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 16px;
+                        margin-bottom: 20px;
+                    }
+
+                    .exam-header h1 {
+                        font-size: 42px;
+                        line-height: 1.05;
+                        margin: 0;
+                        font-weight: 700;
+                        color: #111;
+                    }
+
+                    .timer {
+                        font-size: 22px;
+                        font-weight: 700;
+                        padding: 8px 16px;
+                        border-radius: 10px;
+                        border: 1px solid #dcdcdc;
+                        background: #eaf9ea;
+                        color: #037a03;
+                        white-space: nowrap;
+                    }
+
+                    .timer.warning {
+                        background: #fff4e6;
+                        color: #b86a00;
+                    }
+
+                    .timer.danger {
+                        background: #ffeaea;
+                        color: #b20000;
+                    }
+
+                    .paper-body {
+                        width: 100%;
+                    }
+
+                    .question-card {
+                        border: 1px solid #ececec;
+                        border-radius: 10px;
+                        padding: 18px;
+                        margin-bottom: 18px;
+                        background: #fff;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+                        box-sizing: border-box;
+                    }
+
+                    .question-top {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 10px;
+                    }
+
+                    .q-id {
+                        font-weight: 700;
+                        font-size: 18px;
+                        color: #222;
+                    }
+
+                    .q-marks {
+                        font-size: 14px;
+                        color: #666;
+                        white-space: nowrap;
+                    }
+
+                    .q-text {
+                        margin-bottom: 10px;
+                        font-size: 15px;
+                        line-height: 1.55;
+                        color: #222;
+                        white-space: pre-wrap;
+                    }
+
+                    .q-image img {
+                        max-width: 100%;
+                        height: auto;
+                        display: block;
+                        margin: 10px 0;
+                        border-radius: 6px;
+                    }
+
+                    .mcq-options {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        margin-top: 6px;
+                    }
+
+                    .mcq-label {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        font-size: 15px;
+                    }
+
+                    .short-answer,
+                    .essay-answer {
+                        width: 100%;
+                        min-height: 110px;
+                        max-height: 500px;
+                        padding: 12px;
+                        border-radius: 8px;
+                        border: 1px solid #d6d6d6;
+                        font-size: 15px;
+                        line-height: 1.5;
+                        resize: none; /* auto-grow handled by JS */
+                        overflow: hidden;
+                        box-sizing: border-box;
+                    }
+
+                    .nav-row {
+                        display: flex;
+                        gap: 10px;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: 20px;
+                    }
+
+                    .prev-btn, .next-btn, .back-btn {
+                        padding: 10px 18px;
+                        border-radius: 6px;
+                        border: 1px solid #cfcfcf;
+                        background: #f2f2f2;
+                        cursor: pointer;
+                        font-size: 15px;
+                    }
+
+                    .prev-btn:hover, .next-btn:hover, .back-btn:hover {
+                        background: #e9e9e9;
+                    }
+
+                    .submit-btn {
+                        background: #007bff;
+                        color: white;
+                        padding: 12px 22px;
+                        border-radius: 8px;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 16px;
+                        display: block;
+                        margin: 28px auto;
+                    }
+
+                    .submit-btn:hover {
+                        background: #0056d1;
+                    }
+
+                    .results {
+                        margin-top: 22px;
+                        padding: 18px;
+                        border-radius: 8px;
+                        border: 1px solid #eee;
+                        background: #fafafa;
+                        text-align: left;
+                    }
+
+                    @media (max-width: 720px) {
+                        .exam-page {
+                            padding: 18px;
+                            max-width: 100%;
+                        }
+
+                        .exam-header h1 {
+                            font-size: 28px;
+                        }
+
+                        .timer {
+                            font-size: 18px;
+                            padding: 6px 12px;
+                        }
+                    }
+
+                `}
+            </style>
         </div>
     );
 }

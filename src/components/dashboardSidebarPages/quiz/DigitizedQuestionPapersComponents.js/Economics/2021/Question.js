@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import SolutionModal from "./SolutionModal";
-import "./Question.css";
 
 export default function Question({ item, value, onChange, submitted }) {
     const [open, setOpen] = useState(false);
@@ -122,6 +121,122 @@ export default function Question({ item, value, onChange, submitted }) {
 
             {/* Solution modal */}
             {open && <SolutionModal isOpen={open} onClose={() => setOpen(false)} question={item} />}
+            <style jsx>
+                {`
+                    .question-card {
+                        background: #ffffff;
+                        padding: 18px;
+                        margin: 20px 0;
+                        border-radius: 12px;
+                        border: 1px solid #e4e4e4;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                        width: 100%;
+                    }
+
+                    /* TOP BAR — QUESTION NUMBER + MARKS */
+                    .question-top {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 10px;
+                    }
+
+                    .q-id {
+                        font-weight: bold;
+                        font-size: 18px;
+                    }
+
+                    .q-marks {
+                        font-size: 14px;
+                        color: #666;
+                        margin-left: 10px;
+                        white-space: nowrap;
+                    }
+
+                    /* QUESTION TEXT */
+                    .q-text {
+                        margin-bottom: 12px;
+                        line-height: 1.5;
+                        font-size: 16px;
+                    }
+
+                    /* IMAGES */
+                    .q-image img {
+                        max-width: 100%;
+                        height: auto;
+                        margin: 10px 0;
+                        border-radius: 6px;
+                    }
+
+                    /* MCQ OPTIONS */
+                    .mcq-options {
+                        margin-top: 10px;
+                    }
+
+                    .mcq-label {
+                        display: flex;
+                        align-items: center;
+                        margin: 5px 0;
+                        font-size: 15px;
+                    }
+
+                    .opt-text {
+                        margin-left: 6px;
+                    }
+
+                    /* SHORT + ESSAY TEXTAREAS */
+                    .short-answer,
+                    .essay-answer {
+                        width: 100%;
+                        min-height: 80px;
+                        max-height: 400px;
+                        resize: none;            /* user cannot manually break the layout */
+                        padding: 10px;
+                        border-radius: 8px;
+                        border: 1px solid #ccc;
+                        font-size: 15px;
+                        line-height: 1.5;
+                        overflow: hidden;         /* needed for auto-grow */
+                        box-sizing: border-box;   /* prevents overflow beyond container */
+                    }
+
+                    /* VIEW SOLUTION BUTTON */
+                    .view-solution-area {
+                        margin-top: 15px;
+                        text-align: right;
+                    }
+
+                    .view-solution-btn {
+                        background: #3a6df0;
+                        color: white;
+                        padding: 8px 15px;
+                        border-radius: 8px;
+                        border: none;
+                        cursor: pointer;
+                    }
+
+                    .view-solution-btn:hover {
+                        background: #2d55c9;
+                    }
+                    
+                    .section-title {
+                        margin-top: 30px;
+                        margin-bottom: 10px;
+                        font-size: 22px;
+                        font-weight: bold;
+                        text-decoration: underline;
+                    }
+                    
+                    .instruction-text {
+                        margin: 15px 0;
+                        padding: 15px;
+                        border-left: 4px solid #777;
+                        background: #fafafa;
+                        border-radius: 8px;
+                    }
+
+                `}
+            </style>
         </div>
     );
 }
