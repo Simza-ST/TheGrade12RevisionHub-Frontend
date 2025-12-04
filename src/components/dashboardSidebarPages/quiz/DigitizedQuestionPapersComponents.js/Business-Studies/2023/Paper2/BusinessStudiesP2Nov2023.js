@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import q23 from "../../coatOfArm.png";
 
 function normalizeAnswer(answer) {
     return answer.toLowerCase().trim().replace(/[.,!?]/g, '');
@@ -459,10 +458,10 @@ const BusinessStudiesP2Nov2023 = ({ darkMode = false, setDarkMode = () => {}, no
             <div className="flex-1 min-w-0 p-6 sm:p-8">
                 <div className="pdf-header">
                     <img
-                        src={q23}
+                        src="/images/coatOfArm.png"
                         alt="Coat of Arms of South Africa"
                         className="coat-of-arms absolute top-4 left-4"
-                        style={{position: 'relative', top: '1px', left: '485px'}}
+                        style={{position: 'relative', top: '1px', left: '405px'}}
                     />
                     <div className="header-text">
                         <strong>basic education</strong>
@@ -472,12 +471,17 @@ const BusinessStudiesP2Nov2023 = ({ darkMode = false, setDarkMode = () => {}, no
                     </div>
                     <h1>NATIONAL SENIOR CERTIFICATE</h1>
                     <h2>Business Studies P2 November 2023</h2>
-                    <p><strong>MARKS: 150</strong><br /><strong>TIME: 2 hours</strong></p>
+                    <p><strong>MARKS: 150</strong><br/><strong>TIME: 2 hours</strong></p>
                     <p>This question paper consists of 9 pages.</p>
                 </div>
-                <Timer />
+                <Timer/>
                 <div className="pdf-section page-break">
-                    <h2 style={{ fontSize: '14pt', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>INSTRUCTIONS AND INFORMATION</h2>
+                    <h2 style={{
+                        fontSize: '14pt',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        marginBottom: '20px'
+                    }}>INSTRUCTIONS AND INFORMATION</h2>
                     <ol>
                         <li>This question paper consists of THREE sections and covers TWO main topics.<br />
                             <strong>SECTION A: COMPULSORY</strong><br />

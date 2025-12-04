@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "./HistoryP1Nov2024Eng.css"; // Assuming images for sources if needed, but based on text, no images in provided pages.
 
 function HistoryP1Nov2024Eng() {
 
@@ -507,30 +506,39 @@ function HistoryP1Nov2024Eng() {
 
 
             {/* Instructions and Information */}
-            <div className="instructions" style={{ marginBottom: '20px', border: '1px solid black', padding: '20px' }}>
+            <div className="instructions" style={{marginBottom: '20px', border: '1px solid black', padding: '20px'}}>
                 <h1>INSTRUCTIONS AND INFORMATION</h1>
                 <ol>
-                    <li>This question paper consists of SECTION A and SECTION B based on the prescribed content framework in the CAPS document.
+                    <li>This question paper consists of SECTION A and SECTION B based on the prescribed content
+                        framework in the CAPS document.
                         <ul>
                             <li><strong>SECTION A: SOURCE-BASED QUESTIONS</strong></li>
                             <ul>
                                 <li>QUESTION 1: THE COLD WAR: THE ORIGINS OF THE COLD WAR</li>
                                 <li>QUESTION 2: INDEPENDENT AFRICA: CASE STUDY – ANGOLA</li>
-                                <li>QUESTION 3: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE US CIVIL RIGHTS MOVEMENT</li>
+                                <li>QUESTION 3: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE US CIVIL RIGHTS
+                                    MOVEMENT
+                                </li>
                             </ul>
                             <li><strong>SECTION B: ESSAY QUESTIONS</strong></li>
                             <ul>
                                 <li>QUESTION 4: THE EXTENSION OF THE COLD WAR: CASE STUDY – VIETNAM</li>
                                 <li>QUESTION 5: INDEPENDENT AFRICA: CASE STUDY – THE CONGO</li>
-                                <li>QUESTION 6: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE BLACK POWER MOVEMENT</li>
+                                <li>QUESTION 6: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE BLACK POWER
+                                    MOVEMENT
+                                </li>
                             </ul>
                         </ul>
                     </li>
-                    <li>SECTION A consists of THREE source-based questions. Source material that is required to answer these questions can be found in the ADDENDUM.</li>
+                    <li>SECTION A consists of THREE source-based questions. Source material that is required to answer
+                        these questions can be found in the ADDENDUM.
+                    </li>
                     <li>SECTION B consists of THREE essay questions.</li>
                     <li>Answer THREE questions as follows:
                         <ul>
-                            <li>4.1 At least ONE must be a source-based question and at least ONE must be an essay question.</li>
+                            <li>4.1 At least ONE must be a source-based question and at least ONE must be an essay
+                                question.
+                            </li>
                             <li>4.2 The THIRD question can be either a source-based question or an essay question.</li>
                         </ul>
                     </li>
@@ -549,165 +557,586 @@ function HistoryP1Nov2024Eng() {
             <form onSubmit={e => e.preventDefault()}>
                 {/* Section A Selection */}
                 <h1><strong>Select Section A Questions (1 or 2)</strong></h1>
-                <label><input type="checkbox" checked={selectedSectionA.includes("1")} onChange={() => handleSectionAChange("1")} /> Q1: Berlin Wall</label>
-                <label><input type="checkbox" checked={selectedSectionA.includes("2")} onChange={() => handleSectionAChange("2")} /> Q2: Angola</label>
-                <label><input type="checkbox" checked={selectedSectionA.includes("3")} onChange={() => handleSectionAChange("3")} /> Q3: Civil Rights March</label>
+                <label><input type="checkbox" checked={selectedSectionA.includes("1")}
+                              onChange={() => handleSectionAChange("1")}/> Q1: Berlin Wall</label>
+                <label><input type="checkbox" checked={selectedSectionA.includes("2")}
+                              onChange={() => handleSectionAChange("2")}/> Q2: Angola</label>
+                <label><input type="checkbox" checked={selectedSectionA.includes("3")}
+                              onChange={() => handleSectionAChange("3")}/> Q3: Civil Rights March</label>
 
                 {/* Conditionally render selected questions */}
                 {selectedSectionA.includes("1") && (
                     <div>
-                        <h2>QUESTION 1: HOW WERE THE LIVES OF BERLINERS AFFECTED BY THE CONSTRUCTION OF THE BERLIN WALL IN 1961?</h2>
+                        <h2>QUESTION 1: HOW WERE THE LIVES OF BERLINERS AFFECTED BY THE CONSTRUCTION OF THE BERLIN WALL
+                            IN 1961?</h2>
                         <p>1.1.1 When, according to the source, did the construction of the Berlin Wall begin?</p>
-                        <input name="q111" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }} />
-                        <p>1.1.2 Give ONE reason in the source, why the German Democratic Republic (GDR) constructed the Berlin Wall.</p>
-                        <input name="q112" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }} />
+                        <input name="q111" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.1.2 Give ONE reason in the source, why the German Democratic Republic (GDR) constructed the
+                            Berlin Wall.</p>
+                        <input name="q112" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.1.3 Define the concept communism in your own words.</p>
-                        <input name="q113" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q113" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.1.4 (a) 'the credibility of the GDR'</p>
-                        <input name="q114a" onChange={handleChange}style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }} />
+                        <input name="q114a" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.1.4 (b) 'the workforce of the GDR'</p>
-                        <input name="q114b" onChange={handleChange}style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }} />
-                        <p>1.1.5 Quote TWO pieces of evidence from the source which indicates that 'within a day the West of Berlin was completely sealed off from the East'.</p>
-                        <input name="q115" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.2.1 Identify THREE incidents in the source that Hans Peters witnessed at 2.20 a.m. (13 August 1961) while he was on border duty in the French Sector of West Berlin.</p>
-                        <input name="q121" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.2.2 Comment on what is implied by the words, 'It's all over now with trips to Berlin', in the context of what happened on 13 August 1961.</p>
-                        <input name="q122" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.2.3 Explain why a historian would regard this source as reliable when researching an account of what transpired on the morning of 13 August 1961.</p>
-                        <input name="q123" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.3 Explain how information in Source 1A supports the evidence in Source 1B regarding events that took place in Berlin on 13 August 1961.</p>
-                        <input name="q13" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.4.1 Why, according to the source, was Noffke in West Berlin on the evening before the construction of the Berlin Wall?</p>
-                        <input name="q141" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q114b" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.1.5 Quote TWO pieces of evidence from the source which indicates that 'within a day the
+                            West of Berlin was completely sealed off from the East'.</p>
+                        <input name="q115" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.2.1 Identify THREE incidents in the source that Hans Peters witnessed at 2.20 a.m. (13
+                            August 1961) while he was on border duty in the French Sector of West Berlin.</p>
+                        <input name="q121" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.2.2 Comment on what is implied by the words, 'It's all over now with trips to Berlin', in
+                            the context of what happened on 13 August 1961.</p>
+                        <input name="q122" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.2.3 Explain why a historian would regard this source as reliable when researching an
+                            account of what transpired on the morning of 13 August 1961.</p>
+                        <input name="q123" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.3 Explain how information in Source 1A supports the evidence in Source 1B regarding events
+                            that took place in Berlin on 13 August 1961.</p>
+                        <input name="q13" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.4.1 Why, according to the source, was Noffke in West Berlin on the evening before the
+                            construction of the Berlin Wall?</p>
+                        <input name="q141" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.4.2 Explain the concept capitalist in the context of West Berlin.</p>
-                        <input name="q142" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.4.3 What conclusions can be drawn from the fact that Noffke and a group were prepared to dig a tunnel of 200 yards to smuggle their families to the West?</p>
-                        <input name="q143" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q142" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.4.3 What conclusions can be drawn from the fact that Noffke and a group were prepared to
+                            dig a tunnel of 200 yards to smuggle their families to the West?</p>
+                        <input name="q143" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.4.4 (a) Noffke</p>
-                        <input name="q144a" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q144a" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.4.4 (b) Noffke's colleagues</p>
-                        <input name="q144b" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q144b" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>1.4.4 (c) Noffke's wife</p>
-                        <input name="q144c" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.5.1 Explain whether you would consider the words, 'The men are becoming more jumpy as the Berlin Crisis deepens, Comrade …', to be an appropriate caption for the cartoon.</p>
-                        <input name="q151" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.5.2 Comment on the implication of the message on the signpost on the Western Sector side, '… DEFECTORS WELCOME'.</p>
-                        <input name="q152" onChange={handleChange} style={{width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.5.3 What conclusion can you draw from the body language of the two generals in the foreground, in the context of defections that were taking place?</p>
-                        <input name="q153" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>1.6 Using the information in the relevant sources and your own knowledge, write a paragraph of about EIGHT lines (about 80 words) explaining how the lives of Berliners were affected by the construction of the Berlin Wall in 1961.</p>
-                        <textarea name="q16" onChange={handleChange} />
+                        <input name="q144c" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.5.1 Explain whether you would consider the words, 'The men are becoming more jumpy as the
+                            Berlin Crisis deepens, Comrade …', to be an appropriate caption for the cartoon.</p>
+                        <input name="q151" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.5.2 Comment on the implication of the message on the signpost on the Western Sector side,
+                            '… DEFECTORS WELCOME'.</p>
+                        <input name="q152" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.5.3 What conclusion can you draw from the body language of the two generals in the
+                            foreground, in the context of defections that were taking place?</p>
+                        <input name="q153" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>1.6 Using the information in the relevant sources and your own knowledge, write a paragraph
+                            of about EIGHT lines (about 80 words) explaining how the lives of Berliners were affected by
+                            the construction of the Berlin Wall in 1961.</p>
+                        <textarea name="q16" onChange={handleChange}/>
                     </div>
                 )}
                 {selectedSectionA.includes("2") && (
                     <div>
-                        <h2>QUESTION 2: HOW DID THE DEFEAT OF THE SADF AT THE BATTLE OF CUITO CUANAVALE IN ANGOLA LEAD TO PEACEFUL NEGOTIATIONS IN SOUTHERN AFRICA IN THE LATE 1980s?</h2>
-                        <p>2.1.1 List FOUR military forces in the source that were involved in the final confrontation at the Battle of Cuito Cuanavale.</p>
-                        <input name="q211" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <h2>QUESTION 2: HOW DID THE DEFEAT OF THE SADF AT THE BATTLE OF CUITO CUANAVALE IN ANGOLA LEAD
+                            TO PEACEFUL NEGOTIATIONS IN SOUTHERN AFRICA IN THE LATE 1980s?</h2>
+                        <p>2.1.1 List FOUR military forces in the source that were involved in the final confrontation
+                            at the Battle of Cuito Cuanavale.</p>
+                        <input name="q211" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>2.1.2 Define the term sovereignty in your own words.</p>
-                        <input name="q212" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.1.3 Using the information in the source and your own knowledge, explain the significance of Angola's air superiority during the Battle of Cuito Cuanavale.</p>
-                        <input name="q213" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.1.4 Comment on what is implied by the statement, 'it was important in southern Africa that white South Africans could be killed by bullets fired by black Africans and black Cubans', in the context of the Angolan war.</p>
-                        <input name="q214" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.1.5 Explain the limitations of the source to a historian researching the outcome of the Battle of Cuito Cuanavale.</p>
-                        <input name="q215" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.2.1 Give TWO reasons in the source why the United States government implemented a covert plan in Angola.</p>
-                        <input name="q221" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.2.2 Explain why the United States used Mobutu and South Africa to intervene during the Battle of Cuito Cuanavale.</p>
-                        <input name="q222" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.2.3 Comment on why Castro believed, 'there would have been no possibility of a successful outcome in Angola without the political and logistical support from the Soviet Union …'.</p>
-                        <input name="q223" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.2.4 Quote TWO pieces of evidence from the source that suggests why South Africa had 'to sit down around the negotiating table'.</p>
-                        <input name="q224" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q212" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.1.3 Using the information in the source and your own knowledge, explain the significance of
+                            Angola's air superiority during the Battle of Cuito Cuanavale.</p>
+                        <input name="q213" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.1.4 Comment on what is implied by the statement, 'it was important in southern Africa that
+                            white South Africans could be killed by bullets fired by black Africans and black Cubans',
+                            in the context of the Angolan war.</p>
+                        <input name="q214" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.1.5 Explain the limitations of the source to a historian researching the outcome of the
+                            Battle of Cuito Cuanavale.</p>
+                        <input name="q215" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.2.1 Give TWO reasons in the source why the United States government implemented a covert
+                            plan in Angola.</p>
+                        <input name="q221" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.2.2 Explain why the United States used Mobutu and South Africa to intervene during the
+                            Battle of Cuito Cuanavale.</p>
+                        <input name="q222" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.2.3 Comment on why Castro believed, 'there would have been no possibility of a successful
+                            outcome in Angola without the political and logistical support from the Soviet Union …'.</p>
+                        <input name="q223" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.2.4 Quote TWO pieces of evidence from the source that suggests why South Africa had 'to sit
+                            down around the negotiating table'.</p>
+                        <input name="q224" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>2.3.1 Explain why you think this photograph was taken.</p>
-                        <input name="q231" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.3.2 What do you think was the significance of the presence of the United Nations' Secretary General during the signing of the Tripartite Accord?</p>
-                        <input name="q232" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.4 Comment on how the information in Source 2A supports the evidence in Source 2C regarding the signing of the Tripartite Accord.</p>
-                        <input name="q24" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.5.1 Identify, in the source, any TWO forces/parties that waged a combined attack on the Angolans (MPLA) during the Angolan Civil War.</p>
-                        <input name="q251" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.5.2 Using the information in the source and your own knowledge, comment on what was implied by Mandela's statement, '… your forces in the Battle of Cuito Cuanavale was of truly historic significance.'</p>
-                        <input name="q252" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q231" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.3.2 What do you think was the significance of the presence of the United Nations' Secretary
+                            General during the signing of the Tripartite Accord?</p>
+                        <input name="q232" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.4 Comment on how the information in Source 2A supports the evidence in Source 2C regarding
+                            the signing of the Tripartite Accord.</p>
+                        <input name="q24" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.5.1 Identify, in the source, any TWO forces/parties that waged a combined attack on the
+                            Angolans (MPLA) during the Angolan Civil War.</p>
+                        <input name="q251" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.5.2 Using the information in the source and your own knowledge, comment on what was implied
+                            by Mandela's statement, '… your forces in the Battle of Cuito Cuanavale was of truly
+                            historic significance.'</p>
+                        <input name="q252" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>2.5.3 (a) Western governments</p>
-                        <input name="q253a" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q253a" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>2.5.3 (b) Cuba</p>
-                        <input name="q253b" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q253b" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>2.5.4 Explain the term internationalism in the context of Cuba's foreign policy.</p>
-                        <input name="q254" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>2.6 Using the information in the relevant sources and your own knowledge, write a paragraph of about EIGHT lines (about 80 words) explaining how the defeat of the South African Defence Force (SADF) at the Battle of Cuito Cuanavale in Angola led to peaceful negotiations in southern Africa in the late 1980s.</p>
-                        <textarea name="q26" onChange={handleChange} />
+                        <input name="q254" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>2.6 Using the information in the relevant sources and your own knowledge, write a paragraph
+                            of about EIGHT lines (about 80 words) explaining how the defeat of the South African Defence
+                            Force (SADF) at the Battle of Cuito Cuanavale in Angola led to peaceful negotiations in
+                            southern Africa in the late 1980s.</p>
+                        <textarea name="q26" onChange={handleChange}/>
                     </div>
                 )}
                 {selectedSectionA.includes("3") && (
                     <div>
-                        <h2>QUESTION 3: WHY DID CIVIL RIGHTS MARCHERS IN THE USA ORGANISE THE MARCH ON WASHINGTON ON 28 AUGUST 1963?</h2>
-                        <p>3.1.1 Quote evidence from the source suggesting why organisers of the March on Washington regarded it as more than just a demonstration.</p>
-                        <input name="q311" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.1.2 State any TWO ways in the source in which the organisers wanted the March to be a disciplined and purposeful demonstration.</p>
-                        <input name="q312" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.1.3 Who do you think are referred to as 'evil persons are determined to smear this March and to discredit (doubt) the cause of equality by deliberate efforts', with regard to the preparations for the March on Washington in 1963?</p>
-                        <input name="q313" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.1.4 Comment on the implication of the statement, 'We ask each and every one in attendance … to place the cause (March on Washington) above all else.'</p>
-                        <input name="q314" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <h2>QUESTION 3: WHY DID CIVIL RIGHTS MARCHERS IN THE USA ORGANISE THE MARCH ON WASHINGTON ON 28
+                            AUGUST 1963?</h2>
+                        <p>3.1.1 Quote evidence from the source suggesting why organisers of the March on Washington
+                            regarded it as more than just a demonstration.</p>
+                        <input name="q311" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.1.2 State any TWO ways in the source in which the organisers wanted the March to be a
+                            disciplined and purposeful demonstration.</p>
+                        <input name="q312" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.1.3 Who do you think are referred to as 'evil persons are determined to smear this March
+                            and to discredit (doubt) the cause of equality by deliberate efforts', with regard to the
+                            preparations for the March on Washington in 1963?</p>
+                        <input name="q313" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.1.4 Comment on the implication of the statement, 'We ask each and every one in attendance …
+                            to place the cause (March on Washington) above all else.'</p>
+                        <input name="q314" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>3.2.1 Define the term civil rights in your own words.</p>
-                        <input name="q321" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.2.2 What, according to the source, did the civil rights marchers demand when they converged on the Lincoln Memorial?</p>
-                        <input name="q322" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.2.3 Explain the significance of the presence of many leaders from various fields, who were given the opportunity to address the marchers.</p>
-                        <input name="q323" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.2.4 Comment on why the 'I Have a Dream' speech may be regarded as historically significant.</p>
-                        <input name="q324" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.3.1 State any TWO demands in the source that were made by the marchers who participated in the March on Washington on 28 August 1963.</p>
-                        <input name="q331" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
+                        <input name="q321" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.2.2 What, according to the source, did the civil rights marchers demand when they converged
+                            on the Lincoln Memorial?</p>
+                        <input name="q322" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.2.3 Explain the significance of the presence of many leaders from various fields, who were
+                            given the opportunity to address the marchers.</p>
+                        <input name="q323" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.2.4 Comment on why the 'I Have a Dream' speech may be regarded as historically
+                            significant.</p>
+                        <input name="q324" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.3.1 State any TWO demands in the source that were made by the marchers who participated in
+                            the March on Washington on 28 August 1963.</p>
+                        <input name="q331" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
                         <p>3.3.2 Why do you think the photographer decided to take this photograph?</p>
-                        <input name="q332" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.4 Explain how the information in Source 3B supports the evidence in Source 3C regarding the activities on the day of the March on Washington on 28 August 1963.</p>
-                        <input name="q34" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.5.1 Give TWO reasons in the source which suggests that President Kennedy supported the March on Washington.</p>
-                        <input name="q351" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.5.2 According to the source, give TWO reasons why the President believed the organisers of the March deserved the appreciation from the USA's government.</p>
-                        <input name="q352" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.5.3 Explain the term discrimination in the context of the Civil Rights Movement in the USA.</p>
-                        <input name="q353" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.5.4 Quote any law/programmes from the source that had to be passed by Congress to eliminate discrimination in employment.</p>
-                        <input name="q354" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.5.5 Comment on why a historian would find this source useful when studying the reaction of the USA government to the March on Washington.</p>
-                        <input name="q355" onChange={handleChange} style={{ width:"98%", height:"40px", padding:"15px", fontSize:"1rem", borderRadius:"8px", marginBottom:"20px" }}/>
-                        <p>3.6 Using the information in the relevant sources and your own knowledge, write a paragraph of about EIGHT lines (about 80 words) explaining why civil rights marchers in the USA organised the March on Washington on 28 August 1963.</p>
-                        <textarea name="q36" onChange={handleChange} />
+                        <input name="q332" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.4 Explain how the information in Source 3B supports the evidence in Source 3C regarding the
+                            activities on the day of the March on Washington on 28 August 1963.</p>
+                        <input name="q34" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.5.1 Give TWO reasons in the source which suggests that President Kennedy supported the
+                            March on Washington.</p>
+                        <input name="q351" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.5.2 According to the source, give TWO reasons why the President believed the organisers of
+                            the March deserved the appreciation from the USA's government.</p>
+                        <input name="q352" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.5.3 Explain the term discrimination in the context of the Civil Rights Movement in the
+                            USA.</p>
+                        <input name="q353" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.5.4 Quote any law/programmes from the source that had to be passed by Congress to eliminate
+                            discrimination in employment.</p>
+                        <input name="q354" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.5.5 Comment on why a historian would find this source useful when studying the reaction of
+                            the USA government to the March on Washington.</p>
+                        <input name="q355" onChange={handleChange} style={{
+                            width: "98%",
+                            height: "40px",
+                            padding: "15px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            marginBottom: "20px"
+                        }}/>
+                        <p>3.6 Using the information in the relevant sources and your own knowledge, write a paragraph
+                            of about EIGHT lines (about 80 words) explaining why civil rights marchers in the USA
+                            organised the March on Washington on 28 August 1963.</p>
+                        <textarea name="q36" onChange={handleChange}/>
                     </div>
                 )}
 
                 {/* Section B */}
                 <h1><strong>Select Section B Questions (1 or 2)</strong></h1>
-                <label><input type="checkbox" checked={selectedSectionB.includes("4")} onChange={() => handleSectionBChange("4")} /> Q4: Vietnam</label>
-                <label><input type="checkbox" checked={selectedSectionB.includes("5")} onChange={() => handleSectionBChange("5")} /> Q5: Congo</label>
-                <label><input type="checkbox" checked={selectedSectionB.includes("6")} onChange={() => handleSectionBChange("6")} /> Q6: Black Power Movement</label>
+                <label><input type="checkbox" checked={selectedSectionB.includes("4")}
+                              onChange={() => handleSectionBChange("4")}/> Q4: Vietnam</label>
+                <label><input type="checkbox" checked={selectedSectionB.includes("5")}
+                              onChange={() => handleSectionBChange("5")}/> Q5: Congo</label>
+                <label><input type="checkbox" checked={selectedSectionB.includes("6")}
+                              onChange={() => handleSectionBChange("6")}/> Q6: Black Power Movement</label>
 
                 {selectedSectionB.includes("4") && (
                     <div>
                         <h2>QUESTION 4: THE EXTENSION OF THE COLD WAR: CASE STUDY – VIETNAM</h2>
-                        <textarea placeholder="Introduction" onChange={e => setQ4IntroText(e.target.value)} />
-                        <textarea placeholder="Body" onChange={e => setQ4BodyText(e.target.value)} />
-                        <textarea placeholder="Conclusion" onChange={e => setQ4ConclusionText(e.target.value)} />
+                        <textarea placeholder="Introduction" onChange={e => setQ4IntroText(e.target.value)}/>
+                        <textarea placeholder="Body" onChange={e => setQ4BodyText(e.target.value)}/>
+                        <textarea placeholder="Conclusion" onChange={e => setQ4ConclusionText(e.target.value)}/>
                     </div>
                 )}
                 {selectedSectionB.includes("5") && (
                     <div>
                         <h2>QUESTION 5: INDEPENDENT AFRICA: CASE STUDY – THE CONGO</h2>
-                        <textarea placeholder="Introduction" onChange={e => setQ5IntroText(e.target.value)} />
-                        <textarea placeholder="Body" onChange={e => setQ5BodyText(e.target.value)} />
-                        <textarea placeholder="Conclusion" onChange={e => setQ5ConclusionText(e.target.value)} />
+                        <textarea placeholder="Introduction" onChange={e => setQ5IntroText(e.target.value)}/>
+                        <textarea placeholder="Body" onChange={e => setQ5BodyText(e.target.value)}/>
+                        <textarea placeholder="Conclusion" onChange={e => setQ5ConclusionText(e.target.value)}/>
                     </div>
                 )}
                 {selectedSectionB.includes("6") && (
                     <div>
-                        <h2>QUESTION 6: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE BLACK POWER MOVEMENT</h2>
-                        <textarea placeholder="Introduction" onChange={e => setQ6IntroText(e.target.value)} />
-                        <textarea placeholder="Body" onChange={e => setQ6BodyText(e.target.value)} />
-                        <textarea placeholder="Conclusion" onChange={e => setQ6ConclusionText(e.target.value)} />
+                        <h2>QUESTION 6: CIVIL SOCIETY PROTESTS FROM THE 1950s TO THE 1970s: THE BLACK POWER
+                            MOVEMENT</h2>
+                        <textarea placeholder="Introduction" onChange={e => setQ6IntroText(e.target.value)}/>
+                        <textarea placeholder="Body" onChange={e => setQ6BodyText(e.target.value)}/>
+                        <textarea placeholder="Conclusion" onChange={e => setQ6ConclusionText(e.target.value)}/>
                     </div>
                 )}
 
@@ -740,7 +1169,7 @@ function HistoryP1Nov2024Eng() {
                             <strong>Essay Question {q} Score:</strong> {questionScores[q]}/50
                         </p>
                     ))}
-                    <hr />
+                    <hr/>
                     <h2>Total Score: {totalScore}/150</h2>
                     <h3>Percentage: {percent}%</h3>
 
@@ -769,7 +1198,8 @@ function HistoryP1Nov2024Eng() {
                                 return (
                                     <div key={index} className="incorrect-item">
                                         <p><strong>Question:</strong> {question}</p>
-                                        <p><strong>Your Answer:</strong> {isBlank ? "(No answer given)" : userAnswer}</p>
+                                        <p><strong>Your Answer:</strong> {isBlank ? "(No answer given)" : userAnswer}
+                                        </p>
                                         <p><strong>Correct Answer:</strong> {correctAnswers[question].join(", ")}</p>
                                     </div>
                                 );
@@ -841,7 +1271,239 @@ function HistoryP1Nov2024Eng() {
                 </div>
             )}
 
+            <style jsx>{`
+                * { box-sizing: border-box; }
 
+                body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+                margin: 0;
+                padding: 20px 0;
+                color: #2d3748;
+                min-height: 100vh;
+                line-height: 1.6;
+            }
+
+                .exam-container {
+                max-width: 1150px;
+                margin: 20px auto;
+                padding: 40px;
+                background: #ffffff;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+                border: 1px solid #e2e8f0;
+            }
+
+                /* ==================== HEADINGS – CLEAN & ELEGANT ==================== */
+                h1, h2, h3 {
+                font-weight: 700;
+                color: #2d3748;
+                text-align: center;
+                margin: 30px 0 15px;
+            }
+
+                h1 { font-size: 2.5rem; color: #1a365d; }
+                h2 {
+                font-size: 1.9rem;
+                color: #2c5282;
+                border-bottom: 3px solid #a0aec0;
+                padding-bottom: 8px;
+                display: inline-block;
+            }
+                h3 { font-size: 1.4rem; color: #4a5568; }
+
+                /* ==================== COVER PAGE – SOFT & OFFICIAL ==================== */
+                .cover-page {
+                background: linear-gradient(135deg, #ffffff, #f7fafc);
+                border: 2px solid #e2e8f0;
+                padding: 60px 30px;
+                border-radius: 20px;
+                text-align: center;
+                margin-bottom: 40px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            }
+
+                .dept-title {
+                font-size: 3rem;
+                font-weight: 800;
+                color: #2c5282;
+                margin: 10px 0;
+            }
+
+                .subject-box {
+                background: #edf2f7;
+                border: 3px dashed #a0aec0;
+                padding: 25px 50px;
+                border-radius: 16px;
+                display: inline-block;
+                margin: 25px 0;
+                font-size: 1.9rem;
+                font-weight: bold;
+                color: #2d3748;
+            }
+
+                .exam-info p {
+                background: #e6fffa;
+                color: #234e52;
+                font-weight: 600;
+                padding: 10px 25px;
+                border-radius: 30px;
+                display: inline-block;
+                margin: 10px;
+                font-size: 2.2rem;
+            }
+
+                /* ==================== TIMER – SOFT GREY ==================== */
+                .timer-bar {
+                background: #4a5568;
+                color: white;
+                padding: 16px;
+                border-radius: 14px;
+                text-align: center;
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 25px 0;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            }
+                p{
+                font-size: 20px;
+            }
+
+                /* ==================== INPUTS & TEXTAREAS – VERY SOFT ==================== */
+                input[type="text"], textarea {
+                width: 100%;
+                padding: 18px 20px;
+                margin: 12px 0 28px;
+                border: 2px solid #e2e8f0;
+                border-radius: 14px;
+                font-size: 1.1rem;
+                background: #fafafa;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            }
+
+                input[type="text"]:focus, textarea:focus {
+                outline: none;
+                border-color: #90cdf4;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(144, 205, 244, 0.2);
+            }
+
+                textarea {
+                min-height: 200px;
+                resize: vertical;
+                font-family: inherit;
+            }
+
+                /* ==================== CHECKBOXES – CALM BLUE-GREY ==================== */
+                label {
+                display: block;
+                padding: 18px 22px;
+                background: #edf2f7;
+                color: #2d3748;
+                border-radius: 14px;
+                margin: 14px 0;
+                font-size: 1.35rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: 0.3s;
+                border: 2px solid transparent;
+            }
+
+                label:hover {
+                background: #e6fffa;
+                border-color: #81e6d9;
+            }
+
+                input[type="checkbox"] {
+                transform: scale(1.6);
+                margin-right: 12px;
+                accent-color: #4299e1;
+            }
+
+                /* ==================== BUTTONS – SOFT BLUE & WARM GREY ==================== */
+                .button-container {
+                text-align: center;
+                margin: 70px 0 50px;
+            }
+
+                button {
+                padding: 20px 50px;
+                font-size: 1.5rem;
+                font-weight: 700;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                min-width: 300px;
+                margin: 0 18px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+                transition: all 0.3s ease;
+            }
+
+                .submit-btn {
+                background: #4299e1;
+                color: white;
+            }
+
+                .retry-btn {
+                background: #f7fafc;
+                color: #2d3748;
+                border: 2px solid #e2e8f0;
+            }
+
+                button:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            }
+
+                /* ==================== RESULTS – SOFT & HAPPY ==================== */
+                .results-box {
+                background: linear-gradient(135deg, #bee3f8, #90cdf4);
+                color: #1a365d;
+                padding: 45px;
+                border-radius: 20px;
+                text-align: center;
+                margin: 40px 0;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border: 1px solid #bee3f8;
+            }
+
+                .results-box h3 {
+                font-size: 4.5rem;
+                color: #2b6cb0;
+                font-weight: 900;
+                margin: 15px 0;
+            }
+
+                /* ==================== INCORRECT ANSWERS – GENTLE ==================== */
+                .incorrect-section {
+                background: #fff5f5;
+                border: 1px solid #feb2b2;
+                border-radius: 14px;
+                padding: 25px;
+                margin-top: 30px;
+            }
+
+                .incorrect-item {
+                background: white;
+                padding: 16px;
+                border-radius: 10px;
+                margin: 12px 0;
+                border-left: 5px solid #fc8181;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+
+                /* ==================== RESPONSIVE ==================== */
+                @media (max-width: 768px) {
+                .button-container button {
+                display: block;
+                margin: 18px auto;
+                width: 90%;
+            }
+                h1 { font-size: 2.1rem; }
+                .dept-title { font-size: 2.6rem; }
+            }
+           `} </style>
 
         </div>
 
