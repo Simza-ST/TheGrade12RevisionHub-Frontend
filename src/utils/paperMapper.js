@@ -30,8 +30,6 @@ import catP2Nov2021
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2021/Paper2/catP2Nov2021";
 import CatP2Nov2022
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/CAT/2022/Paper2/catP2Nov2022";
-import LifeScienceP2Nov2022Eng
-    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/LifeScienceP2Nov2022Eng";
 import BusinessStudiesP1Nov2021
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Business-Studies/2021/Paper1/BusinessStudiesP1Nov2021";
 import BusinessStudiesP2Nov2021
@@ -100,6 +98,25 @@ import AccountingP2Nov2023Eng
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2023/Paper2/AccountingP2Nov2023";
 import AccountingP2Nov2024Eng
     from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Accounting/2024/Paper2/AccountingP2Nov2024Eng";
+import LifeScienceP1Nov2021Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2021/Paper1/LifeScienceP1Nov2021Eng";
+import LifeScienceP2Nov2021Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2021/Paper2/LifeScienceP2Nov2021Eng";
+import LifeScienceP1Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2022/Paper1/LifeScienceP1Nov2022Eng";
+import LifeScienceP2Nov2022Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2022/Paper2/LifeScienceP2Nov2022Eng";
+import LifeScienceP1Nov2023Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2023/Paper1/LifeScienceP1Nov2023Eng";
+import LifeScienceP2Nov2023Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2023/Paper2/LifeScienceP2Nov2023Eng";
+import LifeScienceP1Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2024/Paper1/LifeScienceP1Nov2024Eng";
+import LifeScienceP2Nov2024Eng
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Life-Sciences/2024/Paper2/LifeScienceP2Nov2024Eng";
+import PhysicalScienceP1Nov2023
+    from "../components/dashboardSidebarPages/quiz/DigitizedQuestionPapersComponents.js/Physical-Science/2023/Paper1/PhysicalScienceP1Nov2023";
+
 
 // Map filenames to components
 const paperComponents = {
@@ -119,7 +136,6 @@ const paperComponents = {
     "Computer Applications Technology P2 Nov 2023 Eng": catP2Nov2023,
     "Computer Application Technology P2 Nov 2021 Eng": catP2Nov2021,
     "Computer Applications Technology P2 Nov 2022 Eng": CatP2Nov2022,
-    "Life Sciences P2 Nov 2022 Eng": LifeScienceP2Nov2022Eng,
     "Business Studies P1 Nov 2021 Eng":BusinessStudiesP1Nov2021,
     "Business Studies P2 Nov 2021 Eng":BusinessStudiesP2Nov2021,
     "Business Studies P1 Nov 2022 Eng":BusinessStudiesP1Nov2022,
@@ -152,12 +168,19 @@ const paperComponents = {
     "Physical Sciences P2 Nov 2021 Eng":Physic2021,
     "Physical Sciences P2 Nov 2022 Eng":Physic2022,
     "Physical Sciences P2 Nov 2023 Eng":Physic2023,
+    "Physical Sciences P1 Nov 2023 Eng":PhysicalScienceP1Nov2023,
     "Physical Sciences P2 Nov 2024 Eng":Physic2024,
     "History P1 Nov 2024 Eng":HistoryP1Nov2024Eng,
+    "Life Sciences P1 Nov 2021 Eng":LifeScienceP1Nov2021Eng,
+    "Life Sciences P2 Nov 2021 Eng":LifeScienceP2Nov2021Eng,
+    "Life Sciences P1 Nov 2022 Eng":LifeScienceP1Nov2022Eng,
+    "Life Sciences P2 Nov 2022 Eng":LifeScienceP2Nov2022Eng,
+    "Life Sciences P1 Nov 2023 Eng":LifeScienceP1Nov2023Eng,
+    "Life Sciences P2 Nov 2023 Eng":LifeScienceP2Nov2023Eng,
+    "Life Sciences P1 Nov 2024 Eng":LifeScienceP1Nov2024Eng,
+    "Life Sciences P2 Nov 2024 Eng":LifeScienceP2Nov2024Eng,
 
-    // Add more filename mappings as needed:
-    // "PhysicsP1May2023": PhysicsP1May2023,
-    // "ChemistryP2Sep2022": ChemistryP2Sep2022,
+
 };
 
 export const getPaperComponent = (fileName) => {
