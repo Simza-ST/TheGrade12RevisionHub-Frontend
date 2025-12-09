@@ -249,7 +249,7 @@ const SectionA = ({ formData, handleInputChange, handleSelectChange }) => {
                         <div className="image-label">C</div>
                         <div className="question-image">
                             <img
-                                src="/images/C.png"
+                                src="/images/C.jpg"
                                 alt="Payment method C"
                                 className="mcq-image"
                                 onError={(e) => {
@@ -287,7 +287,7 @@ const SectionA = ({ formData, handleInputChange, handleSelectChange }) => {
                         <div className="image-label">E</div>
                         <div className="question-image">
                             <img
-                                src="/images/E.png"
+                                src="/images/E.jpg"
                                 alt="Payment method E"
                                 className="mcq-image"
                                 onError={(e) => {
@@ -429,3 +429,4 @@ const SectionA = ({ formData, handleInputChange, handleSelectChange }) => {
 };
 
 export default SectionA;
+

@@ -265,3 +265,4 @@ const SectionB = ({ formData, handleInputChange, handleTextareaChange }) => {
 };
 
 export default SectionB;
+

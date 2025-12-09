@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Question from "./Question";
+import timer from "./Timer";
 
 function Quiz({ paper, finishQuiz, goBack }) {
     const [answers, setAnswers] = useState({});

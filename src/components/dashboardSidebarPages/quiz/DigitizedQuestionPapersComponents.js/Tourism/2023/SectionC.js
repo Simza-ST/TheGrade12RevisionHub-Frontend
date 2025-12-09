@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
@@ -30,7 +31,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                                 className="icon-image"
                                 onError={handleImageError} // Using the fixed handler
                             />
-                            <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <div className="image-fallback" style={{ border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 [Image A: Bullfighting - Matador entertainment]
                             </div>
                         </div>
@@ -46,7 +47,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                                 className="icon-image"
                                 onError={handleImageError} // Using the fixed handler
                             />
-                            <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <div className="image-fallback" style={{ border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 [Image B: Statue of Liberty - Symbol of democracy]
                             </div>
                         </div>
@@ -62,7 +63,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                                 className="icon-image"
                                 onError={handleImageError} // Using the fixed handler
                             />
-                            <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <div className="image-fallback" style={{border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 [Image C: Floating Market - Traditional Thai market]
                             </div>
                         </div>
@@ -78,7 +79,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                                 className="icon-image"
                                 onError={handleImageError} // Using the fixed handler
                             />
-                            <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <div className="image-fallback" style={{border: '1px solid #ccc', padding: '20px', minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 [Image D: Grand Canyon - Red rock formation]
                             </div>
                         </div>
@@ -129,7 +130,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                         className="case-study-image"
                         onError={handleImageError} // Using the fixed handler
                     />
-                    <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="image-fallback" style={{border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         [Image: Machu Picchu - Ancient Inca city in Peru, South America]
                     </div>
                     <div className="image-source">Source: UNESCO World Heritage Center</div>
@@ -158,7 +159,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                         className="case-study-image"
                         onError={handleImageError} // Using the fixed handler
                     />
-                    <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="image-fallback" style={{border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         [Image: South Africa's Fabulous Flowers and Fynbos - Cape Floral Region]
                     </div>
                     <div className="image-source">Source: www.unescoworldheritagecenter.org</div>
@@ -210,7 +211,7 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
                         className="case-study-image"
                         onError={handleImageError} // Using the fixed handler
                     />
-                    <div className="image-fallback" style={{display: 'none', border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <div className="image-fallback" style={{border: '1px solid #ccc', padding: '30px', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         [Image: Meetings Africa 2023 - Business tourism event in South Africa]
                     </div>
                     <div className="image-source">Source: www.tourismupdate.co.za</div>
@@ -243,3 +244,4 @@ const SectionC = ({ formData, handleInputChange, handleTextareaChange }) => {
 };
 
 export default SectionC;
+

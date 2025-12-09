@@ -1,0 +1,116 @@
+/* --- Quiz Card --- */
+.quiz-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Question text */
+.quiz-card p,
+.quiz-card h3 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Input field for text questions */
+.quiz-card input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem;
+    outline: none;
+    font-size: 1rem;
+}
+
+.quiz-card input[type="text"]:focus {
+    border-color: #3b82f6; /* Blue focus */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Points text */
+.quiz-points {
+    font-size: 0.875rem;
+    color: #6b7280; /* Gray */
+    margin-top: 0.25rem;
+}
+
+/* Instruction cards */
+.quiz-instruction {
+    background-color: #f3f4f6; /* Light gray */
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-style: italic;
+    color: #374151; /* Dark gray */
+    margin: 1rem 0;
+    border-left: 4px solid #3b82f6; /* Blue side accent */
+}
+
+/* Header cards for questions like "QUESTION 1" */
+.quiz-header {
+    background-color: #e0f2fe; /* Light blue */
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1e3a8a; /* Dark blue */
+    margin: 1rem 0;
+    text-transform: uppercase;
+}
+
+/* Image cards */
+.quiz-image {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.quiz-image img {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Multiple choice buttons (if needed later) */
+.quiz-option {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.25rem 0;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quiz-option:hover {
+    background-color: #e0f2fe;
+    border-color: #3b82f6;
+}
+
+/* Correct/incorrect feedback */
+.quiz-feedback {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.quiz-feedback.correct {
+    color: #16a34a; /* Green */
+}
+
+.quiz-feedback.incorrect {
+    color: #dc2626; /* Red */
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .quiz-card {
+        padding: 0.75rem;
+    }
+
+    .quiz-header {
+        font-size: 1rem;
+    }
+}
